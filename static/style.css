@@ -248,3 +248,31 @@ a.btn-gold:hover, button.btn-gold:hover {
         padding: 5px 12px !important;
     }
 }
+
+/* Executive Desktop Navbar Alignment */
+@media (min-width: 992px) {
+    .navbar-nav {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.15rem;
+        letter-spacing: 1px;
+    }
+}
+
+/* Auth Buttons */
+.btn-outline-gold {
+    color: #d49a00 !important;
+    border: 1px solid #d49a00 !important;
+    background-color: transparent !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.btn-outline-gold:hover {
+    background-color: #d49a00 !important;
+    color: #ffffff !important;
+}

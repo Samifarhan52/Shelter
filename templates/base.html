@@ -11,50 +11,45 @@
 </head>
 <body>
 
-    <!-- Responsive Navigation Header -->
+    <!-- Executive Responsive Navigation Header -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top border-bottom border-secondary py-2">
-        <div class="container-fluid px-3">
+        <div class="container-fluid px-lg-5 px-3">
             
-            <!-- Main Header Flex Row -->
-            <div class="d-flex align-items-center justify-content-between w-100">
+            <!-- LEFT: Brand Logo & Title -->
+            <div class="d-flex flex-column align-items-start">
+                <a class="navbar-brand d-flex align-items-center fw-bold text-light m-0" href="{{ url_for('home') }}">
+                    <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Shelter Hunt Logo" class="brand-logo me-2">
+                    <span class="brand-title">SHELTER HUNT</span>
+                </a>
                 
-                <!-- LEFT SIDE: Logo, Brand & Mobile Menu Button Underneath -->
-                <div class="d-flex flex-column align-items-start">
-                    <a class="navbar-brand d-flex align-items-center fw-bold text-light m-0" href="{{ url_for('home') }}">
-                        <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Shelter Hunt Logo" class="brand-logo me-2">
-                        <span class="brand-title">SHELTER HUNT</span>
-                    </a>
-                    
-                    <!-- Hamburger Button Placed Directly Under Logo/Title on Left (Mobile Only) -->
-                    <button class="navbar-toggler p-1 border-secondary mt-1 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                </div>
-
-                <!-- RIGHT SIDE: Login & Sign Up Buttons (Always Locked Top Right) -->
-                <div class="d-flex align-items-center gap-2 ms-auto">
-                    {% if session.get('user_id') %}
-                        <span class="text-warning fw-bold small d-none d-sm-inline me-1">Hi, {{ session.get('user_name') }}</span>
-                        {% if session.get('user_email') == 'admin@shelterhunt.com' %}
-                            <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
-                        {% endif %}
-                        <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">Logout</a>
-                    {% else %}
-                        <a class="btn btn-outline-gold btn-sm px-2 py-1" href="{{ url_for('login') }}">Login</a>
-                        <a class="btn btn-gold btn-sm px-2 py-1" href="{{ url_for('signup') }}">Sign Up</a>
-                    {% endif %}
-                </div>
-
+                <!-- Mobile Only: Hamburger Toggle Under Logo -->
+                <button class="navbar-toggler p-1 border-secondary mt-1 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
             </div>
 
-            <!-- COLLAPSIBLE NAVIGATION LINKS (Expands smoothly on toggle) -->
-            <div class="collapse navbar-collapse w-100" id="navbarNav">
-                <ul class="navbar-nav me-auto align-items-lg-center pt-3 pt-lg-0">
-                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('home') }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('sites') }}">Sites</a></li>
-                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('about') }}">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('services') }}">Services</a></li>
+            <!-- CENTER/EXPANDED: Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto align-items-lg-center pt-3 pt-lg-0">
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2 fw-semibold" href="{{ url_for('home') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2 fw-semibold" href="{{ url_for('sites') }}">Sites</a></li>
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2 fw-semibold" href="{{ url_for('about') }}">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2 fw-semibold" href="{{ url_for('services') }}">Services</a></li>
                 </ul>
+            </div>
+
+            <!-- RIGHT: Auth / User Action Buttons (Always Far-Right Corner) -->
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                {% if session.get('user_id') %}
+                    <span class="text-warning fw-bold small d-none d-sm-inline me-1">Hi, {{ session.get('user_name') }}</span>
+                    {% if session.get('user_email') == 'admin@shelterhunt.com' %}
+                        <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
+                    {% endif %}
+                    <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a class="btn btn-outline-gold btn-sm px-3 py-1 fw-bold" href="{{ url_for('login') }}">Login</a>
+                    <a class="btn btn-gold btn-sm px-3 py-1 fw-bold" href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
             </div>
 
         </div>
