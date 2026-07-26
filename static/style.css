@@ -135,3 +135,26 @@ a.btn-gold:hover, button.btn-gold:hover {
     padding: 3px;
     object-fit: contain;
 }
+
+/* Responsive Brand Title Scaling */
+.brand-title {
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+/* Mobile Screen Adjustments */
+@media (max-width: 576px) {
+    .brand-title {
+        font-size: 0.78rem; /* Scales text down on smaller phone screens */
+    }
+    
+    .brand-logo {
+        height: 32px !important; /* Slightly smaller logo for small screens */
+    }
+
+    .btn-gold.btn-sm {
+        font-size: 0.75rem;
+        padding: 4px 10px !important;
+    }
+}

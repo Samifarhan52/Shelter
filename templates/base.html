@@ -11,36 +11,46 @@
 </head>
 <body>
 
-    <!-- Professional Horizontal Navbar with Logo -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top border-bottom border-secondary">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center fw-bold text-light" href="{{ url_for('home') }}">
-                <!-- Logo Integration -->
-                <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Shelter Hunt Consultants Logo" class="brand-logo me-2">
-                <span>SHELTER HUNT CONSULTANTS</span>
+    <!-- Mobile-Responsive Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top border-bottom border-secondary py-2">
+        <div class="container d-flex align-items-center justify-content-between">
+            
+            <!-- Brand Logo & Responsive Title -->
+            <a class="navbar-brand d-flex align-items-center fw-bold text-light m-0" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Shelter Hunt Logo" class="brand-logo me-2">
+                <span class="brand-title">SHELTER HUNT CONSULTANTS</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link text-light px-3" href="{{ url_for('home') }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link text-light px-3" href="{{ url_for('sites') }}">Sites</a></li>
-                    <li class="nav-item"><a class="nav-link text-light px-3" href="{{ url_for('about') }}">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link text-light px-3" href="{{ url_for('services') }}">Services</a></li>
-                    
-                    {% if session.get('user_id') %}
-                        <li class="nav-item px-2"><span class="text-warning fw-bold">Hi, {{ session.get('user_name') }}</span></li>
-                        {% if session.get('user_email') == 'admin@shelterhunt.com' %}
-                            <li class="nav-item ms-2"><a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a></li>
-                        {% endif %}
-                        <li class="nav-item ms-2"><a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">Logout</a></li>
-                    {% else %}
-                        <li class="nav-item ms-2"><a class="nav-link text-light px-3" href="{{ url_for('login') }}">Login</a></li>
-                        <li class="nav-item ms-2"><a class="btn btn-gold btn-sm" href="{{ url_for('signup') }}">Sign Up</a></li>
+
+            <!-- Right Side: Action Buttons (Kept Outside Menu) + Hamburger Toggle -->
+            <div class="d-flex align-items-center">
+                {% if session.get('user_id') %}
+                    <span class="text-warning fw-bold small me-2 d-none d-sm-inline">Hi, {{ session.get('user_name') }}</span>
+                    {% if session.get('user_email') == 'admin@shelterhunt.com' %}
+                        <a class="btn btn-outline-warning btn-sm me-2" href="{{ url_for('admin_dashboard') }}">Admin</a>
                     {% endif %}
+                    <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <!-- Always visible outside mobile drawer -->
+                    <a class="btn btn-link text-light text-decoration-none btn-sm p-1 me-1" href="{{ url_for('login') }}">Login</a>
+                    <a class="btn btn-gold btn-sm px-2 py-1 me-2" href="{{ url_for('signup') }}">Sign Up</a>
+                {% endif %}
+
+                <!-- Hamburger Button for Sites, About Us, Services -->
+                <button class="navbar-toggler p-1 border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
+            <!-- Collapsible Dropdown Drawer (Only Navigation Links Inside) -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center pt-3 pt-lg-0">
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('home') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('sites') }}">Sites</a></li>
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('about') }}">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link text-light px-3 py-2" href="{{ url_for('services') }}">Services</a></li>
                 </ul>
             </div>
+
         </div>
     </nav>
 
@@ -60,7 +70,7 @@
 
     {% block content %}{% endblock %}
 
-    <!-- Footer with Logo -->
+    <!-- Footer -->
     <footer class="text-center py-4 mt-5" style="background-color: #0b1320; color: #a0aec0;">
         <div class="container">
             <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo" class="footer-logo mb-2">
