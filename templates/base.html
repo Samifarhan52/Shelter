@@ -21,24 +21,25 @@
                 <span class="brand-title text-truncate">SHELTER HUNT</span>
             </a>
 
-            <!-- RIGHT: Login, Sign Up, & Hamburger Menu Locked on Far-Right -->
-            <div class="d-flex align-items-center gap-2 ms-auto">
-                {% if session.get('user_id') %}
-                    <span class="text-warning fw-bold small d-none d-sm-inline me-1">Hi, {{ session.get('user_name') }}</span>
-                    {% if session.get('user_email') == 'admin@shelterhunt.com' %}
-                        <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
-                    {% endif %}
-                    <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">Logout</a>
-                {% else %}
-                    <a class="btn btn-link text-light text-decoration-none btn-sm p-0 me-1" href="{{ url_for('login') }}">Login</a>
-                    <a class="btn btn-gold btn-sm px-2 py-1" href="{{ url_for('signup') }}">Sign Up</a>
-                {% endif %}
+<!-- RIGHT: Login, Sign Up, & Hamburger Menu Locked on Far-Right -->
+<div class="d-flex align-items-center gap-2 ms-auto">
+    {% if session.get('user_id') %}
+        <span class="text-warning fw-bold small d-none d-sm-inline me-1">Hi, {{ session.get('user_name') }}</span>
+        {% if session.get('user_email') == 'admin@shelterhunt.com' %}
+            <a class="btn btn-outline-warning btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
+        {% endif %}
+        <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <!-- Polished Outlined Login Button -->
+        <a class="btn btn-outline-gold btn-sm px-2 py-1" href="{{ url_for('login') }}">Login</a>
+        <a class="btn btn-gold btn-sm px-2 py-1" href="{{ url_for('signup') }}">Sign Up</a>
+    {% endif %}
 
-                <!-- Hamburger Button on Far-Right Corner -->
-                <button class="navbar-toggler p-1 border-secondary ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
+    <!-- Hamburger Button on Far-Right Corner -->
+    <button class="navbar-toggler p-1 border-secondary ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
 
             <!-- COLLAPSIBLE NAVIGATION LINKS -->
             <div class="collapse navbar-collapse" id="navbarNav">

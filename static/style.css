@@ -191,3 +191,26 @@ a.btn-gold:hover, button.btn-gold:hover {
         padding: 4px 10px !important;
     }
 }
+
+/* Outlined Executive Login Button */
+.btn-outline-gold {
+    color: #d49a00 !important;
+    border: 1px solid #d49a00 !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.btn-outline-gold:hover {
+    background-color: #d49a00 !important;
+    color: #ffffff !important;
+}
+
+/* Mobile Button Styling Improvements */
+@media (max-width: 576px) {
+    .btn-outline-gold.btn-sm {
+        font-size: 0.75rem !important;
+        padding: 4px 10px !important;
+    }
+}
