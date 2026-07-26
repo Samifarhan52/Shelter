@@ -158,3 +158,36 @@ a.btn-gold:hover, button.btn-gold:hover {
         padding: 4px 10px !important;
     }
 }
+
+/* Fixed Single-Row Mobile Header Adjustments */
+.brand-logo {
+    height: 36px;
+    width: auto;
+    border-radius: 4px;
+    background-color: #ffffff;
+    padding: 2px;
+}
+
+.brand-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+}
+
+/* Force everything onto one tight line on mobile screens */
+@media (max-width: 576px) {
+    .brand-title {
+        font-size: 0.85rem;
+        max-width: 130px; /* Prevents title from pushing action buttons off screen */
+    }
+
+    .navbar-toggler {
+        padding: 4px 8px !important;
+    }
+
+    a.btn-gold.btn-sm {
+        font-size: 0.75rem !important;
+        padding: 4px 10px !important;
+    }
+}
