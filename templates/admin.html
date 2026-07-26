@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold mb-4">Admin Dashboard — Captured Leads & Bookings</h2>
+    <div class="navy-card">
+        <div class="table-responsive">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Date & Slot</th>
+                        <th>Client Details</th>
+                        <th>Location</th>
+                        <th>Budget</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr>
+                        <td><span class="badge bg-warning text-dark">{{ lead.session_date }}</span><br>{{ lead.slot_time }}</td>
+                        <td><strong>{{ lead.full_name }}</strong><br>{{ lead.email }}<br>{{ lead.phone }}</td>
+                        <td>{{ lead.location }}</td>
+                        <td>{{ lead.budget }}</td>
+                        <td><small>{{ lead.message }}</small></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

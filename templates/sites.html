@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="fw-bold text-center mb-4">Our Featured Sites & Projects</h2>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="navy-card">
+                <h4 class="fw-bold text-warning">Prestige Horizon</h4>
+                <p class="text-muted">Luxury 3 & 4 BHK Apartments with prime connectivity and premium amenities.</p>
+                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-sm">Inquire & Book Session</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="navy-card">
+                <h4 class="fw-bold text-warning">Brigade Greens</h4>
+                <p class="text-muted">Eco-friendly modern township designed for long-term residential value.</p>
+                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-sm">Inquire & Book Session</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

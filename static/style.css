@@ -1,0 +1,137 @@
+/* Remove default list styling */
+ul.navbar-nav, .navbar-nav li {
+    list-style: none !important;
+    list-style-type: none !important;
+    padding-left: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+:root {
+    --bg-dark: #121e31;
+    --card-dark: #1e2c42;
+    --gold-primary: #d49a00;
+    --gold-hover: #b38200;
+    --text-light: #ffffff;
+    --text-muted: #cbd5e1;
+    --border-dark: #2d3748;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+/* Navbar Styling */
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ffffff !important;
+}
+
+.nav-link {
+    color: #e2e8f0 !important;
+    font-weight: 500;
+    margin-right: 12px;
+}
+
+.nav-link:hover {
+    color: var(--gold-primary) !important;
+}
+
+/* Hero Section Banner */
+.hero-section {
+    padding: 100px 0 130px 0;
+    position: relative;
+    border-bottom: 2px solid var(--gold-primary);
+}
+
+.hero-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #ffffff !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: #f1f5f9 !important;
+    line-height: 1.6;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Solid CTA Button Fix */
+a.btn-gold, button.btn-gold {
+    background-color: var(--gold-primary) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    padding: 14px 32px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    display: inline-block !important;
+    text-decoration: none !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.25s ease-in-out !important;
+}
+
+a.btn-gold:hover, button.btn-gold:hover {
+    background-color: var(--gold-hover) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Search Bar Floating Container */
+.search-container-wrapper {
+    margin-top: -50px;
+    position: relative;
+    z-index: 20;
+}
+
+.search-container {
+    background-color: var(--card-dark);
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid var(--border-dark);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.form-control, .form-select {
+    background-color: #121e31 !important;
+    color: #ffffff !important;
+    border: 1px solid var(--border-dark) !important;
+    padding: 12px 16px;
+}
+
+.form-control::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Card Boxes */
+.navy-card {
+    background-color: var(--card-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    padding: 30px;
+}
+
+/* Logo Styling for Navbar & Footer */
+.brand-logo {
+    height: 42px;
+    width: auto;
+    border-radius: 6px;
+    background-color: #ffffff;
+    padding: 2px;
+    object-fit: contain;
+}
+
+.footer-logo {
+    height: 50px;
+    width: auto;
+    border-radius: 6px;
+    background-color: #ffffff;
+    padding: 3px;
+    object-fit: contain;
+}

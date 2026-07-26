@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="navy-card">
+                <h3 class="fw-bold text-center text-light mb-4">Client Login</h3>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label text-light fw-semibold">Email Address</label>
+                        <input type="email" name="email" class="form-control" required placeholder="Enter your email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-light fw-semibold">Password</label>
+                        <input type="password" name="password" class="form-control" required placeholder="Enter password">
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 mb-3 fw-bold">Login</button>
+                </form>
+                
+                <!-- Fixed High-Contrast Footer Link -->
+                <p class="text-center text-light mb-0 pt-2 fs-6">
+                    Don't have an account? <a href="{{ url_for('signup') }}" class="text-warning fw-bold text-decoration-underline ms-1">Sign Up</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
