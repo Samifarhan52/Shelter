@@ -214,3 +214,37 @@ a.btn-gold:hover, button.btn-gold:hover {
         padding: 4px 10px !important;
     }
 }
+
+/* Outlined Executive Login Button */
+.btn-outline-gold {
+    color: #d49a00 !important;
+    border: 1px solid #d49a00 !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.btn-outline-gold:hover {
+    background-color: #d49a00 !important;
+    color: #ffffff !important;
+}
+
+/* Mobile Screen Layout Adjustments */
+@media (max-width: 991px) {
+    .brand-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .navbar-toggler {
+        padding: 2px 6px !important;
+        font-size: 0.9rem;
+    }
+
+    .btn-outline-gold.btn-sm, .btn-gold.btn-sm {
+        font-size: 0.8rem !important;
+        padding: 5px 12px !important;
+    }
+}
