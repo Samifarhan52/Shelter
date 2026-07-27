@@ -14,18 +14,18 @@ body {
     color: var(--text-dark);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
-    overflow-x: hidden; /* Prevents unwanted horizontal scrolling on mobile */
+    overflow-x: hidden;
 }
 
-/* --- Header & Navigation --- */
+/* Header & Navigation Styles */
 .navbar-custom {
     background-color: var(--navy-dark);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 .logo-wrapper {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background-color: #ffffff;
     display: flex;
@@ -44,11 +44,15 @@ body {
 }
 
 .brand-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: #ffffff !important;
     letter-spacing: 0.5px;
     line-height: 1.1;
+}
+
+.brand-sub {
+    font-size: 0.6rem;
 }
 
 .nav-search-input {
@@ -61,26 +65,46 @@ body {
     color: #94a3b8 !important;
 }
 
-/* --- Hero Section --- */
+/* Buttons */
+.btn-gold {
+    background-color: var(--gold-accent) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    padding: 10px 24px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    display: inline-block !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.btn-gold:hover {
+    background-color: var(--gold-hover) !important;
+    transform: translateY(-1px);
+}
+
+.btn-header-cta {
+    padding: 6px 14px !important;
+    font-size: 0.85rem !important;
+}
+
+/* Hero Section */
 .hero-section {
-    padding: 100px 0 80px 0;
-    min-height: 480px;
-    display: flex;
-    align-items: center;
+    padding: 90px 0 70px 0;
     position: relative;
 }
 
 .hero-tagline {
     color: var(--gold-accent) !important;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     letter-spacing: 2px;
     text-transform: uppercase;
 }
 
 .hero-title {
     color: #ffffff !important;
-    font-size: 2.8rem;
+    font-size: 3rem;
     font-weight: 800;
     line-height: 1.2;
     text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
@@ -94,27 +118,7 @@ body {
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* --- Executive Buttons --- */
-.btn-gold {
-    background-color: var(--gold-accent) !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    padding: 12px 28px !important;
-    border-radius: 6px !important;
-    border: none !important;
-    display: inline-block !important;
-    text-decoration: none !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
-    transition: all 0.25s ease-in-out !important;
-}
-
-.btn-gold:hover {
-    background-color: var(--gold-hover) !important;
-    color: #ffffff !important;
-    transform: translateY(-2px);
-}
-
-/* --- Content Cards --- */
+/* Cards */
 .philosophy-card {
     background-color: #ffffff;
     border-left: 5px solid var(--gold-accent);
@@ -129,15 +133,8 @@ body {
     border-radius: 10px;
     padding: 28px;
     box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.white-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
-}
-
-/* --- Footer Helpers --- */
 .text-light-slate {
     color: #cbd5e1 !important;
 }
@@ -145,7 +142,7 @@ body {
 .footer-links a {
     color: #cbd5e1 !important;
     display: inline-block;
-    padding: 3px 0;
+    padding: 2px 0;
     transition: all 0.2s ease-in-out;
 }
 
@@ -154,71 +151,45 @@ body {
     padding-left: 4px;
 }
 
-/* ========================================================= */
-/* 📱 MOBILE RESPONSIVE MEDIA QUERIES (max-width: 768px)      */
-/* ========================================================= */
+/* ========================================== */
+/* 📱 EXPLICIT MOBILE LAYOUT FIXES (< 768px)   */
+/* ========================================== */
 @media (max-width: 768px) {
-    /* Header Adjustments */
+    /* Header Scaling */
     .brand-title {
-        font-size: 0.9rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    .brand-sub {
+        font-size: 0.52rem !important;
     }
 
     .logo-wrapper {
-        width: 36px;
-        height: 36px;
+        width: 32px !important;
+        height: 32px !important;
     }
 
-    /* Hero Section Scaling */
+    .btn-header-cta {
+        padding: 5px 10px !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Hero Banner Scaling */
     .hero-section {
-        padding: 60px 0 50px 0 !important;
-        min-height: auto;
+        padding: 50px 0 45px 0 !important;
+    }
+
+    .hero-tagline {
+        font-size: 0.8rem !important;
     }
 
     .hero-title {
-        font-size: 1.85rem !important;
+        font-size: 1.75rem !important;
         margin-bottom: 0.75rem !important;
     }
 
     .hero-subtitle {
-        font-size: 0.98rem !important;
+        font-size: 0.95rem !important;
         line-height: 1.5;
         margin-bottom: 1.25rem !important;
-    }
-
-    .btn-gold.btn-lg {
-        padding: 12px 20px !important;
-        font-size: 0.95rem !important;
-        width: 100%; /* Full width touch target on phone screens */
-        text-align: center;
-    }
-
-    /* Card Padding on Mobile */
-    .philosophy-card {
-        padding: 20px !important;
-        border-left-width: 4px;
-    }
-
-    .philosophy-card p {
-        font-size: 1rem !important;
-    }
-
-    .white-card {
-        padding: 20px !important;
-    }
-
-    /* Mobile Search Bar in Header */
-    .nav-search-input {
-        font-size: 0.85rem !important;
-    }
-
-    /* Mobile Navigation Drawer Links */
-    .navbar-nav .nav-link {
-        padding: 10px 15px !important;
-        border-bottom: 1px solid #334155;
-    }
-
-    /* Booking Page Slots Adjustment */
-    .slot-btn {
-        padding: 12px !important;
-    }
-}
+    } 
