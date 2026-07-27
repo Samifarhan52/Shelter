@@ -1,70 +1,100 @@
-/* Remove default list styling */
-ul.navbar-nav, .navbar-nav li {
-    list-style: none !important;
-    list-style-type: none !important;
-    padding-left: 0 !important;
-    margin-bottom: 0 !important;
-}
-
 :root {
-    --bg-dark: #121e31;
-    --card-dark: #1e2c42;
-    --gold-primary: #d49a00;
-    --gold-hover: #b38200;
-    --text-light: #ffffff;
-    --text-muted: #cbd5e1;
-    --border-dark: #2d3748;
+    --bg-light: #f8fafc;
+    --navy-dark: #0f172a;
+    --navy-header: #1e293b;
+    --gold-accent: #c59b27;
+    --gold-hover: #a37f1e;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
 }
 
 body {
-    background-color: var(--bg-dark);
-    color: var(--text-light);
+    background-color: var(--bg-light);
+    color: var(--text-dark);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
+    line-height: 1.6;
 }
 
-/* Navbar Styling */
-.navbar-brand {
-    font-weight: 700;
-    letter-spacing: 1px;
+/* Header & Logo */
+.navbar-custom {
+    background-color: var(--navy-dark);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.logo-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    border: 2px solid var(--gold-accent);
+}
+
+.brand-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.brand-title {
+    font-size: 1.2rem;
+    font-weight: 800;
     color: #ffffff !important;
+    letter-spacing: 0.5px;
 }
 
-.nav-link {
-    color: #e2e8f0 !important;
-    font-weight: 500;
-    margin-right: 12px;
+/* Header Search Input */
+.nav-search-input {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border: 1px solid #334155 !important;
 }
 
-.nav-link:hover {
-    color: var(--gold-primary) !important;
+.nav-search-input::placeholder {
+    color: #94a3b8 !important;
 }
 
-/* Hero Section Banner */
+/* Hero Section Fixes (Spacious Padding & Bright White Text) */
 .hero-section {
-    padding: 100px 0 130px 0;
+    padding: 130px 0 110px 0;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
     position: relative;
-    border-bottom: 2px solid var(--gold-primary);
+}
+
+.hero-tagline {
+    color: var(--gold-accent) !important;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .hero-title {
+    color: #ffffff !important;
     font-size: 3.2rem;
     font-weight: 800;
-    line-height: 1.15;
-    color: #ffffff !important;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    line-height: 1.2;
+    text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
 }
 
 .hero-subtitle {
-    font-size: 1.25rem;
-    color: #f1f5f9 !important;
-    line-height: 1.6;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    color: #f8fafc !important;
+    font-size: 1.2rem;
+    font-weight: 400;
+    max-width: 720px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* Solid CTA Button Fix */
-a.btn-gold, button.btn-gold {
-    background-color: var(--gold-primary) !important;
+/* Gold Executive CTA Button */
+.btn-gold {
+    background-color: var(--gold-accent) !important;
     color: #ffffff !important;
     font-weight: 700 !important;
     padding: 14px 32px !important;
@@ -72,207 +102,62 @@ a.btn-gold, button.btn-gold {
     border: none !important;
     display: inline-block !important;
     text-decoration: none !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
     transition: all 0.25s ease-in-out !important;
 }
 
-a.btn-gold:hover, button.btn-gold:hover {
+.btn-gold:hover {
     background-color: var(--gold-hover) !important;
     color: #ffffff !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Search Bar Floating Container */
-.search-container-wrapper {
-    margin-top: -50px;
-    position: relative;
-    z-index: 20;
-}
-
-.search-container {
-    background-color: var(--card-dark);
-    padding: 24px;
-    border-radius: 10px;
-    border: 1px solid var(--border-dark);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-}
-
-.form-control, .form-select {
-    background-color: #121e31 !important;
-    color: #ffffff !important;
-    border: 1px solid var(--border-dark) !important;
-    padding: 12px 16px;
-}
-
-.form-control::placeholder {
-    color: #94a3b8 !important;
-}
-
-/* Card Boxes */
-.navy-card {
-    background-color: var(--card-dark);
-    border: 1px solid var(--border-dark);
+/* Content Cards */
+.philosophy-card {
+    background-color: #ffffff;
+    border-left: 5px solid var(--gold-accent);
+    padding: 40px;
     border-radius: 8px;
-    padding: 30px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
 }
 
-/* Logo Styling for Navbar & Footer */
-.brand-logo {
-    height: 42px;
-    width: auto;
-    border-radius: 6px;
+.white-card {
     background-color: #ffffff;
-    padding: 2px;
-    object-fit: contain;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 32px;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.footer-logo {
-    height: 50px;
-    width: auto;
-    border-radius: 6px;
-    background-color: #ffffff;
-    padding: 3px;
-    object-fit: contain;
+.white-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
 }
 
-/* Responsive Brand Title Scaling */
-.brand-title {
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-}
-
-/* Mobile Screen Adjustments */
-@media (max-width: 576px) {
-    .brand-title {
-        font-size: 0.78rem; /* Scales text down on smaller phone screens */
-    }
-    
-    .brand-logo {
-        height: 32px !important; /* Slightly smaller logo for small screens */
-    }
-
-    .btn-gold.btn-sm {
-        font-size: 0.75rem;
-        padding: 4px 10px !important;
-    }
-}
-
-/* Fixed Single-Row Mobile Header Adjustments */
-.brand-logo {
-    height: 36px;
-    width: auto;
-    border-radius: 4px;
-    background-color: #ffffff;
-    padding: 2px;
-}
-
-.brand-title {
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: #ffffff;
-}
-
-/* Force everything onto one tight line on mobile screens */
-@media (max-width: 576px) {
-    .brand-title {
-        font-size: 0.85rem;
-        max-width: 130px; /* Prevents title from pushing action buttons off screen */
-    }
-
-    .navbar-toggler {
-        padding: 4px 8px !important;
-    }
-
-    a.btn-gold.btn-sm {
-        font-size: 0.75rem !important;
-        padding: 4px 10px !important;
-    }
-}
-
-/* Outlined Executive Login Button */
-.btn-outline-gold {
-    color: #d49a00 !important;
-    border: 1px solid #d49a00 !important;
-    background-color: transparent !important;
-    font-weight: 600 !important;
-    border-radius: 4px !important;
+/* Slot Selection Hover Animations */
+.slot-btn {
     transition: all 0.2s ease-in-out !important;
 }
 
-.btn-outline-gold:hover {
-    background-color: #d49a00 !important;
-    color: #ffffff !important;
+.slot-btn:hover {
+    background-color: #fffde7 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(197, 155, 39, 0.25) !important;
+}
+/* High-Contrast Light Slate Footer Text Color */
+.text-light-slate {
+    color: #cbd5e1 !important;
 }
 
-/* Mobile Button Styling Improvements */
-@media (max-width: 576px) {
-    .btn-outline-gold.btn-sm {
-        font-size: 0.75rem !important;
-        padding: 4px 10px !important;
-    }
+/* Footer Links Interaction */
+.footer-links a {
+    color: #cbd5e1 !important;
+    transition: all 0.2s ease-in-out;
 }
 
-/* Outlined Executive Login Button */
-.btn-outline-gold {
-    color: #d49a00 !important;
-    border: 1px solid #d49a00 !important;
-    background-color: transparent !important;
-    font-weight: 600 !important;
-    border-radius: 4px !important;
-    transition: all 0.2s ease-in-out !important;
-}
-
-.btn-outline-gold:hover {
-    background-color: #d49a00 !important;
-    color: #ffffff !important;
-}
-
-/* Mobile Screen Layout Adjustments */
-@media (max-width: 991px) {
-    .brand-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #ffffff;
-    }
-
-    .navbar-toggler {
-        padding: 2px 6px !important;
-        font-size: 0.9rem;
-    }
-
-    .btn-outline-gold.btn-sm, .btn-gold.btn-sm {
-        font-size: 0.8rem !important;
-        padding: 5px 12px !important;
-    }
-}
-
-/* Executive Desktop Navbar Alignment */
-@media (min-width: 992px) {
-    .navbar-nav {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    
-    .navbar-brand {
-        font-size: 1.15rem;
-        letter-spacing: 1px;
-    }
-}
-
-/* Auth Buttons */
-.btn-outline-gold {
-    color: #d49a00 !important;
-    border: 1px solid #d49a00 !important;
-    background-color: transparent !important;
-    border-radius: 4px !important;
-    transition: all 0.2s ease-in-out !important;
-}
-
-.btn-outline-gold:hover {
-    background-color: #d49a00 !important;
-    color: #ffffff !important;
+.footer-links a:hover {
+    color: var(--gold-accent) !important;
+    padding-left: 4px;
 }

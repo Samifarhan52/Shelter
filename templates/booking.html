@@ -2,82 +2,106 @@
 {% block content %}
 
 <div class="container py-5">
-    <h2 class="text-center fw-bold mb-2">Book a Property Strategy Session</h2>
-    <p class="text-center text-muted mb-4">Select an available time slot for your 1-on-1 consultation.</p>
+    <div class="text-center mb-5">
+        <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">SHELTER HUNT CONSULTANTS</p>
+        <h2 class="fw-bold display-5" style="color: var(--navy-dark);">Book a Property Strategy Session</h2>
+        <p class="text-muted fs-5">Select an available time slot for your 1-on-1 expert consultation.</p>
+    </div>
 
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="navy-card">
+        <div class="col-lg-8 col-md-10">
+            
+            <!-- STEP 1: Date & Slot Selection Card -->
+            <div class="white-card mb-4">
+                <h4 class="fw-bold mb-3 d-flex align-items-center" style="color: var(--navy-dark);">
+                    <span class="badge rounded-circle me-2" style="background-color: var(--gold-accent); color: #fff; font-size: 1rem; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">1</span>
+                    Select Consultation Date & Time
+                </h4>
+                
                 <!-- Date Filter -->
                 <form method="GET" action="{{ url_for('booking_slots') }}" class="mb-4">
-                    <label class="form-label text-warning fw-bold">Select Date:</label>
-                    <input type="date" name="date" class="form-control bg-dark text-light border-secondary" value="{{ date }}" onchange="this.form.submit()">
+                    <label class="form-label fw-semibold text-dark">Consultation Date:</label>
+                    <input type="date" name="date" class="form-control form-control-lg border-secondary" value="{{ date }}" onchange="this.form.submit()" style="background-color: #ffffff !important; color: #0f172a !important;">
                 </form>
 
-                <h5 class="fw-bold mb-3">Available Slots for {{ date }}</h5>
+                <h6 class="fw-bold mb-3 text-muted">Daily Time Slots for {{ date }}</h6>
                 <div class="row g-3" id="slotContainer">
                     {% for slot in all_slots %}
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-sm-12">
                             {% if slot in booked_slots %}
-                                <button class="slot-btn disabled" disabled>
-                                    {{ slot }} <span class="badge bg-danger ms-2">Already Booked</span>
-                                </button>
+                                <div class="p-3 border rounded text-center d-flex align-items-center justify-content-between" style="background-color: #f1f5f9; border-color: #cbd5e1 !important;">
+                                    <span class="fw-bold text-muted">{{ slot }}</span>
+                                    <span class="badge bg-danger">Already Booked</span>
+                                </div>
                             {% else %}
-                                <button class="slot-btn" onclick="selectSlot('{{ slot }}')">
-                                    {{ slot }} <span class="badge bg-success ms-2">Available</span>
+                                <button type="button" class="btn btn-outline-dark w-100 p-3 text-start d-flex align-items-center justify-content-between slot-btn" onclick="selectSlot('{{ slot }}')" style="border-color: var(--gold-accent); border-width: 2px;">
+                                    <span class="fw-bold" style="color: var(--navy-dark);">{{ slot }}</span>
+                                    <span class="badge" style="background-color: var(--gold-accent); color: #fff;">Available</span>
                                 </button>
                             {% endif %}
                         </div>
                     {% endfor %}
                 </div>
+            </div>
 
-                <!-- Registration / Details Form -->
-                <form method="POST" action="{{ url_for('confirm_booking') }}" id="bookingForm" class="mt-4 style-display: none;">
-                    <hr class="border-secondary my-4">
-                    <h5 class="fw-bold text-warning mb-3">Provide Details to Confirm Session</h5>
-                    
-                    <input type="hidden" name="session_date" value="{{ date }}">
+            <!-- STEP 2: Lead Intake & Registration Form -->
+            <div class="white-card" id="bookingFormCard" style="display: none; border-top: 4px solid var(--gold-accent);">
+                <h4 class="fw-bold mb-3 d-flex align-items-center" style="color: var(--navy-dark);">
+                    <span class="badge rounded-circle me-2" style="background-color: var(--gold-accent); color: #fff; font-size: 1rem; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">2</span>
+                    Provide Your Details
+                </h4>
+                <p class="text-muted mb-4">Please fill in your contact information and requirements to confirm your appointment.</p>
+
+                <form method="POST" action="{{ url_for('confirm_booking') }}" id="bookingForm" onsubmit="sendToWhatsApp(event)">
+                    <input type="hidden" name="session_date" id="sessionDateInput" value="{{ date }}">
                     <input type="hidden" name="slot_time" id="selectedSlotInput">
 
-                    <div class="mb-3">
-                        <label class="form-label">Selected Slot</label>
-                        <input type="text" id="slotDisplay" class="form-control bg-dark text-warning fw-bold" readonly>
+                    <div class="mb-3 p-3 rounded" style="background-color: #f8fafc; border: 1px solid var(--border-color);">
+                        <label class="form-label small text-muted fw-bold mb-1">SELECTED TIME SLOT</label>
+                        <input type="text" id="slotDisplay" class="form-control-plaintext fw-bold fs-5 text-warning p-0" style="color: var(--gold-accent) !important;" readonly>
                     </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" name="full_name" class="form-control" value="{{ session.get('user_name', '') }}" required>
+                            <label class="form-label fw-semibold text-dark">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="full_name" id="fullName" class="form-control form-control-lg border-secondary" placeholder="e.g. Rahul Sharma" required style="background-color: #ffffff !important; color: #0f172a !important;">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Email Address</label>
-                            <input type="email" name="email" class="form-control" value="{{ session.get('user_email', '') }}" required>
+                            <label class="form-label fw-semibold text-dark">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="email" id="email" class="form-control form-control-lg border-secondary" placeholder="name@example.com" required style="background-color: #ffffff !important; color: #0f172a !important;">
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Contact Number</label>
-                            <input type="tel" name="phone" class="form-control" required>
+                            <label class="form-label fw-semibold text-dark">Contact Number <span class="text-danger">*</span></label>
+                            <input type="tel" name="phone" id="phone" class="form-control form-control-lg border-secondary" placeholder="+91 98765 43210" required style="background-color: #ffffff !important; color: #0f172a !important;">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Preferred Place / Location</label>
-                            <input type="text" name="location" class="form-control" placeholder="e.g. Indiranagar, Bangalore" required>
+                            <label class="form-label fw-semibold text-dark">Preferred Location / Place <span class="text-danger">*</span></label>
+                            <input type="text" name="location" id="location" class="form-control form-control-lg border-secondary" placeholder="e.g. Indiranagar, Bangalore" required style="background-color: #ffffff !important; color: #0f172a !important;">
                         </div>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Target Budget Range</label>
-                        <select name="budget" class="form-select" required>
+                        <label class="form-label fw-semibold text-dark">Target Budget Range <span class="text-danger">*</span></label>
+                        <select name="budget" id="budget" class="form-select form-select-lg border-secondary" required style="background-color: #ffffff !important; color: #0f172a !important;">
+                            <option value="" disabled selected>Select Budget Range</option>
                             <option value="50L - 1Cr">₹50 Lakhs - ₹1 Crore</option>
                             <option value="1Cr - 2.5Cr">₹1 Crore - ₹2.5 Crores</option>
                             <option value="2.5Cr+">₹2.5 Crores+</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Comments / Requirements</label>
-                        <textarea name="message" class="form-control" rows="3" placeholder="Tell us more about what you are looking for..."></textarea>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-dark">Comments / Specific Requirements</label>
+                        <textarea name="message" id="message" class="form-control border-secondary" rows="3" placeholder="Describe the type of property or questions you have..." style="background-color: #ffffff !important; color: #0f172a !important;"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-gold w-100 fw-bold">Confirm & Reserve Session</button>
+
+                    <button type="submit" class="btn btn-gold btn-lg w-100 py-3 fw-bold fs-5">Confirm & Reserve Strategy Session</button>
                 </form>
             </div>
+
         </div>
     </div>
 </div>
@@ -86,8 +110,47 @@
 function selectSlot(slot) {
     document.getElementById('selectedSlotInput').value = slot;
     document.getElementById('slotDisplay').value = slot;
-    document.getElementById('bookingForm').style.display = 'block';
-    window.scrollTo({ top: document.getElementById('bookingForm').offsetTop - 100, behavior: 'smooth' });
+    
+    var formCard = document.getElementById('bookingFormCard');
+    formCard.style.display = 'block';
+    
+    window.scrollTo({ top: formCard.offsetTop - 100, behavior: 'smooth' });
+}
+
+function sendToWhatsApp(event) {
+    // Collect form field values
+    var date = document.getElementById('sessionDateInput').value;
+    var slot = document.getElementById('selectedSlotInput').value;
+    var name = document.getElementById('fullName').value;
+    var email = document.getElementById('email').value;
+    var phone = document.getElementById('phone').value;
+    var location = document.getElementById('location').value;
+    var budget = document.getElementById('budget').value;
+    var message = document.getElementById('message').value || "None";
+
+    // Target WhatsApp Number
+    var adminWhatsAppNumber = "918050607031";
+
+    // Pre-formatted message template
+    var textMessage = "Hey Sudharshan,\n\n" +
+                      "A new Property Strategy Session has been booked on Shelter Hunt Consultants!\n\n" +
+                      "📌 *Booking Details:*\n" +
+                      "• *Date:* " + date + "\n" +
+                      "• *Time Slot:* " + slot + "\n\n" +
+                      "👤 *Client Details:*\n" +
+                      "• *Name:* " + name + "\n" +
+                      "• *Email:* " + email + "\n" +
+                      "• *Phone:* " + phone + "\n" +
+                      "• *Preferred Location:* " + location + "\n" +
+                      "• *Budget Range:* " + budget + "\n" +
+                      "• *Comments/Message:* " + message;
+
+    // Encode string for URL compatibility
+    var encodedMessage = encodeURIComponent(textMessage);
+    var whatsappUrl = "https://wa.me/" + adminWhatsAppNumber + "?text=" + encodedMessage;
+
+    // Open WhatsApp in new window/tab
+    window.open(whatsappUrl, '_blank');
 }
 </script>
 

@@ -20,14 +20,12 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
-                phone TEXT NOT NULL,
                 password TEXT NOT NULL
             )
         ''')
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
                 session_date TEXT NOT NULL,
                 slot_time TEXT NOT NULL,
                 full_name TEXT NOT NULL,
@@ -36,21 +34,21 @@ def init_db():
                 location TEXT NOT NULL,
                 budget TEXT NOT NULL,
                 message TEXT,
-                booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(user_id) REFERENCES users(id)
+                booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        # Setup Default Admin Account
         cursor.execute("SELECT * FROM users WHERE email = 'admin@shelterhunt.com'")
         if not cursor.fetchone():
             hashed_pwd = generate_password_hash("Admin@123")
-            cursor.execute("INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)",
-                           ("Admin", "admin@shelterhunt.com", "0000000000", hashed_pwd))
+            cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+                           ("Admin", "admin@shelterhunt.com", hashed_pwd))
         conn.commit()
 
 def get_daily_slots():
     return ["10:00 AM", "12:00 PM", "02:30 PM", "04:30 PM", "06:30 PM"]
 
-# --- Page Routes ---
+# --- Public Routes ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -67,67 +65,9 @@ def about():
 def services():
     return render_template('services.html')
 
-# --- Auth Routes ---
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        password = request.form.get('password')
-        
-        hashed_pwd = generate_password_hash(password)
-        try:
-            with get_db() as conn:
-                cursor = conn.cursor()
-                cursor.execute("INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)",
-                               (name, email, phone, hashed_pwd))
-                conn.commit()
-            flash("Account created successfully! Please login.", "success")
-            return redirect(url_for('login'))
-        except sqlite3.IntegrityError:
-            flash("Email already registered.", "danger")
-            
-    return render_template('register.html')
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-        user = cursor.fetchone()
-        
-        if user and check_password_hash(user['password'], password):
-            session['user_id'] = user['id']
-            session['user_name'] = user['name']
-            session['user_email'] = user['email']
-            
-            next_url = request.args.get('next')
-            if next_url:
-                return redirect(next_url)
-            return redirect(url_for('home'))
-        else:
-            flash("Invalid email or password.", "danger")
-            
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    flash("You have been logged out.", "info")
-    return redirect(url_for('home'))
-
-# --- Booking Routes ---
+# --- Public Strategy Session Booking ---
 @app.route('/book-session')
 def booking_slots():
-    if 'user_id' not in session:
-        flash("Please log in or sign up to book a Property Strategy Session.", "warning")
-        return redirect(url_for('login', next=url_for('booking_slots')))
-        
     selected_date = request.args.get('date', datetime.date.today().isoformat())
     all_slots = get_daily_slots()
     
@@ -141,9 +81,6 @@ def booking_slots():
 
 @app.route('/confirm-booking', methods=['POST'])
 def confirm_booking():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-        
     session_date = request.form.get('session_date')
     slot_time = request.form.get('slot_time')
     full_name = request.form.get('full_name')
@@ -156,25 +93,46 @@ def confirm_booking():
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO sessions (user_id, session_date, slot_time, full_name, email, phone, location, budget, message)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (session['user_id'], session_date, slot_time, full_name, email, phone, location, budget, message))
+            INSERT INTO sessions (session_date, slot_time, full_name, email, phone, location, budget, message)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (session_date, slot_time, full_name, email, phone, location, budget, message))
         conn.commit()
         
-    flash("Your Property Strategy Session is successfully booked!", "success")
+    flash("Your Property Strategy Session has been successfully booked!", "success")
     return redirect(url_for('home'))
 
-@app.route('/admin')
-def admin_dashboard():
-    if session.get('user_email') != 'admin@shelterhunt.com':
-        flash("Access Restricted.", "danger")
-        return redirect(url_for('home'))
+# --- Hidden Admin Portal Route ---
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
         
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM sessions ORDER BY booked_at DESC")
-    leads = cursor.fetchall()
-    return render_template('admin.html', leads=leads)
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        user = cursor.fetchone()
+        
+        if user and check_password_hash(user['password'], password):
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin'))
+        else:
+            flash("Invalid Admin Credentials.", "danger")
+
+    if session.get('admin_logged_in'):
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sessions ORDER BY booked_at DESC")
+        leads = cursor.fetchall()
+        return render_template('admin.html', leads=leads)
+        
+    return render_template('admin_login.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    flash("Admin logged out.", "info")
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     init_db()
