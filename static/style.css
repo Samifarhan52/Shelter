@@ -14,24 +14,26 @@ body {
     color: var(--text-dark);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     line-height: 1.6;
+    overflow-x: hidden; /* Prevents unwanted horizontal scrolling on mobile */
 }
 
-/* Header & Logo */
+/* --- Header & Navigation --- */
 .navbar-custom {
     background-color: var(--navy-dark);
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
 .logo-wrapper {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3px;
+    padding: 2px;
     border: 2px solid var(--gold-accent);
+    flex-shrink: 0;
 }
 
 .brand-logo {
@@ -42,13 +44,13 @@ body {
 }
 
 .brand-title {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #ffffff !important;
     letter-spacing: 0.5px;
+    line-height: 1.1;
 }
 
-/* Header Search Input */
 .nav-search-input {
     background-color: #1e293b !important;
     color: #ffffff !important;
@@ -59,10 +61,10 @@ body {
     color: #94a3b8 !important;
 }
 
-/* Hero Section Fixes (Spacious Padding & Bright White Text) */
+/* --- Hero Section --- */
 .hero-section {
-    padding: 130px 0 110px 0;
-    min-height: 500px;
+    padding: 100px 0 80px 0;
+    min-height: 480px;
     display: flex;
     align-items: center;
     position: relative;
@@ -71,14 +73,14 @@ body {
 .hero-tagline {
     color: var(--gold-accent) !important;
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 0.9rem;
     letter-spacing: 2px;
     text-transform: uppercase;
 }
 
 .hero-title {
     color: #ffffff !important;
-    font-size: 3.2rem;
+    font-size: 2.8rem;
     font-weight: 800;
     line-height: 1.2;
     text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
@@ -86,23 +88,23 @@ body {
 
 .hero-subtitle {
     color: #f8fafc !important;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 400;
     max-width: 720px;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* Gold Executive CTA Button */
+/* --- Executive Buttons --- */
 .btn-gold {
     background-color: var(--gold-accent) !important;
     color: #ffffff !important;
     font-weight: 700 !important;
-    padding: 14px 32px !important;
+    padding: 12px 28px !important;
     border-radius: 6px !important;
     border: none !important;
     display: inline-block !important;
     text-decoration: none !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
     transition: all 0.25s ease-in-out !important;
 }
 
@@ -110,14 +112,13 @@ body {
     background-color: var(--gold-hover) !important;
     color: #ffffff !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Content Cards */
+/* --- Content Cards --- */
 .philosophy-card {
     background-color: #ffffff;
     border-left: 5px solid var(--gold-accent);
-    padding: 40px;
+    padding: 35px;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
 }
@@ -126,38 +127,98 @@ body {
     background-color: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 10px;
-    padding: 32px;
+    padding: 28px;
     box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .white-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
 }
 
-/* Slot Selection Hover Animations */
-.slot-btn {
-    transition: all 0.2s ease-in-out !important;
-}
-
-.slot-btn:hover {
-    background-color: #fffde7 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(197, 155, 39, 0.25) !important;
-}
-/* High-Contrast Light Slate Footer Text Color */
+/* --- Footer Helpers --- */
 .text-light-slate {
     color: #cbd5e1 !important;
 }
 
-/* Footer Links Interaction */
 .footer-links a {
     color: #cbd5e1 !important;
+    display: inline-block;
+    padding: 3px 0;
     transition: all 0.2s ease-in-out;
 }
 
 .footer-links a:hover {
     color: var(--gold-accent) !important;
     padding-left: 4px;
+}
+
+/* ========================================================= */
+/* 📱 MOBILE RESPONSIVE MEDIA QUERIES (max-width: 768px)      */
+/* ========================================================= */
+@media (max-width: 768px) {
+    /* Header Adjustments */
+    .brand-title {
+        font-size: 0.9rem !important;
+    }
+
+    .logo-wrapper {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* Hero Section Scaling */
+    .hero-section {
+        padding: 60px 0 50px 0 !important;
+        min-height: auto;
+    }
+
+    .hero-title {
+        font-size: 1.85rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .hero-subtitle {
+        font-size: 0.98rem !important;
+        line-height: 1.5;
+        margin-bottom: 1.25rem !important;
+    }
+
+    .btn-gold.btn-lg {
+        padding: 12px 20px !important;
+        font-size: 0.95rem !important;
+        width: 100%; /* Full width touch target on phone screens */
+        text-align: center;
+    }
+
+    /* Card Padding on Mobile */
+    .philosophy-card {
+        padding: 20px !important;
+        border-left-width: 4px;
+    }
+
+    .philosophy-card p {
+        font-size: 1rem !important;
+    }
+
+    .white-card {
+        padding: 20px !important;
+    }
+
+    /* Mobile Search Bar in Header */
+    .nav-search-input {
+        font-size: 0.85rem !important;
+    }
+
+    /* Mobile Navigation Drawer Links */
+    .navbar-nav .nav-link {
+        padding: 10px 15px !important;
+        border-bottom: 1px solid #334155;
+    }
+
+    /* Booking Page Slots Adjustment */
+    .slot-btn {
+        padding: 12px !important;
+    }
 }

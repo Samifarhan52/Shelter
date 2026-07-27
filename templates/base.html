@@ -14,22 +14,22 @@
     <!-- Executive Header -->
     <header class="navbar-custom sticky-top">
         
-        <!-- TOP ROW: Logo, Search & Action -->
-        <div class="py-3 border-bottom border-secondary">
-            <div class="container-fluid px-lg-5 px-3 d-flex align-items-center justify-content-between gap-3">
+        <!-- TOP ROW: Brand & Quick Action -->
+        <div class="py-2 py-md-3 border-bottom border-secondary">
+            <div class="container-fluid px-3 px-lg-5 d-flex align-items-center justify-content-between gap-2">
                 
                 <!-- Logo & Brand Name -->
                 <a class="navbar-brand d-flex align-items-center m-0" href="{{ url_for('home') }}">
-                    <div class="logo-wrapper me-3">
+                    <div class="logo-wrapper me-2 me-md-3">
                         <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Shelter Hunt Logo" class="brand-logo">
                     </div>
                     <div>
                         <span class="brand-title">SHELTER HUNT</span>
-                        <small class="d-block text-warning fw-normal" style="font-size: 0.65rem; letter-spacing: 2px;">CONSULTANTS</small>
+                        <small class="d-block text-warning fw-normal" style="font-size: 0.6rem; letter-spacing: 1.5px;">CONSULTANTS</small>
                     </div>
                 </a>
 
-                <!-- Centered Header Search Bar (Desktop) -->
+                <!-- Centered Search Bar (Desktop View) -->
                 <div class="d-none d-md-block flex-grow-1 mx-lg-5 mx-3" style="max-width: 550px;">
                     <form class="input-group">
                         <input type="text" class="form-control nav-search-input py-2" placeholder="Search projects, locations, or builders...">
@@ -43,10 +43,10 @@
                     </form>
                 </div>
 
-                <!-- Right Action & Mobile Toggle -->
+                <!-- Right Action & Mobile Drawer Toggle -->
                 <div class="d-flex align-items-center gap-2">
-                    <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-sm px-3">Book Session</a>
-                    <button class="navbar-toggler border-secondary d-lg-none p-1 text-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-sm px-2 px-md-3">Book Session</a>
+                    <button class="navbar-toggler border-secondary d-lg-none p-1 text-light ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                 </div>
@@ -54,21 +54,21 @@
             </div>
         </div>
 
-        <!-- BOTTOM ROW: Clean Menu Links -->
+        <!-- BOTTOM ROW: Navigation Links & Mobile Search -->
         <nav class="navbar navbar-expand-lg navbar-dark p-0" style="background-color: var(--navy-header);">
-            <div class="container-fluid px-lg-5 px-3">
+            <div class="container-fluid px-3 px-lg-5">
                 
-                <!-- Mobile Search Bar -->
+                <!-- Mobile Search Bar (Only visible on small mobile screens) -->
                 <div class="d-md-none w-100 py-2">
-                    <div class="input-group input-group-sm">
-                        <input type="text" class="form-control nav-search-input" placeholder="Search projects...">
-                        <button class="btn btn-gold" type="button">Search</button>
-                    </div>
+                    <form class="input-group input-group-sm">
+                        <input type="text" class="form-control nav-search-input" placeholder="Search projects or location...">
+                        <button class="btn btn-gold px-3" type="button">Search</button>
+                    </form>
                 </div>
 
-                <!-- Menu Links -->
+                <!-- Navigation Links -->
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav mx-auto align-items-center py-2 gap-lg-4">
+                    <ul class="navbar-nav mx-auto align-items-lg-center py-2 gap-lg-4">
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('home') }}">Home</a></li>
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('sites') }}">Sites</a></li>
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('about') }}">About Us</a></li>
@@ -97,54 +97,54 @@
 
     {% block content %}{% endblock %}
 
-    <!-- Executive Corporate Footer -->
-    <footer class="text-light pt-5 pb-4 mt-5" style="background-color: var(--navy-dark); border-top: 4px solid var(--gold-accent);">
-        <div class="container">
+    <!-- Mobile-Optimized Executive Footer -->
+    <footer class="text-light pt-4 pt-md-5 pb-4 mt-5" style="background-color: var(--navy-dark); border-top: 4px solid var(--gold-accent);">
+        <div class="container px-3 px-md-4">
             <div class="row g-4 mb-4">
                 
                 <!-- Column 1: Brand & Overview -->
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-4 col-md-6 col-12">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="logo-wrapper me-3" style="width: 48px; height: 48px;">
+                        <div class="logo-wrapper me-3" style="width: 42px; height: 42px;">
                             <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Shelter Hunt Logo" class="brand-logo">
                         </div>
                         <div>
-                            <h5 class="fw-bold mb-0 text-white">SHELTER HUNT</h5>
-                            <small class="text-warning fw-normal" style="font-size: 0.65rem; letter-spacing: 2px;">CONSULTANTS</small>
+                            <h5 class="fw-bold mb-0 text-white fs-6">SHELTER HUNT</h5>
+                            <small class="text-warning fw-normal" style="font-size: 0.6rem; letter-spacing: 2px;">CONSULTANTS</small>
                         </div>
                     </div>
-                    <p class="text-light-slate small pe-lg-3" style="line-height: 1.7;">
+                    <p class="text-light-slate small pe-lg-3 mb-0" style="line-height: 1.6;">
                         A knowledge-first real estate advisory built on expert guidance rather than sales pressure. Helping buyers navigate legal compliance, market pricing, and property investments with confidence.
                     </p>
                 </div>
 
                 <!-- Column 2: Quick Links -->
-                <div class="col-lg-2 col-md-6">
-                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px;">Quick Links</h6>
-                    <ul class="list-unstyled mb-0 footer-links">
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.88rem;">Quick Links</h6>
+                    <ul class="list-unstyled mb-0 footer-links small">
                         <li class="mb-2"><a href="{{ url_for('home') }}" class="text-light-slate text-decoration-none">Home</a></li>
                         <li class="mb-2"><a href="{{ url_for('sites') }}" class="text-light-slate text-decoration-none">Featured Sites</a></li>
                         <li class="mb-2"><a href="{{ url_for('about') }}" class="text-light-slate text-decoration-none">Our Philosophy</a></li>
                         <li class="mb-2"><a href="{{ url_for('services') }}" class="text-light-slate text-decoration-none">Services</a></li>
-                        <li class="mb-2"><a href="{{ url_for('booking_slots') }}" class="text-warning text-decoration-none fw-bold">Book Strategy Session</a></li>
+                        <li class="mb-2"><a href="{{ url_for('booking_slots') }}" class="text-warning text-decoration-none fw-bold">Book Session</a></li>
                     </ul>
                 </div>
 
                 <!-- Column 3: Advisory Services -->
-                <div class="col-lg-3 col-md-6">
-                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px;">Our Services</h6>
-                    <ul class="list-unstyled mb-0 footer-links">
-                        <li class="mb-2 text-light-slate">⚖️ Legal & Title Verification</li>
-                        <li class="mb-2 text-light-slate">🛡️ Property Advocate Work</li>
-                        <li class="mb-2 text-light-slate">📋 Professional Structural Audits</li>
-                        <li class="mb-2 text-light-slate">📊 Micro-Market Valuation</li>
-                        <li class="mb-2 text-light-slate">🏠 Post-Purchase Registration Support</li>
+                <div class="col-lg-3 col-md-6 col-6">
+                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.88rem;">Our Services</h6>
+                    <ul class="list-unstyled mb-0 footer-links small">
+                        <li class="mb-2 text-light-slate">⚖️ Legal Verification</li>
+                        <li class="mb-2 text-light-slate">🛡️ Advocate Work</li>
+                        <li class="mb-2 text-light-slate">📋 Structural Audits</li>
+                        <li class="mb-2 text-light-slate">📊 Valuation</li>
+                        <li class="mb-2 text-light-slate">🏠 Registration</li>
                     </ul>
                 </div>
 
-                <!-- Column 4: Contact & Consultations -->
-                <div class="col-lg-3 col-md-6">
-                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px;">Get in Touch</h6>
+                <!-- Column 4: Contact & WhatsApp -->
+                <div class="col-lg-3 col-md-6 col-12">
+                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.88rem;">Get in Touch</h6>
                     <p class="text-light-slate small mb-2">
                         <strong class="text-white">📍 Address:</strong> Bengaluru, Karnataka, India
                     </p>
@@ -154,18 +154,18 @@
                     <p class="text-light-slate small mb-3">
                         <strong class="text-white">✉️ Email:</strong> contact@shelterhunt.com
                     </p>
-                    <a href="https://wa.me/918050607031?text=Hi%20Sudharshan,%20I%20have%20a%20query%20regarding%20property%20consultation." target="_blank" class="btn btn-gold btn-sm fw-bold">
+                    <a href="https://wa.me/918050607031?text=Hi%20Sudharshan,%20I%20have%20a%20query%20regarding%20property%20consultation." target="_blank" class="btn btn-gold btn-sm fw-bold w-100 py-2">
                         💬 Instant WhatsApp Connect
                     </a>
                 </div>
 
             </div>
 
-            <hr class="border-secondary opacity-50 my-4">
+            <hr class="border-secondary opacity-50 my-3">
 
-            <!-- Sub-Footer Row (Hidden Admin Link) -->
-            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between small text-light-slate">
-                <p class="mb-2 mb-md-0">© 2026 Shelter Hunt Consultants. All rights reserved.</p>
+            <!-- Sub-Footer Row -->
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between small text-light-slate text-center text-md-start gap-2">
+                <p class="mb-0">© 2026 Shelter Hunt Consultants. All rights reserved.</p>
                 <div>
                     <a href="#" class="text-light-slate text-decoration-none me-3">Privacy Policy</a>
                     <a href="#" class="text-light-slate text-decoration-none">Terms of Service</a>
