@@ -17,15 +17,15 @@ body {
     overflow-x: hidden;
 }
 
-/* Header & Navigation Styles */
+/* Header & Navigation */
 .navbar-custom {
     background-color: var(--navy-dark);
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 
 .logo-wrapper {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background-color: #ffffff;
     display: flex;
@@ -44,15 +44,11 @@ body {
 }
 
 .brand-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #ffffff !important;
     letter-spacing: 0.5px;
     line-height: 1.1;
-}
-
-.brand-sub {
-    font-size: 0.6rem;
 }
 
 .nav-search-input {
@@ -65,7 +61,7 @@ body {
     color: #94a3b8 !important;
 }
 
-/* Buttons */
+/* Executive Buttons */
 .btn-gold {
     background-color: var(--gold-accent) !important;
     color: #ffffff !important;
@@ -81,6 +77,7 @@ body {
 .btn-gold:hover {
     background-color: var(--gold-hover) !important;
     transform: translateY(-1px);
+    color: #ffffff !important;
 }
 
 .btn-header-cta {
@@ -90,7 +87,7 @@ body {
 
 /* Hero Section */
 .hero-section {
-    padding: 90px 0 70px 0;
+    padding: 110px 0 90px 0;
     position: relative;
 }
 
@@ -104,7 +101,7 @@ body {
 
 .hero-title {
     color: #ffffff !important;
-    font-size: 3rem;
+    font-size: 3.2rem;
     font-weight: 800;
     line-height: 1.2;
     text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8);
@@ -112,13 +109,13 @@ body {
 
 .hero-subtitle {
     color: #f8fafc !important;
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 400;
     max-width: 720px;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
-/* Cards */
+/* Content Cards */
 .philosophy-card {
     background-color: #ffffff;
     border-left: 5px solid var(--gold-accent);
@@ -133,6 +130,12 @@ body {
     border-radius: 10px;
     padding: 28px;
     box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.white-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
 }
 
 .text-light-slate {
@@ -142,7 +145,7 @@ body {
 .footer-links a {
     color: #cbd5e1 !important;
     display: inline-block;
-    padding: 2px 0;
+    padding: 3px 0;
     transition: all 0.2s ease-in-out;
 }
 
@@ -152,21 +155,16 @@ body {
 }
 
 /* ========================================== */
-/* 📱 EXPLICIT MOBILE LAYOUT FIXES (< 768px)   */
+/* 📱 MOBILE RESPONSIVE ADAPTATIONS (< 768px)  */
 /* ========================================== */
 @media (max-width: 768px) {
-    /* Header Scaling */
     .brand-title {
-        font-size: 0.85rem !important;
-    }
-
-    .brand-sub {
-        font-size: 0.52rem !important;
+        font-size: 0.9rem !important;
     }
 
     .logo-wrapper {
-        width: 32px !important;
-        height: 32px !important;
+        width: 36px !important;
+        height: 36px !important;
     }
 
     .btn-header-cta {
@@ -174,22 +172,26 @@ body {
         font-size: 0.75rem !important;
     }
 
-    /* Hero Banner Scaling */
     .hero-section {
-        padding: 50px 0 45px 0 !important;
-    }
-
-    .hero-tagline {
-        font-size: 0.8rem !important;
+        padding: 60px 0 50px 0 !important;
     }
 
     .hero-title {
-        font-size: 1.75rem !important;
+        font-size: 1.85rem !important;
         margin-bottom: 0.75rem !important;
     }
 
     .hero-subtitle {
-        font-size: 0.95rem !important;
+        font-size: 0.98rem !important;
         line-height: 1.5;
         margin-bottom: 1.25rem !important;
-    } 
+    }
+
+    .philosophy-card {
+        padding: 20px !important;
+    }
+
+    .white-card {
+        padding: 20px !important;
+    }
+}

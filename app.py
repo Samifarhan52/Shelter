@@ -37,7 +37,7 @@ def init_db():
                 booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        # Setup Default Admin Account
+        # Default Secure Admin Account
         cursor.execute("SELECT * FROM users WHERE email = 'admin@shelterhunt.com'")
         if not cursor.fetchone():
             hashed_pwd = generate_password_hash("Admin@123")
@@ -48,7 +48,7 @@ def init_db():
 def get_daily_slots():
     return ["10:00 AM", "12:00 PM", "02:30 PM", "04:30 PM", "06:30 PM"]
 
-# --- Public Routes ---
+# --- Public Pages ---
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -65,7 +65,7 @@ def about():
 def services():
     return render_template('services.html')
 
-# --- Public Strategy Session Booking ---
+# --- Strategy Session Booking ---
 @app.route('/book-session')
 def booking_slots():
     selected_date = request.args.get('date', datetime.date.today().isoformat())
@@ -98,7 +98,7 @@ def confirm_booking():
         ''', (session_date, slot_time, full_name, email, phone, location, budget, message))
         conn.commit()
         
-    flash("Your Property Strategy Session has been successfully booked!", "success")
+    flash("Your Property Strategy Session has been successfully reserved!", "success")
     return redirect(url_for('home'))
 
 # --- Hidden Admin Portal Route ---
@@ -131,7 +131,7 @@ def admin():
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin_logged_in', None)
-    flash("Admin logged out.", "info")
+    flash("Admin logged out successfully.", "info")
     return redirect(url_for('home'))
 
 if __name__ == '__main__':

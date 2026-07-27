@@ -118,7 +118,6 @@ function selectSlot(slot) {
 }
 
 function sendToWhatsApp(event) {
-    // Collect form field values
     var date = document.getElementById('sessionDateInput').value;
     var slot = document.getElementById('selectedSlotInput').value;
     var name = document.getElementById('fullName').value;
@@ -128,10 +127,8 @@ function sendToWhatsApp(event) {
     var budget = document.getElementById('budget').value;
     var message = document.getElementById('message').value || "None";
 
-    // Target WhatsApp Number
     var adminWhatsAppNumber = "918050607031";
 
-    // Pre-formatted message template
     var textMessage = "Hey Sudharshan,\n\n" +
                       "A new Property Strategy Session has been booked on Shelter Hunt Consultants!\n\n" +
                       "📌 *Booking Details:*\n" +
@@ -145,11 +142,9 @@ function sendToWhatsApp(event) {
                       "• *Budget Range:* " + budget + "\n" +
                       "• *Comments/Message:* " + message;
 
-    // Encode string for URL compatibility
     var encodedMessage = encodeURIComponent(textMessage);
     var whatsappUrl = "https://wa.me/" + adminWhatsAppNumber + "?text=" + encodedMessage;
 
-    // Open WhatsApp in new window/tab
     window.open(whatsappUrl, '_blank');
 }
 </script>
