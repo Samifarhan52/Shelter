@@ -1,22 +1,44 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <div class="container py-5">
-    <h2 class="fw-bold text-center mb-4">Our Featured Sites & Projects</h2>
+    <div class="text-center mb-5">
+        <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">CURATED PORTFOLIO</p>
+        <h2 class="fw-bold display-5" style="color: var(--navy-dark);">Featured Property Sites</h2>
+        <p class="text-muted fs-5">Handpicked premium residential projects verified by our advisory team.</p>
+    </div>
+
     <div class="row g-4">
-        <div class="col-md-6">
-            <div class="navy-card">
-                <h4 class="fw-bold text-warning">Prestige Horizon</h4>
-                <p class="text-muted">Luxury 3 & 4 BHK Apartments with prime connectivity and premium amenities.</p>
-                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-sm">Inquire & Book Session</a>
+        <div class="col-lg-4 col-md-6">
+            <div class="white-card h-100">
+                <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">Prestige Group</span>
+                <h4 class="fw-bold" style="color: var(--navy-dark);">Prestige City - Luxury Apartments</h4>
+                <p class="text-muted small mb-2">📍 Sarjapur Road, Bengaluru</p>
+                <p class="text-muted">High-rise residential township offering premium 2 & 3 BHK residences with world-class amenities and strong investment growth.</p>
+                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="navy-card">
-                <h4 class="fw-bold text-warning">Brigade Greens</h4>
-                <p class="text-muted">Eco-friendly modern township designed for long-term residential value.</p>
-                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-sm">Inquire & Book Session</a>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="white-card h-100">
+                <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">Brigade Group</span>
+                <h4 class="fw-bold" style="color: var(--navy-dark);">Brigade Eldorado</h4>
+                <p class="text-muted small mb-2">📍 Aerospace Park, KIADB, North Bengaluru</p>
+                <p class="text-muted">Modern integrated enclave designed for professionals seeking high rental yields and fast capital appreciation near the airport hub.</p>
+                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="white-card h-100">
+                <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">Sobha Developers</span>
+                <h4 class="fw-bold" style="color: var(--navy-dark);">Sobha Town Park</h4>
+                <p class="text-muted small mb-2">📍 Hosur Road, Near Electronic City</p>
+                <p class="text-muted">Luxury New-York styled residential community built with Sobha's signature German technology construct quality.</p>
+                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

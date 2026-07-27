@@ -1,34 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <div class="container py-5">
-    <h2 class="text-center fw-bold mb-2">Any Query, One Solution</h2>
-    <p class="text-center text-muted mb-5">End-to-end property services — from legal verification to post-purchase management.</p>
+    <div class="text-center mb-5">
+        <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">OUR EXPERTISE</p>
+        <h2 class="fw-bold display-5" style="color: var(--navy-dark);">Comprehensive Property Services</h2>
+        <p class="text-muted fs-5">Professional real estate advisory, legal compliance, and technical inspection services.</p>
+    </div>
 
     <div class="row g-4">
         <div class="col-md-6">
-            <div class="navy-card">
-                <h5 class="fw-bold text-warning">⚖️ Legal & Title Verification</h5>
-                <p class="text-muted">Comprehensive title search, encumbrance checks, mutation verification, and agreement drafting handled by qualified legal professionals.</p>
+            <div class="white-card h-100">
+                <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">⚖️ Legal & Title Verification</h4>
+                <p class="text-muted">Our legal team conducts multi-year title searches, verifies Encumbrance Certificates (EC), examines parent deeds, and verifies RERA registration numbers before you pay booking advances.</p>
             </div>
         </div>
+
         <div class="col-md-6">
-            <div class="navy-card">
-                <h5 class="fw-bold text-warning">🛡️ Property Advocate Work</h5>
-                <p class="text-muted">Dedicated advocate representation for registration, stamp duty compliance, power-of-attorney execution, and dispute resolution.</p>
+            <div class="white-card h-100">
+                <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">🛡️ Property Advocate Representation</h4>
+                <p class="text-muted">Dedicated legal advocate assistance for drafting Agreements to Sell, Sale Deeds, handling stamp duty compliance, sub-registrar office registration, and power-of-attorney execution.</p>
             </div>
         </div>
+
         <div class="col-md-6">
-            <div class="navy-card">
-                <h5 class="fw-bold text-warning">📋 Professional Inspections</h5>
-                <p class="text-muted">Structural assessments, plumbing & electrical audits, and RERA compliance checks performed by certified engineers before you commit.</p>
+            <div class="white-card h-100">
+                <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">📋 Professional Structural Audits</h4>
+                <p class="text-muted">Pre-possession technical inspections performed by civil engineers to assess concrete quality, plumbing, electrical loading, layout dimensions, and architectural plan compliance.</p>
             </div>
         </div>
+
         <div class="col-md-6">
-            <div class="navy-card">
-                <h5 class="fw-bold text-warning">🏠 Post-Purchase Support</h5>
-                <p class="text-muted">Society transfer, utility connections, property tax setup, and ongoing maintenance coordination — so ownership begins stress-free.</p>
+            <div class="white-card h-100">
+                <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">📊 Micro-Market Price Valuation</h4>
+                <p class="text-muted">Comparative market analysis (CMA) evaluating real transaction prices in the surrounding area to ensure you do not overpay for real estate assets.</p>
             </div>
         </div>
     </div>
+
+    <div class="text-center mt-5">
+        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-lg fw-bold">Book a Consultation Strategy Session</a>
+    </div>
 </div>
+
 {% endblock %}
