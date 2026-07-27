@@ -195,3 +195,24 @@ body {
         padding: 20px !important;
     }
 }
+
+/* Custom Mobile Hamburger Toggle Button */
+.mobile-menu-btn {
+    background-color: #1e293b;
+    border: 1px solid var(--gold-accent);
+    border-radius: 6px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:active {
+    background-color: var(--gold-accent);
+}
+
+.mobile-menu-btn:active svg {
+    stroke: #0f172a;
+}
