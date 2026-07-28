@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- Hero Banner with High Contrast Gradient Overlay -->
+<!-- Dynamic Hero Banner with Dynamic System Settings -->
 <div class="hero-section text-center text-md-start" 
      style="background: linear-gradient(rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92)), url('{{ url_for('static', filename='head.jpeg') }}') center/cover no-repeat;">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8 col-md-10">
                 <p class="hero-tagline mb-2">SHELTER HUNT CONSULTANTS</p>
-                <h1 class="hero-title mb-3">Smart Property Decisions Start Here.</h1>
+                <h1 class="hero-title mb-3">{{ settings.get('hero_title', 'Smart Property Decisions Start Here.') if settings else 'Smart Property Decisions Start Here.' }}</h1>
                 <p class="hero-subtitle mb-4">
-                    We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.
+                    {{ settings.get('hero_subtitle', "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.") if settings else "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time." }}
                 </p>
                 <div class="pt-2">
                     <a href="{{ url_for('booking_slots') }}" class="btn-gold btn-lg">Book a Property Strategy Session</a>
@@ -144,7 +144,7 @@
 <!-- Bottom Call To Action Banner -->
 <div class="container text-center my-5 py-5 text-light rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 4px solid var(--gold-accent);">
     <h2 class="fw-bold text-light mb-2">Ready for Expert Property Guidance?</h2>
-    <p style="color: whitesmoke;">No obligations, no hard sells — just a focused strategy session to understand your goals and chart the best path forward.</p>
+    <p class="text-light mb-4 fs-5" style="color: whitesmoke !important;">No obligations, no hard sells — just a focused strategy session to understand your goals and chart the best path forward.</p>
     <a href="{{ url_for('booking_slots') }}" class="btn-gold btn-lg">Book a Property Strategy Session</a>
 </div>
 

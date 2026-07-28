@@ -168,15 +168,15 @@
                 <div class="col-lg-3 col-md-6 col-12">
                     <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">Get in Touch</h6>
                     <p class="text-light-slate small mb-2">
-                        <strong class="text-white">📍 Address:</strong> Bengaluru, Karnataka, India
+                        <strong class="text-white">📍 Address:</strong> {{ settings.get('contact_address', 'Bengaluru, Karnataka, India') if settings else 'Bengaluru, Karnataka, India' }}
                     </p>
                     <p class="text-light-slate small mb-2">
-                        <strong class="text-white">📞 Phone:</strong> +91 8050749331
+                        <strong class="text-white">📞 Phone:</strong> {{ settings.get('contact_phone', '+91 8050749331') if settings else '+91 8050749331' }}
                     </p>
                     <p class="text-light-slate small mb-3">
-                        <strong class="text-white">✉️ Email:</strong> contact@shelterhunt.com
+                        <strong class="text-white">✉️ Email:</strong> {{ settings.get('contact_email', 'contact@shelterhunt.com') if settings else 'contact@shelterhunt.com' }}
                     </p>
-                    <a href="https://wa.me/918050749331?text=Hi%20Sudharshan,%20I%20have%20a%20query%20regarding%20property%20consultation." target="_blank" class="btn btn-gold btn-sm fw-bold w-100 py-2">
+                    <a href="https://wa.me/{{ settings.get('whatsapp_number', '918050749331') if settings else '918050749331' }}?text=Hi%20Sudharshan,%20I%20have%20a%20query%20regarding%20property%20consultation." target="_blank" class="btn btn-gold btn-sm fw-bold w-100 py-2">
                         💬 Instant WhatsApp Connect
                     </a>
                 </div>
