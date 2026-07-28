@@ -8,13 +8,33 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Executive Navy Header Search Inputs & Select Styling */
+        .nav-search-input {
+            background-color: #1e293b !important;
+            color: #ffffff !important;
+            border: 1px solid #334155 !important;
+        }
+        .nav-search-input::placeholder {
+            color: #94a3b8 !important;
+        }
+        .nav-search-input option {
+            background-color: #0f172a !important;
+            color: #ffffff !important;
+            padding: 8px;
+        }
+        .nav-search-input:focus {
+            border-color: var(--gold-accent) !important;
+            box-shadow: 0 0 0 0.2rem rgba(197, 155, 39, 0.25) !important;
+        }
+    </style>
 </head>
 <body>
 
     <!-- Executive Navigation Header -->
     <header class="navbar-custom sticky-top">
         
-        <!-- TOP ROW: Brand, Search Bar & Booking Button -->
+        <!-- TOP ROW: Brand, Desktop Search & Mobile Menu -->
         <div class="py-2 py-md-3 border-bottom border-secondary">
             <div class="container-fluid px-3 px-lg-5 d-flex align-items-center justify-content-between">
                 
@@ -29,17 +49,17 @@
                     </div>
                 </a>
 
-                <!-- Centered Desktop Search Bar with Dynamic Builders -->
-                <div class="d-none d-lg-block flex-grow-1 mx-lg-5" style="max-width: 520px;">
+                <!-- Centered Desktop Search Bar with Dynamic Active Builders -->
+                <div class="d-none d-lg-block flex-grow-1 mx-lg-5" style="max-width: 540px;">
                     <form class="input-group">
                         <input type="text" class="form-control nav-search-input py-2" placeholder="Search projects, locations, or builders...">
-                        <select class="form-select nav-search-input py-2" style="max-width: 140px;">
-                            <option selected>Builder</option>
+                        <select class="form-select nav-search-input py-2" style="max-width: 150px;">
+                            <option value="" selected>Builder</option>
                             {% for b in builders %}
                                 <option value="{{ b.name }}">{{ b.name }}</option>
                             {% endfor %}
                         </select>
-                        <button class="btn btn-gold px-4" type="button">Search</button>
+                        <button class="btn btn-gold px-4 fw-bold" type="button">Search</button>
                     </form>
                 </div>
 
@@ -47,7 +67,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-header-cta px-3">Book Session</a>
                     
-                    <!-- Mobile-Only Hamburger Toggle -->
+                    <!-- Mobile-Only Custom Hamburger Toggle -->
                     <button class="mobile-menu-btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -60,21 +80,21 @@
             </div>
         </div>
 
-        <!-- SECOND ROW: Navigation Links (Desktop Horizontal / Mobile Drawer) -->
+        <!-- SECOND ROW: Navigation Bar (Desktop Links / Mobile Drawer) -->
         <nav class="navbar navbar-expand-lg navbar-dark p-0 border-0 mb-0" style="background-color: var(--navy-header);">
             <div class="container-fluid px-3 px-lg-5">
                 
-                <!-- Mobile Search Bar (Only visible on small mobile screens) -->
+                <!-- Mobile Search Bar -->
                 <div class="d-lg-none w-100 py-2">
                     <form class="input-group input-group-sm">
                         <input type="text" class="form-control nav-search-input" placeholder="Search projects or location...">
-                        <select class="form-select nav-search-input" style="max-width: 100px;">
-                            <option selected>Builder</option>
+                        <select class="form-select nav-search-input" style="max-width: 110px;">
+                            <option value="" selected>Builder</option>
                             {% for b in builders %}
                                 <option value="{{ b.name }}">{{ b.name }}</option>
                             {% endfor %}
                         </select>
-                        <button class="btn btn-gold px-2" type="button">Search</button>
+                        <button class="btn btn-gold px-2 fw-bold" type="button">Search</button>
                     </form>
                 </div>
 
@@ -93,7 +113,7 @@
 
     </header>
 
-    <!-- Global Alerts -->
+    <!-- Global Flash Alerts -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="container my-3">
@@ -109,7 +129,7 @@
 
     {% block content %}{% endblock %}
 
-    <!-- Corporate Footer -->
+    <!-- Corporate Executive Footer -->
     <footer class="text-light pt-4 pt-md-5 pb-4 mt-5" style="background-color: var(--navy-dark); border-top: 4px solid var(--gold-accent);">
         <div class="container px-3 px-md-4">
             <div class="row g-4 mb-4">
