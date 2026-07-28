@@ -4,19 +4,11 @@ import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "shelter_hunt_secret_key_2026")
 
-UPLOAD_FOLDER = os.path.join(app.root_path, 'static')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/shelter_hunt')
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_db():
     url = DATABASE_URL
@@ -61,7 +53,7 @@ def init_db():
             )
         ''')
 
-        # Featured Sites / Projects (added image_filename column)
+        # Featured Sites / Projects
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sites (
                 id SERIAL PRIMARY KEY,
@@ -69,17 +61,10 @@ def init_db():
                 builder VARCHAR(255) NOT NULL,
                 location VARCHAR(255) NOT NULL,
                 description TEXT NOT NULL,
-                image_filename VARCHAR(255) DEFAULT 'head.jpeg',
+                image_filename VARCHAR(500) DEFAULT 'head.jpeg',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-
-        # Migration check: Ensure 'image_filename' column exists on existing table
-        try:
-            cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename VARCHAR(255) DEFAULT 'head.jpeg';")
-            conn.commit()
-        except Exception:
-            conn.rollback()
 
         # Builders Table
         cursor.execute('''
@@ -90,9 +75,22 @@ def init_db():
             )
         ''')
 
-        # Migration check: Ensure 'is_active' exists
+        # Run Auto-Migrations for column safety
+        try:
+            cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename VARCHAR(500) DEFAULT 'head.jpeg';")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
         try:
             cursor.execute("ALTER TABLE builders ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
+        try:
+            cursor.execute("UPDATE builders SET is_active = TRUE WHERE is_active IS NULL;")
+            cursor.execute("UPDATE sites SET image_filename = 'head.jpeg' WHERE image_filename IS NULL;")
             conn.commit()
         except Exception:
             conn.rollback()
@@ -123,7 +121,7 @@ def init_db():
                 ('Sobha Town Park', 'Sobha Developers', 'Hosur Road, Bengaluru', 'Luxury New-York styled residential community built with Sobha German technology.', 'head.jpeg')
             ])
 
-        # Ensure any site titled 'Blue Bells' or containing 'Blue Bells' points to 'bluebells.jpeg'
+        # Ensure Blue Bells points to bluebells.jpeg
         cursor.execute("UPDATE sites SET image_filename = 'bluebells.jpeg' WHERE LOWER(title) LIKE '%blue%bell%' OR LOWER(title) LIKE '%bluebells%';")
         conn.commit()
 
@@ -275,7 +273,7 @@ def admin():
         
     return render_template('admin_login.html')
 
-# CMS Actions: Add Site (with image upload / custom filename)
+# CMS Actions: Add Site
 @app.route('/admin/add-site', methods=['POST'])
 def admin_add_site():
     if not session.get('admin_logged_in'):
@@ -285,29 +283,21 @@ def admin_add_site():
     builder = request.form.get('builder')
     location = request.form.get('location')
     description = request.form.get('description')
-    custom_filename = request.form.get('custom_filename')
+    image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
-    image_filename = 'head.jpeg'
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO sites (title, builder, location, description, image_filename) VALUES (%s, %s, %s, %s, %s)",
+                       (title, builder, location, description, image_filename))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("New Featured Site published successfully!", "success")
+    except Exception as e:
+        print(f"Error adding site: {e}")
+        flash("Could not add site.", "danger")
     
-    if custom_filename and custom_filename.strip():
-        image_filename = custom_filename.strip()
-        
-    if 'site_image' in request.files:
-        file = request.files['site_image']
-        if file and file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            image_filename = filename
-    
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO sites (title, builder, location, description, image_filename) VALUES (%s, %s, %s, %s, %s)",
-                   (title, builder, location, description, image_filename))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
-    flash("New Featured Site published successfully!", "success")
     return redirect(url_for('admin'))
 
 # CMS Actions: Edit Site
@@ -320,31 +310,24 @@ def admin_edit_site(site_id):
     builder = request.form.get('builder')
     location = request.form.get('location')
     description = request.form.get('description')
-    image_filename = request.form.get('existing_image', 'head.jpeg')
+    image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
-    if 'site_image' in request.files:
-        file = request.files['site_image']
-        if file and file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            image_filename = filename
-            
-    custom_filename = request.form.get('custom_filename')
-    if custom_filename and custom_filename.strip():
-        image_filename = custom_filename.strip()
-    
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE sites 
-        SET title = %s, builder = %s, location = %s, description = %s, image_filename = %s
-        WHERE id = %s
-    ''', (title, builder, location, description, image_filename, site_id))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
-    flash("Site updated successfully!", "success")
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE sites 
+            SET title = %s, builder = %s, location = %s, description = %s, image_filename = %s
+            WHERE id = %s
+        ''', (title, builder, location, description, image_filename, site_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Site details updated successfully!", "success")
+    except Exception as e:
+        print(f"Error updating site: {e}")
+        flash("Could not update site.", "danger")
+        
     return redirect(url_for('admin'))
 
 # CMS Actions: Delete Site
@@ -353,14 +336,18 @@ def admin_delete_site(site_id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM sites WHERE id = %s", (site_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM sites WHERE id = %s", (site_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Site entry removed.", "info")
+    except Exception as e:
+        print(f"Error deleting site: {e}")
+        flash("Could not delete site.", "danger")
         
-    flash("Site entry removed.", "info")
     return redirect(url_for('admin'))
 
 # CMS Actions: Add Builder / Brand

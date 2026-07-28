@@ -13,11 +13,18 @@
             <div class="col-lg-4 col-md-6">
                 <div class="white-card h-100 d-flex flex-column justify-content-between p-0 overflow-hidden shadow-sm">
                     <div style="height: 200px; overflow: hidden; position: relative;">
-                        <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
-                             alt="{{ site.title }}" 
-                             class="w-100 h-100" 
-                             style="object-fit: cover;"
-                             onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                        {% if site.image_filename and ('http://' in site.image_filename or 'https://' in site.image_filename) %}
+                            <img src="{{ site.image_filename }}" 
+                                 alt="{{ site.title }}" 
+                                 class="w-100 h-100" 
+                                 style="object-fit: cover;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
+                                 alt="{{ site.title }}" 
+                                 class="w-100 h-100" 
+                                 style="object-fit: cover;"
+                                 onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                        {% endif %}
                         <span class="badge position-absolute top-0 start-0 m-3" style="background-color: var(--gold-accent); color: #fff;">
                             {{ site.builder }}
                         </span>

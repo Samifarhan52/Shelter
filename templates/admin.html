@@ -182,13 +182,13 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: Manage Featured Sites / Projects -->
+               <!-- TAB 2: Manage Featured Sites / Projects -->
 <div class="tab-pane fade" id="sites">
     <div class="row g-4">
         <div class="col-12 col-lg-5">
             <div class="bg-white p-3 p-md-4 rounded shadow-sm">
                 <h5 class="fw-bold mb-3">Add New Featured Site</h5>
-                <form method="POST" action="{{ url_for('admin_add_site') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ url_for('admin_add_site') }}">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Project Title</label>
                         <input type="text" name="title" class="form-control" placeholder="e.g. Blue Bells Luxury Enclave" required>
@@ -207,13 +207,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Description</label>
-                        <textarea name="description" class="form-control" rows="3" placeholder="Brief details about specs, amenities..." required></textarea>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Brief details about specs..." required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Upload Site Image</label>
-                        <input type="file" name="site_image" class="form-control" accept="image/*">
-                        <small class="text-muted d-block mt-1">Or specify an existing filename in static folder:</small>
-                        <input type="text" name="custom_filename" class="form-control form-control-sm mt-1" placeholder="e.g. bluebells.jpeg">
+                        <label class="form-label fw-semibold">Image Filename or Web URL</label>
+                        <input type="text" name="image_filename" class="form-control" placeholder="e.g. bluebells.jpeg or https://..." value="head.jpeg">
+                        <small class="text-muted">Use static project image (e.g. <code>bluebells.jpeg</code>, <code>head.jpeg</code>) or paste an image URL.</small>
                     </div>
                     <button type="submit" class="btn btn-warning w-100 fw-bold py-2">Publish Featured Site</button>
                 </form>
@@ -228,10 +227,11 @@
                     <div class="list-group-item p-3">
                         <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
-                                     alt="Site Thumbnail" 
-                                     style="width: 70px; height: 55px; object-fit: cover; border-radius: 6px;"
-                                     onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                                {% if 'http://' in site.image_filename or 'https://' in site.image_filename %}
+                                    <img src="{{ site.image_filename }}" style="width: 70px; height: 55px; object-fit: cover; border-radius: 6px;">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" style="width: 70px; height: 55px; object-fit: cover; border-radius: 6px;" onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                                {% endif %}
                                 <div>
                                     <span class="badge bg-dark mb-1">{{ site.builder }}</span>
                                     <h6 class="fw-bold mb-0 text-dark">{{ site.title }}</h6>
@@ -239,7 +239,7 @@
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit Image & Details</button>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit</button>
                                 <a href="{{ url_for('admin_delete_site', site_id=site.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this project listing?')">Delete</a>
                             </div>
                         </div>
@@ -249,8 +249,7 @@
                     <div class="modal fade" id="editModal{{ site.id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form method="POST" action="{{ url_for('admin_edit_site', site_id=site.id) }}" enctype="multipart/form-data">
-                                    <input type="hidden" name="existing_image" value="{{ site.image_filename or 'head.jpeg' }}">
+                                <form method="POST" action="{{ url_for('admin_edit_site', site_id=site.id) }}">
                                     <div class="modal-header">
                                         <h5 class="modal-title fw-bold">Edit {{ site.title }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -277,14 +276,9 @@
                                             <textarea name="description" class="form-control" rows="3" required>{{ site.description }}</textarea>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label fw-semibold">Current Image</label>
-                                            <div class="mb-2">
-                                                <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" style="max-height: 80px; border-radius: 6px;">
-                                            </div>
-                                            <label class="form-label fw-semibold">Upload New Image</label>
-                                            <input type="file" name="site_image" class="form-control" accept="image/*">
-                                            <small class="text-muted d-block mt-1">Or change static filename:</small>
-                                            <input type="text" name="custom_filename" class="form-control form-control-sm mt-1" value="{{ site.image_filename }}">
+                                            <label class="form-label fw-semibold">Image Filename or Web URL</label>
+                                            <input type="text" name="image_filename" class="form-control" value="{{ site.image_filename or 'head.jpeg' }}" required>
+                                            <small class="text-muted">e.g. <code>bluebells.jpeg</code>, <code>head.jpeg</code>, or an image link starting with <code>https://</code></small>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
