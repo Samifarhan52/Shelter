@@ -185,7 +185,6 @@ def booking_slots():
     today_str = datetime.date.today().isoformat()
     selected_date = request.args.get('date', today_str)
     
-    # Block selection of past dates
     if selected_date < today_str:
         selected_date = today_str
 
@@ -285,9 +284,9 @@ def confirm_booking():
             
         wa_text += "\nPlease confirm my appointment slot. Thank you!"
 
-        # Encode text & redirect directly to WhatsApp
+        # Encode text & redirect directly to WhatsApp (+91 8050749331)
         encoded_message = urllib.parse.quote(wa_text)
-        whatsapp_url = f"https://wa.me/918050607031?text={encoded_message}"
+        whatsapp_url = f"https://wa.me/918050749331?text={encoded_message}"
         
         return redirect(whatsapp_url)
 
