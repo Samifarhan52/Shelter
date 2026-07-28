@@ -1,6 +1,7 @@
 import os
 import datetime
 import base64
+import urllib.parse
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, redirect, url_for, session, flash
@@ -27,7 +28,7 @@ def init_db():
         conn = get_db()
         cursor = conn.cursor()
         
-        # Admin Users
+        # Admin Users Table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -37,7 +38,7 @@ def init_db():
             )
         ''')
         
-        # Session Leads (Added status column for cancellation / reopening)
+        # Session Leads Table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
                 id SERIAL PRIMARY KEY,
@@ -54,7 +55,7 @@ def init_db():
             )
         ''')
 
-        # Featured Sites / Projects
+        # Featured Sites / Projects Table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sites (
                 id SERIAL PRIMARY KEY,
@@ -76,7 +77,7 @@ def init_db():
             )
         ''')
 
-        # Auto-Migrations
+        # Schema Safety Migrations
         try:
             cursor.execute("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Confirmed';")
             cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename TEXT DEFAULT 'head.jpeg';")
@@ -86,20 +87,20 @@ def init_db():
         except Exception:
             conn.rollback()
 
-        # Default Admin
+        # Default Admin Account
         cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
         if not cursor.fetchone():
             hashed_pwd = generate_password_hash("Admin@123")
             cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
                            ("Admin", "admin@shelterhunt.com", hashed_pwd))
 
-        # Seed Builders
+        # Seed Builders if empty
         cursor.execute("SELECT COUNT(*) as count FROM builders")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany("INSERT INTO builders (name, is_active) VALUES (%s, %s)", 
                                [('Prestige Group', True), ('Brigade Group', True), ('Sobha Developers', True), ('Godrej Properties', True)])
 
-        # Seed Sites
+        # Seed Sites if empty
         cursor.execute("SELECT COUNT(*) as count FROM sites")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany('''
@@ -153,6 +154,7 @@ def home():
         conn.close()
     except Exception:
         sites_list = []
+        
     return render_template('index.html', sites=sites_list, builders=get_active_builders())
 
 @app.route('/sites')
@@ -166,6 +168,7 @@ def sites():
         conn.close()
     except Exception:
         sites_list = []
+        
     return render_template('sites.html', sites=sites_list, builders=get_active_builders())
 
 @app.route('/about')
@@ -182,7 +185,7 @@ def booking_slots():
     today_str = datetime.date.today().isoformat()
     selected_date = request.args.get('date', today_str)
     
-    # Prevent past date viewing/booking
+    # Block selection of past dates
     if selected_date < today_str:
         selected_date = today_str
 
@@ -191,7 +194,6 @@ def booking_slots():
     try:
         conn = get_db()
         cursor = conn.cursor()
-        # Only check active confirmed bookings
         cursor.execute("SELECT slot_time FROM sessions WHERE session_date = %s AND (status = 'Confirmed' OR status IS NULL)", (selected_date,))
         booked_records = cursor.fetchall()
         booked_slots = [r['slot_time'] for r in booked_records]
@@ -207,7 +209,6 @@ def check_availability():
     slot = request.args.get('slot')
     current_date = request.args.get('date', datetime.date.today().isoformat())
     
-    # Find next 3 available days for this slot
     recommendations = []
     try:
         conn = get_db()
@@ -238,7 +239,7 @@ def confirm_booking():
     phone = request.form.get('phone')
     location = request.form.get('location')
     budget = request.form.get('budget')
-    message = request.form.get('message')
+    message = request.form.get('message', '')
     
     today_str = datetime.date.today().isoformat()
     if session_date < today_str:
@@ -248,14 +249,16 @@ def confirm_booking():
     try:
         conn = get_db()
         cursor = conn.cursor()
+        
         # Verify slot is still open
         cursor.execute("SELECT id FROM sessions WHERE session_date = %s AND slot_time = %s AND (status = 'Confirmed' OR status IS NULL)", (session_date, slot_time))
         if cursor.fetchone():
-            flash(f"Sorry! The {slot_time} slot on {session_date} was just booked by someone else. Please choose another slot or date.", "warning")
+            flash(f"Sorry! The {slot_time} slot on {session_date} was just booked by someone else. Please choose another slot.", "warning")
             cursor.close()
             conn.close()
             return redirect(url_for('booking_slots', date=session_date))
 
+        # Insert booking into database
         cursor.execute('''
             INSERT INTO sessions (session_date, slot_time, full_name, email, phone, location, budget, message, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Confirmed')
@@ -263,12 +266,35 @@ def confirm_booking():
         conn.commit()
         cursor.close()
         conn.close()
-        flash("Your Property Strategy Session has been successfully booked!", "success")
+        
+        # Pre-format WhatsApp Confirmation Message
+        wa_text = (
+            f"Hello Shelter Hunt Consultants!\n\n"
+            f"I have just booked a Property Strategy Session on your website.\n\n"
+            f"📌 *Booking Details:*\n"
+            f"• *Date:* {session_date}\n"
+            f"• *Slot Time:* {slot_time}\n"
+            f"• *Name:* {full_name}\n"
+            f"• *Phone:* {phone}\n"
+            f"• *Email:* {email}\n"
+            f"• *Location:* {location}\n"
+            f"• *Budget:* {budget}\n"
+        )
+        if message:
+            wa_text += f"• *Notes:* {message}\n"
+            
+        wa_text += "\nPlease confirm my appointment slot. Thank you!"
+
+        # Encode text & redirect directly to WhatsApp
+        encoded_message = urllib.parse.quote(wa_text)
+        whatsapp_url = f"https://wa.me/918050607031?text={encoded_message}"
+        
+        return redirect(whatsapp_url)
+
     except Exception as e:
         print(f"Booking error: {e}")
         flash("Error processing booking. Please try again.", "danger")
-        
-    return redirect(url_for('home'))
+        return redirect(url_for('booking_slots'))
 
 # --- CMS Admin Dashboard ---
 @app.route('/admin', methods=['GET', 'POST'])
@@ -326,7 +352,7 @@ def admin_toggle_session(session_id):
             new_status = 'Cancelled' if current_status == 'Confirmed' else 'Confirmed'
             cursor.execute("UPDATE sessions SET status = %s WHERE id = %s", (new_status, session_id))
             conn.commit()
-            flash(f"Booking status updated to {new_status}. Slot is now {'reopened' if new_status == 'Confirmed' else 'cancelled'}.", "info")
+            flash(f"Booking status updated to {new_status}.", "info")
         cursor.close()
         conn.close()
     except Exception as e:
