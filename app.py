@@ -1,44 +1,57 @@
-import sqlite3
+import os
 import datetime
+import psycopg2
+import psycopg2.extras
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "shelter_hunt_secret_key_2026"
-DATABASE = "database.db"
+app.secret_key = os.environ.get("SECRET_KEY", "shelter_hunt_secret_key_2026")
+
+# Reads the cloud PostgreSQL URL from environment variables, falling back to local PostgreSQL
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/shelter_hunt')
 
 def get_db():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    url = DATABASE_URL
+    # Enforce sslmode=require for cloud PostgreSQL instances like Supabase/Neon
+    if url and 'sslmode' not in url and 'localhost' not in url:
+        url += '?sslmode=require' if '?' not in url else '&sslmode=require'
+        
+    conn = psycopg2.connect(url, cursor_factory=psycopg2.extras.RealDictCursor)
     return conn
 
 def init_db():
-    with get_db() as conn:
+    if not DATABASE_URL:
+        print("DATABASE_URL not set. Skipping DB initialization.")
+        return
+        
+    try:
+        conn = get_db()
         cursor = conn.cursor()
         
-        # Admin Users
+        # Admin Users Table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                email TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL
             )
         ''')
         
-        # Leads / Booked Sessions
+        # Strategy Session Leads Table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_date TEXT NOT NULL,
-                slot_time TEXT NOT NULL,
-                full_name TEXT NOT NULL,
-                email TEXT NOT NULL,
-                phone TEXT NOT NULL,
-                location TEXT NOT NULL,
-                budget TEXT NOT NULL,
+                id SERIAL PRIMARY KEY,
+                session_date VARCHAR(50) NOT NULL,
+                slot_time VARCHAR(50) NOT NULL,
+                full_name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                phone VARCHAR(50) NOT NULL,
+                location VARCHAR(255) NOT NULL,
+                budget VARCHAR(100) NOT NULL,
                 message TEXT,
-                status TEXT DEFAULT 'New',
+                status VARCHAR(50) DEFAULT 'New',
                 booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -46,10 +59,10 @@ def init_db():
         # CMS Table: Featured Projects / Sites
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sites (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                builder TEXT NOT NULL,
-                location TEXT NOT NULL,
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                builder VARCHAR(255) NOT NULL,
+                location VARCHAR(255) NOT NULL,
                 description TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -58,22 +71,22 @@ def init_db():
         # CMS Table: Builders / Brands Filter
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS builders (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT UNIQUE NOT NULL
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) UNIQUE NOT NULL
             )
         ''')
 
         # Setup Default Admin Account
-        cursor.execute("SELECT * FROM users WHERE email = 'admin@shelterhunt.com'")
+        cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
         if not cursor.fetchone():
             hashed_pwd = generate_password_hash("Admin@123")
-            cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
+            cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
                            ("Admin", "admin@shelterhunt.com", hashed_pwd))
 
         # Insert Default Builders if empty
         cursor.execute("SELECT COUNT(*) as count FROM builders")
         if cursor.fetchone()['count'] == 0:
-            cursor.executemany("INSERT INTO builders (name) VALUES (?)", 
+            cursor.executemany("INSERT INTO builders (name) VALUES (%s)", 
                                [('Prestige Group',), ('Brigade Group',), ('Sobha Developers',), ('Godrej Properties',)])
 
         # Insert Default Sites if empty
@@ -81,7 +94,7 @@ def init_db():
         if cursor.fetchone()['count'] == 0:
             cursor.executemany('''
                 INSERT INTO sites (title, builder, location, description)
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
             ''', [
                 ('Prestige City - Luxury Apartments', 'Prestige Group', 'Sarjapur Road, Bengaluru', 'High-rise residential township offering premium 2 & 3 BHK residences.'),
                 ('Brigade Eldorado', 'Brigade Group', 'Aerospace Park, KIADB, Bengaluru', 'Modern integrated enclave designed for professionals seeking high rental yields.'),
@@ -89,6 +102,17 @@ def init_db():
             ])
 
         conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Database Initialization Warning: {e}")
+
+@app.before_request
+def ensure_db_initialized():
+    """Safely runs DB schema creation once before handling the first HTTP request."""
+    if not getattr(app, '_db_initialized', False):
+        init_db()
+        app._db_initialized = True
 
 def get_daily_slots():
     return ["10:00 AM", "12:00 PM", "02:30 PM", "04:30 PM", "06:30 PM"]
@@ -96,18 +120,28 @@ def get_daily_slots():
 # --- Public Routes ---
 @app.route('/')
 def home():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM sites ORDER BY id DESC")
-    sites_list = cursor.fetchall()
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sites ORDER BY id DESC")
+        sites_list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception:
+        sites_list = []
     return render_template('index.html', sites=sites_list)
 
 @app.route('/sites')
 def sites():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM sites ORDER BY id DESC")
-    sites_list = cursor.fetchall()
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM sites ORDER BY id DESC")
+        sites_list = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except Exception:
+        sites_list = []
     return render_template('sites.html', sites=sites_list)
 
 @app.route('/about')
@@ -124,11 +158,16 @@ def booking_slots():
     selected_date = request.args.get('date', datetime.date.today().isoformat())
     all_slots = get_daily_slots()
     
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT slot_time FROM sessions WHERE session_date = ?", (selected_date,))
-    booked_records = cursor.fetchall()
-    booked_slots = [r['slot_time'] for r in booked_records]
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT slot_time FROM sessions WHERE session_date = %s", (selected_date,))
+        booked_records = cursor.fetchall()
+        booked_slots = [r['slot_time'] for r in booked_records]
+        cursor.close()
+        conn.close()
+    except Exception:
+        booked_slots = []
     
     return render_template('booking.html', date=selected_date, all_slots=all_slots, booked_slots=booked_slots)
 
@@ -143,13 +182,15 @@ def confirm_booking():
     budget = request.form.get('budget')
     message = request.form.get('message')
     
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO sessions (session_date, slot_time, full_name, email, phone, location, budget, message)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (session_date, slot_time, full_name, email, phone, location, budget, message))
-        conn.commit()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO sessions (session_date, slot_time, full_name, email, phone, location, budget, message)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    ''', (session_date, slot_time, full_name, email, phone, location, budget, message))
+    conn.commit()
+    cursor.close()
+    conn.close()
         
     flash("Your Property Strategy Session has been successfully booked!", "success")
     return redirect(url_for('home'))
@@ -163,8 +204,10 @@ def admin():
         
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
+        cursor.close()
+        conn.close()
         
         if user and check_password_hash(user['password'], password):
             session['admin_logged_in'] = True
@@ -185,6 +228,9 @@ def admin():
         cursor.execute("SELECT * FROM builders ORDER BY id DESC")
         builders_list = cursor.fetchall()
         
+        cursor.close()
+        conn.close()
+        
         return render_template('admin.html', leads=leads, sites=sites_list, builders=builders_list)
         
     return render_template('admin_login.html')
@@ -200,11 +246,13 @@ def admin_add_site():
     location = request.form.get('location')
     description = request.form.get('description')
     
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO sites (title, builder, location, description) VALUES (?, ?, ?, ?)",
-                       (title, builder, location, description))
-        conn.commit()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO sites (title, builder, location, description) VALUES (%s, %s, %s, %s)",
+                   (title, builder, location, description))
+    conn.commit()
+    cursor.close()
+    conn.close()
     
     flash("New Featured Site published successfully!", "success")
     return redirect(url_for('admin'))
@@ -215,10 +263,12 @@ def admin_delete_site(site_id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM sites WHERE id = ?", (site_id,))
-        conn.commit()
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM sites WHERE id = %s", (site_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
         
     flash("Site entry removed.", "info")
     return redirect(url_for('admin'))
@@ -231,14 +281,18 @@ def admin_add_builder():
         
     builder_name = request.form.get('builder_name')
     
-    with get_db() as conn:
-        cursor = conn.cursor()
-        try:
-            cursor.execute("INSERT INTO builders (name) VALUES (?)", (builder_name,))
-            conn.commit()
-            flash("New Builder / Brand added to filter options!", "success")
-        except sqlite3.IntegrityError:
-            flash("Builder already exists.", "warning")
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO builders (name) VALUES (%s)", (builder_name,))
+        conn.commit()
+        flash("New Builder / Brand added to filter options!", "success")
+    except psycopg2.IntegrityError:
+        conn.rollback()
+        flash("Builder already exists.", "warning")
+    finally:
+        cursor.close()
+        conn.close()
             
     return redirect(url_for('admin'))
 
@@ -249,5 +303,4 @@ def admin_logout():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True, port=5000)

@@ -216,3 +216,16 @@ body {
 .mobile-menu-btn:active svg {
     stroke: #0f172a;
 }
+/* Eliminate Gap Between Header and Hero Section */
+header.navbar-custom {
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+}
+
+header nav.navbar {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.hero-section {
+    margin-top: 0 !important;
+}
