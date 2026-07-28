@@ -125,63 +125,61 @@
 
             <div class="tab-content">
                 
-                <!-- TAB 1: Customer Booking Leads -->
-                <div class="tab-pane fade show active" id="leads">
-                    <div class="row g-3 mb-4">
-                        <div class="col-12 col-sm-6 col-md-4">
-                            <div class="stat-card border-start border-4 border-warning">
-                                <h6 class="text-muted mb-1 small">Total Strategy Session Leads</h6>
-                                <h2 class="fw-bold m-0">{{ leads|length }}</h2>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded p-3 p-md-4 shadow-sm">
-                        <h5 class="fw-bold mb-3">Booked Property Strategy Sessions</h5>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-dark">
-                                    <tr class="text-nowrap">
-                                        <th>Date & Slot</th>
-                                        <th>Client Name</th>
-                                        <th>Contact Info</th>
-                                        <th>Location & Budget</th>
-                                        <th>Comments</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for lead in leads %}
-                                    <tr>
-                                        <td class="text-nowrap">
-                                            <strong class="d-block text-dark">{{ lead.session_date }}</strong>
-                                            <span class="badge bg-warning text-dark">{{ lead.slot_time }}</span>
-                                        </td>
-                                        <td><strong>{{ lead.full_name }}</strong></td>
-                                        <td class="text-nowrap">
-                                            <div>📞 {{ lead.phone }}</div>
-                                            <small class="text-muted">✉️ {{ lead.email }}</small>
-                                        </td>
-                                        <td class="text-nowrap">
-                                            <div>📍 {{ lead.location }}</div>
-                                            <small class="badge bg-light text-dark border">💰 {{ lead.budget }}</small>
-                                        </td>
-                                        <td><small class="text-muted d-inline-block" style="max-width: 200px;">{{ lead.message or 'N/A' }}</small></td>
-                                        <td class="text-nowrap">
-                                            <a href="https://wa.me/91{{ lead.phone }}?text=Hi%20{{ lead.full_name }},%20regarding%20your%20Shelter%20Hunt%20strategy%20session%20booking." target="_blank" class="btn btn-sm btn-success fw-bold">WhatsApp</a>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4 text-muted">No strategy session bookings captured yet.</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
+                <!-- TAB 1: Strategy Session Leads -->
+<div class="tab-pane fade show active" id="leads">
+    <div class="bg-white p-3 p-md-4 rounded shadow-sm">
+        <h5 class="fw-bold mb-3">Client Booking Leads</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Client Name</th>
+                        <th>Contact</th>
+                        <th>Location & Budget</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr>
+                        <td>
+                            <strong>{{ lead.session_date }}</strong><br>
+                            <span class="badge bg-secondary">{{ lead.slot_time }}</span>
+                        </td>
+                        <td>
+                            {{ lead.full_name }}<br>
+                            <small class="text-muted">{{ lead.email }}</small>
+                        </td>
+                        <td>{{ lead.phone }}</td>
+                        <td>
+                            📍 {{ lead.location }}<br>
+                            💰 {{ lead.budget }}
+                        </td>
+                        <td>
+                            {% if lead.status == 'Cancelled' %}
+                                <span class="badge bg-danger">Cancelled</span>
+                            {% else %}
+                                <span class="badge bg-success">Confirmed</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_toggle_session', session_id=lead.id) }}" class="btn btn-sm {% if lead.status == 'Cancelled' %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
+                                {% if lead.status == 'Cancelled' %}Reopen Slot{% else %}Cancel & Free Slot{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No consultation bookings yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
               <!-- TAB 2: Manage Featured Sites / Projects -->
 <div class="tab-pane fade" id="sites">
     <div class="row g-4">

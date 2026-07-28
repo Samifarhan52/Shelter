@@ -3,149 +3,155 @@
 
 <div class="container py-5">
     <div class="text-center mb-5">
-        <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">SHELTER HUNT CONSULTANTS</p>
+        <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">EXPERT ADVISORY</p>
         <h2 class="fw-bold display-5" style="color: var(--navy-dark);">Book a Property Strategy Session</h2>
-        <p class="text-muted fs-5">Select an available time slot for your 1-on-1 expert consultation.</p>
+        <p class="text-muted fs-5">Select your preferred date and time slot below.</p>
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
-            
-            <!-- STEP 1: Date & Slot Selection Card -->
-            <div class="white-card mb-4">
-                <h4 class="fw-bold mb-3 d-flex align-items-center" style="color: var(--navy-dark);">
-                    <span class="badge rounded-circle me-2" style="background-color: var(--gold-accent); color: #fff; font-size: 1rem; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">1</span>
-                    Select Consultation Date & Time
-                </h4>
+        <div class="col-lg-8">
+            <div class="white-card p-4 p-md-5 shadow-sm">
                 
-                <!-- Date Filter -->
+                <!-- Date Picker Form -->
                 <form method="GET" action="{{ url_for('booking_slots') }}" class="mb-4">
-                    <label class="form-label fw-semibold text-dark">Consultation Date:</label>
-                    <input type="date" name="date" class="form-control form-control-lg border-secondary" value="{{ date }}" onchange="this.form.submit()" style="background-color: #ffffff !important; color: #0f172a !important;">
+                    <label class="form-label fw-bold" style="color: var(--navy-dark);">1. Select Consultation Date:</label>
+                    <div class="input-group">
+                        <input type="date" name="date" class="form-control form-control-lg" value="{{ date }}" min="{{ today }}" onchange="this.form.submit()">
+                        <button type="submit" class="btn btn-gold px-4 fw-bold">Check Slots</button>
+                    </div>
+                    <small class="text-muted mt-1 d-block">Past dates are automatically locked and cannot be selected.</small>
                 </form>
 
-                <h6 class="fw-bold mb-3 text-muted">Daily Time Slots for {{ date }}</h6>
-                <div class="row g-3" id="slotContainer">
-                    {% for slot in all_slots %}
-                        <div class="col-md-6 col-sm-12">
-                            {% if slot in booked_slots %}
-                                <div class="p-3 border rounded text-center d-flex align-items-center justify-content-between" style="background-color: #f1f5f9; border-color: #cbd5e1 !important;">
-                                    <span class="fw-bold text-muted">{{ slot }}</span>
-                                    <span class="badge bg-danger">Already Booked</span>
-                                </div>
-                            {% else %}
-                                <button type="button" class="btn btn-outline-dark w-100 p-3 text-start d-flex align-items-center justify-content-between slot-btn" onclick="selectSlot('{{ slot }}')" style="border-color: var(--gold-accent); border-width: 2px;">
-                                    <span class="fw-bold" style="color: var(--navy-dark);">{{ slot }}</span>
-                                    <span class="badge" style="background-color: var(--gold-accent); color: #fff;">Available</span>
-                                </button>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
+                <hr class="my-4">
 
-            <!-- STEP 2: Lead Intake & Registration Form -->
-            <div class="white-card" id="bookingFormCard" style="display: none; border-top: 4px solid var(--gold-accent);">
-                <h4 class="fw-bold mb-3 d-flex align-items-center" style="color: var(--navy-dark);">
-                    <span class="badge rounded-circle me-2" style="background-color: var(--gold-accent); color: #fff; font-size: 1rem; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">2</span>
-                    Provide Your Details
-                </h4>
-                <p class="text-muted mb-4">Please fill in your contact information and requirements to confirm your appointment.</p>
+                <!-- Slot Selection & Booking Form -->
+                <form method="POST" action="{{ url_for('confirm_booking') }}" id="bookingForm">
+                    <input type="hidden" name="session_date" value="{{ date }}">
+                    <input type="hidden" name="slot_time" id="selectedSlotInput" required>
 
-                <form method="POST" action="{{ url_for('confirm_booking') }}" id="bookingForm" onsubmit="sendToWhatsApp(event)">
-                    <input type="hidden" name="session_date" id="sessionDateInput" value="{{ date }}">
-                    <input type="hidden" name="slot_time" id="selectedSlotInput">
-
-                    <div class="mb-3 p-3 rounded" style="background-color: #f8fafc; border: 1px solid var(--border-color);">
-                        <label class="form-label small text-muted fw-bold mb-1">SELECTED TIME SLOT</label>
-                        <input type="text" id="slotDisplay" class="form-control-plaintext fw-bold fs-5 text-warning p-0" style="color: var(--gold-accent) !important;" readonly>
+                    <h5 class="fw-bold mb-3" style="color: var(--navy-dark);">2. Daily Time Slots for {{ date }}</h5>
+                    
+                    <div class="row g-3 mb-4">
+                        {% for slot in all_slots %}
+                            <div class="col-md-6">
+                                {% if slot in booked_slots %}
+                                    <!-- Booked Slot Card with Recommendation Trigger -->
+                                    <div class="p-3 rounded border bg-light text-muted d-flex justify-content-between align-items-center opacity-75">
+                                        <div>
+                                            <span class="fw-bold d-block">{{ slot }}</span>
+                                            <small class="text-danger">Already Booked</small>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="fetchRecommendations('{{ slot }}', '{{ date }}')">
+                                            Find Next Available Dates
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <!-- Available Slot Card -->
+                                    <div class="p-3 rounded border slot-card text-center fw-bold" 
+                                         id="slot-{{ loop.index }}"
+                                         style="cursor: pointer; border-color: #cbd5e1 !important; transition: all 0.2s;"
+                                         onclick="selectSlot('{{ slot }}', 'slot-{{ loop.index }}')">
+                                        <span class="d-block fs-5" style="color: var(--navy-dark);">{{ slot }}</span>
+                                        <span class="badge bg-success mt-1">Available</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold text-dark">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" name="full_name" id="fullName" class="form-control form-control-lg border-secondary" placeholder="e.g. Rahul Sharma" required style="background-color: #ffffff !important; color: #0f172a !important;">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold text-dark">Email Address <span class="text-danger">*</span></label>
-                            <input type="email" name="email" id="email" class="form-control form-control-lg border-secondary" placeholder="name@example.com" required style="background-color: #ffffff !important; color: #0f172a !important;">
-                        </div>
+                    <!-- Recommendation Alert Box -->
+                    <div id="recommendationBox" class="alert alert-warning d-none mb-4" role="alert">
+                        <h6 class="fw-bold mb-1">📅 Alternative Open Dates for <span id="recSlotTitle"></span>:</h6>
+                        <p class="small mb-2">The selected slot is booked on this day. However, this slot is open on these upcoming dates:</p>
+                        <div id="recDatesList" class="d-flex gap-2 flex-wrap"></div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold text-dark">Contact Number <span class="text-danger">*</span></label>
-                            <input type="tel" name="phone" id="phone" class="form-control form-control-lg border-secondary" placeholder="+91 98765 43210" required style="background-color: #ffffff !important; color: #0f172a !important;">
+                    <div id="bookingDetailsSection" style="display: none;" class="mt-4 pt-3 border-top">
+                        <h5 class="fw-bold mb-3" style="color: var(--navy-dark);">3. Enter Your Details</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Full Name</label>
+                                <input type="text" name="full_name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email Address</label>
+                                <input type="email" name="email" class="form-control" placeholder="e.g. rahul@gmail.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone Number</label>
+                                <input type="tel" name="phone" class="form-control" placeholder="e.g. +91 9876543210" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Target Location / Property Area</label>
+                                <input type="text" name="location" class="form-control" placeholder="e.g. Sarjapur Road" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Estimated Budget</label>
+                                <input type="text" name="budget" class="form-control" placeholder="e.g. 1.5 Cr - 2 Cr" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Specific Query or Requirements (Optional)</label>
+                                <textarea name="message" class="form-control" rows="3" placeholder="Tell us what you are looking for..."></textarea>
+                            </div>
+                            <div class="col-md-12 pt-2">
+                                <button type="submit" class="btn btn-gold w-100 btn-lg fw-bold py-3">Confirm Strategy Session Booking</button>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold text-dark">Preferred Location / Place <span class="text-danger">*</span></label>
-                            <input type="text" name="location" id="location" class="form-control form-control-lg border-secondary" placeholder="e.g. Indiranagar, Bangalore" required style="background-color: #ffffff !important; color: #0f172a !important;">
-                        </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold text-dark">Target Budget Range <span class="text-danger">*</span></label>
-                        <select name="budget" id="budget" class="form-select form-select-lg border-secondary" required style="background-color: #ffffff !important; color: #0f172a !important;">
-                            <option value="" disabled selected>Select Budget Range</option>
-                            <option value="50L - 1Cr">₹50 Lakhs - ₹1 Crore</option>
-                            <option value="1Cr - 2.5Cr">₹1 Crore - ₹2.5 Crores</option>
-                            <option value="2.5Cr+">₹2.5 Crores+</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-dark">Comments / Specific Requirements</label>
-                        <textarea name="message" id="message" class="form-control border-secondary" rows="3" placeholder="Describe the type of property or questions you have..." style="background-color: #ffffff !important; color: #0f172a !important;"></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-gold btn-lg w-100 py-3 fw-bold fs-5">Confirm & Reserve Strategy Session</button>
                 </form>
-            </div>
 
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-function selectSlot(slot) {
-    document.getElementById('selectedSlotInput').value = slot;
-    document.getElementById('slotDisplay').value = slot;
+function selectSlot(slotTime, elementId) {
+    // Reset all slot borders
+    document.querySelectorAll('[id^="slot-"]').forEach(el => {
+        el.style.backgroundColor = '#ffffff';
+        el.style.borderColor = '#cbd5e1';
+    });
     
-    var formCard = document.getElementById('bookingFormCard');
-    formCard.style.display = 'block';
+    // Highlight selected slot
+    const selectedEl = document.getElementById(elementId);
+    selectedEl.style.backgroundColor = '#f8fafc';
+    selectedEl.style.borderColor = 'var(--gold-accent)';
     
-    window.scrollTo({ top: formCard.offsetTop - 100, behavior: 'smooth' });
+    // Set hidden input value
+    document.getElementById('selectedSlotInput').value = slotTime;
+    
+    // Show booking details form
+    document.getElementById('bookingDetailsSection').style.display = 'block';
+    document.getElementById('bookingDetailsSection').scrollIntoView({ behavior: 'smooth' });
 }
 
-function sendToWhatsApp(event) {
-    var date = document.getElementById('sessionDateInput').value;
-    var slot = document.getElementById('selectedSlotInput').value;
-    var name = document.getElementById('fullName').value;
-    var email = document.getElementById('email').value;
-    var phone = document.getElementById('phone').value;
-    var location = document.getElementById('location').value;
-    var budget = document.getElementById('budget').value;
-    var message = document.getElementById('message').value || "None";
-
-    var adminWhatsAppNumber = "918050607031";
-
-    var textMessage = "Hey Sudharshan,\n\n" +
-                      "A new Property Strategy Session has been booked on Shelter Hunt Consultants!\n\n" +
-                      "📌 *Booking Details:*\n" +
-                      "• *Date:* " + date + "\n" +
-                      "• *Time Slot:* " + slot + "\n\n" +
-                      "👤 *Client Details:*\n" +
-                      "• *Name:* " + name + "\n" +
-                      "• *Email:* " + email + "\n" +
-                      "• *Phone:* " + phone + "\n" +
-                      "• *Preferred Location:* " + location + "\n" +
-                      "• *Budget Range:* " + budget + "\n" +
-                      "• *Comments/Message:* " + message;
-
-    var encodedMessage = encodeURIComponent(textMessage);
-    var whatsappUrl = "https://wa.me/" + adminWhatsAppNumber + "?text=" + encodedMessage;
-
-    window.open(whatsappUrl, '_blank');
+function fetchRecommendations(slot, currentDate) {
+    fetch(`/check-availability?slot=${encodeURIComponent(slot)}&date=${currentDate}`)
+        .then(response => response.json())
+        .then(data => {
+            const box = document.getElementById('recommendationBox');
+            const title = document.getElementById('recSlotTitle');
+            const list = document.getElementById('recDatesList');
+            
+            title.textContent = data.slot;
+            list.innerHTML = '';
+            
+            if (data.recommendations.length > 0) {
+                data.recommendations.forEach(d => {
+                    const btn = document.createElement('ahref');
+                    btn.className = 'btn btn-sm btn-dark fw-bold text-decoration-none px-3 py-2';
+                    btn.href = `/book-session?date=${d}`;
+                    btn.textContent = `📅 ${d}`;
+                    list.appendChild(btn);
+                });
+            } else {
+                list.innerHTML = '<span class="text-muted small">No upcoming slots found in the next 14 days.</span>';
+            }
+            
+            box.classList.remove('d-none');
+            box.scrollIntoView({ behavior: 'smooth' });
+        });
 }
 </script>
 

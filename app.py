@@ -37,7 +37,7 @@ def init_db():
             )
         ''')
         
-        # Session Leads
+        # Session Leads (Added status column for cancellation / reopening)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
                 id SERIAL PRIMARY KEY,
@@ -49,7 +49,7 @@ def init_db():
                 location VARCHAR(255) NOT NULL,
                 budget VARCHAR(100) NOT NULL,
                 message TEXT,
-                status VARCHAR(50) DEFAULT 'New',
+                status VARCHAR(50) DEFAULT 'Confirmed',
                 booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -76,34 +76,30 @@ def init_db():
             )
         ''')
 
-        # Auto-Migrations for Schema Safety
+        # Auto-Migrations
         try:
+            cursor.execute("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Confirmed';")
             cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename TEXT DEFAULT 'head.jpeg';")
             cursor.execute("ALTER TABLE sites ALTER COLUMN image_filename TYPE TEXT;")
-            conn.commit()
-        except Exception:
-            conn.rollback()
-
-        try:
             cursor.execute("ALTER TABLE builders ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;")
             conn.commit()
         except Exception:
             conn.rollback()
 
-        # Default Admin Account
+        # Default Admin
         cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
         if not cursor.fetchone():
             hashed_pwd = generate_password_hash("Admin@123")
             cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
                            ("Admin", "admin@shelterhunt.com", hashed_pwd))
 
-        # Seed Builders if completely empty
+        # Seed Builders
         cursor.execute("SELECT COUNT(*) as count FROM builders")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany("INSERT INTO builders (name, is_active) VALUES (%s, %s)", 
                                [('Prestige Group', True), ('Brigade Group', True), ('Sobha Developers', True), ('Godrej Properties', True)])
 
-        # Seed Default Sites if completely empty
+        # Seed Sites
         cursor.execute("SELECT COUNT(*) as count FROM sites")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany('''
@@ -157,7 +153,6 @@ def home():
         conn.close()
     except Exception:
         sites_list = []
-        
     return render_template('index.html', sites=sites_list, builders=get_active_builders())
 
 @app.route('/sites')
@@ -171,7 +166,6 @@ def sites():
         conn.close()
     except Exception:
         sites_list = []
-        
     return render_template('sites.html', sites=sites_list, builders=get_active_builders())
 
 @app.route('/about')
@@ -185,13 +179,20 @@ def services():
 # --- Strategy Session Booking ---
 @app.route('/book-session')
 def booking_slots():
-    selected_date = request.args.get('date', datetime.date.today().isoformat())
+    today_str = datetime.date.today().isoformat()
+    selected_date = request.args.get('date', today_str)
+    
+    # Prevent past date viewing/booking
+    if selected_date < today_str:
+        selected_date = today_str
+
     all_slots = get_daily_slots()
     
     try:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT slot_time FROM sessions WHERE session_date = %s", (selected_date,))
+        # Only check active confirmed bookings
+        cursor.execute("SELECT slot_time FROM sessions WHERE session_date = %s AND (status = 'Confirmed' OR status IS NULL)", (selected_date,))
         booked_records = cursor.fetchall()
         booked_slots = [r['slot_time'] for r in booked_records]
         cursor.close()
@@ -199,7 +200,34 @@ def booking_slots():
     except Exception:
         booked_slots = []
     
-    return render_template('booking.html', date=selected_date, all_slots=all_slots, booked_slots=booked_slots, builders=get_active_builders())
+    return render_template('booking.html', date=selected_date, today=today_str, all_slots=all_slots, booked_slots=booked_slots, builders=get_active_builders())
+
+@app.route('/check-availability', methods=['GET'])
+def check_availability():
+    slot = request.args.get('slot')
+    current_date = request.args.get('date', datetime.date.today().isoformat())
+    
+    # Find next 3 available days for this slot
+    recommendations = []
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        
+        check_date = datetime.date.fromisoformat(current_date)
+        for i in range(1, 15):
+            check_date += datetime.timedelta(days=1)
+            date_str = check_date.isoformat()
+            cursor.execute("SELECT id FROM sessions WHERE session_date = %s AND slot_time = %s AND (status = 'Confirmed' OR status IS NULL)", (date_str, slot))
+            if not cursor.fetchone():
+                recommendations.append(date_str)
+                if len(recommendations) >= 3:
+                    break
+        cursor.close()
+        conn.close()
+    except Exception:
+        pass
+        
+    return {"slot": slot, "recommendations": recommendations}
 
 @app.route('/confirm-booking', methods=['POST'])
 def confirm_booking():
@@ -212,17 +240,34 @@ def confirm_booking():
     budget = request.form.get('budget')
     message = request.form.get('message')
     
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO sessions (session_date, slot_time, full_name, email, phone, location, budget, message)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-    ''', (session_date, slot_time, full_name, email, phone, location, budget, message))
-    conn.commit()
-    cursor.close()
-    conn.close()
+    today_str = datetime.date.today().isoformat()
+    if session_date < today_str:
+        flash("Cannot book consultation slots for past dates.", "danger")
+        return redirect(url_for('booking_slots'))
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        # Verify slot is still open
+        cursor.execute("SELECT id FROM sessions WHERE session_date = %s AND slot_time = %s AND (status = 'Confirmed' OR status IS NULL)", (session_date, slot_time))
+        if cursor.fetchone():
+            flash(f"Sorry! The {slot_time} slot on {session_date} was just booked by someone else. Please choose another slot or date.", "warning")
+            cursor.close()
+            conn.close()
+            return redirect(url_for('booking_slots', date=session_date))
+
+        cursor.execute('''
+            INSERT INTO sessions (session_date, slot_time, full_name, email, phone, location, budget, message, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Confirmed')
+        ''', (session_date, slot_time, full_name, email, phone, location, budget, message))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Your Property Strategy Session has been successfully booked!", "success")
+    except Exception as e:
+        print(f"Booking error: {e}")
+        flash("Error processing booking. Please try again.", "danger")
         
-    flash("Your Property Strategy Session has been successfully booked!", "success")
     return redirect(url_for('home'))
 
 # --- CMS Admin Dashboard ---
@@ -264,6 +309,31 @@ def admin():
         return render_template('admin.html', leads=leads, sites=sites_list, builders=builders_list)
         
     return render_template('admin_login.html')
+
+# Admin Action: Cancel or Reopen Booking
+@app.route('/admin/toggle-session/<int:session_id>')
+def admin_toggle_session(session_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT status FROM sessions WHERE id = %s", (session_id,))
+        res = cursor.fetchone()
+        if res:
+            current_status = res['status'] or 'Confirmed'
+            new_status = 'Cancelled' if current_status == 'Confirmed' else 'Confirmed'
+            cursor.execute("UPDATE sessions SET status = %s WHERE id = %s", (new_status, session_id))
+            conn.commit()
+            flash(f"Booking status updated to {new_status}. Slot is now {'reopened' if new_status == 'Confirmed' else 'cancelled'}.", "info")
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"Error toggling session: {e}")
+        flash("Could not update booking status.", "danger")
+        
+    return redirect(url_for('admin'))
 
 # CMS Actions: Add Site
 @app.route('/admin/add-site', methods=['POST'])
