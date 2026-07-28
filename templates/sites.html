@@ -13,7 +13,12 @@
             <div class="col-lg-4 col-md-6">
                 <div class="white-card h-100 d-flex flex-column justify-content-between p-0 overflow-hidden shadow-sm">
                     <div style="height: 200px; overflow: hidden; position: relative;">
-                        {% if site.image_filename and ('http://' in site.image_filename or 'https://' in site.image_filename) %}
+                        {% if site.image_filename and ('data:video' in site.image_filename or '.mp4' in site.image_filename or '.webm' in site.image_filename) %}
+                            <video src="{% if 'data:' in site.image_filename or 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" 
+                                   class="w-100 h-100" 
+                                   style="object-fit: cover;" 
+                                   autoplay loop muted playsinline></video>
+                        {% elif site.image_filename and ('data:' in site.image_filename or 'http://' in site.image_filename or 'https://' in site.image_filename) %}
                             <img src="{{ site.image_filename }}" 
                                  alt="{{ site.title }}" 
                                  class="w-100 h-100" 

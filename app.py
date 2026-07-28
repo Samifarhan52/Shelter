@@ -54,7 +54,7 @@ def init_db():
             )
         ''')
 
-        # Featured Sites / Projects (TEXT type for image_filename to support long base64 strings and URLs)
+        # Featured Sites / Projects
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sites (
                 id SERIAL PRIMARY KEY,
@@ -76,7 +76,7 @@ def init_db():
             )
         ''')
 
-        # Auto-Migrations for Schema Upgrades
+        # Auto-Migrations for Schema Safety
         try:
             cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename TEXT DEFAULT 'head.jpeg';")
             cursor.execute("ALTER TABLE sites ALTER COLUMN image_filename TYPE TEXT;")
@@ -90,27 +90,20 @@ def init_db():
         except Exception:
             conn.rollback()
 
-        try:
-            cursor.execute("UPDATE builders SET is_active = TRUE WHERE is_active IS NULL;")
-            cursor.execute("UPDATE sites SET image_filename = 'head.jpeg' WHERE image_filename IS NULL;")
-            conn.commit()
-        except Exception:
-            conn.rollback()
-
-        # Default Admin
+        # Default Admin Account
         cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
         if not cursor.fetchone():
             hashed_pwd = generate_password_hash("Admin@123")
             cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
                            ("Admin", "admin@shelterhunt.com", hashed_pwd))
 
-        # Seed Builders
+        # Seed Builders if completely empty
         cursor.execute("SELECT COUNT(*) as count FROM builders")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany("INSERT INTO builders (name, is_active) VALUES (%s, %s)", 
                                [('Prestige Group', True), ('Brigade Group', True), ('Sobha Developers', True), ('Godrej Properties', True)])
 
-        # Seed Default Sites
+        # Seed Default Sites if completely empty
         cursor.execute("SELECT COUNT(*) as count FROM sites")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany('''
@@ -123,10 +116,7 @@ def init_db():
                 ('Sobha Town Park', 'Sobha Developers', 'Hosur Road, Bengaluru', 'Luxury New-York styled residential community built with Sobha German technology.', 'head.jpeg')
             ])
 
-        # Ensure Blue Bells project points to bluebells.jpeg
-        cursor.execute("UPDATE sites SET image_filename = 'bluebells.jpeg' WHERE (LOWER(title) LIKE '%blue%bell%' OR LOWER(title) LIKE '%bluebells%') AND image_filename = 'head.jpeg';")
         conn.commit()
-
         cursor.close()
         conn.close()
     except Exception as e:
@@ -275,7 +265,7 @@ def admin():
         
     return render_template('admin_login.html')
 
-# CMS Actions: Add Site (Handles direct file uploads as well as text links)
+# CMS Actions: Add Site
 @app.route('/admin/add-site', methods=['POST'])
 def admin_add_site():
     if not session.get('admin_logged_in'):
@@ -287,7 +277,6 @@ def admin_add_site():
     description = request.form.get('description')
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
-    # Process uploaded media file if user chose a file
     if 'media_file' in request.files:
         file = request.files['media_file']
         if file and file.filename != '':
@@ -312,7 +301,7 @@ def admin_add_site():
     
     return redirect(url_for('admin'))
 
-# CMS Actions: Edit Site (Handles direct file uploads as well as text links)
+# CMS Actions: Edit Site
 @app.route('/admin/edit-site/<int:site_id>', methods=['POST'])
 def admin_edit_site(site_id):
     if not session.get('admin_logged_in'):
@@ -324,7 +313,6 @@ def admin_edit_site(site_id):
     description = request.form.get('description')
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
-    # Process uploaded media file if a new file was chosen
     if 'media_file' in request.files:
         file = request.files['media_file']
         if file and file.filename != '':
@@ -345,7 +333,7 @@ def admin_edit_site(site_id):
         conn.commit()
         cursor.close()
         conn.close()
-        flash("Site details and media updated successfully!", "success")
+        flash("Site details updated successfully!", "success")
     except Exception as e:
         print(f"Error updating site: {e}")
         flash("Could not update site.", "danger")
