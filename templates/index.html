@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
 
-
 <!-- Hero Banner with High Contrast Gradient Overlay -->
 <div class="hero-section text-center text-md-start" 
      style="background: linear-gradient(rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92)), url('{{ url_for('static', filename='head.jpeg') }}') center/cover no-repeat;">
@@ -28,6 +27,34 @@
         <p class="fs-5 text-dark mb-0" style="line-height: 1.8;">
             Shelter Hunt Consultants is a knowledge-first agency built on the belief that real estate decisions deserve expert guidance, not sales pressure. We focus on answering complex property queries — from market viability to legal compliance — and providing tailored solutions rather than listing brochures. Our deep market expertise, cultivated over years of hands-on advisory work, is our clients' strongest advantage.
         </p>
+    </div>
+</div>
+
+<!-- Dynamic Featured Property Sites Section -->
+<div class="container my-5" id="featured-sites">
+    <h3 class="text-center fw-bold mb-2" style="color: var(--navy-dark);">Featured Property Sites</h3>
+    <p class="text-center text-muted mb-5">Handpicked premium residential projects verified by our advisory team.</p>
+    
+    <div class="row g-4">
+        {% for site in sites %}
+            <div class="col-lg-4 col-md-6">
+                <div class="white-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">{{ site.builder }}</span>
+                        <h4 class="fw-bold" style="color: var(--navy-dark);">{{ site.title }}</h4>
+                        <p class="text-muted small mb-2">📍 {{ site.location }}</p>
+                        <p class="text-muted">{{ site.description }}</p>
+                    </div>
+                    <div class="pt-3">
+                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center py-4">
+                <p class="text-muted fs-5">No featured property sites published yet.</p>
+            </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -59,7 +86,7 @@
 </div>
 
 <!-- Beyond the Purchase Section -->
-<div class="container my-5" id="sites">
+<div class="container my-5">
     <h3 class="text-center fw-bold mb-2" style="color: var(--navy-dark);">Beyond the Purchase</h3>
     <p class="text-center text-muted mb-5">End-to-end property services — from legal verification to post-purchase management.</p>
     
@@ -94,7 +121,7 @@
 <!-- Bottom Call To Action Banner -->
 <div class="container text-center my-5 py-5 text-light rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 4px solid var(--gold-accent);">
     <h2 class="fw-bold text-light mb-2">Ready for Expert Property Guidance?</h2>
-    <p >No obligations, no hard sells — just a focused strategy session to understand your goals and chart the best path forward.</p>
+    <p class="text-muted mb-4 fs-5">No obligations, no hard sells — just a focused strategy session to understand your goals and chart the best path forward.</p>
     <a href="{{ url_for('booking_slots') }}" class="btn-gold btn-lg">Book a Property Strategy Session</a>
 </div>
 

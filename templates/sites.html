@@ -9,35 +9,25 @@
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-4 col-md-6">
-            <div class="white-card h-100">
-                <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">Prestige Group</span>
-                <h4 class="fw-bold" style="color: var(--navy-dark);">Prestige City - Luxury Apartments</h4>
-                <p class="text-muted small mb-2">📍 Sarjapur Road, Bengaluru</p>
-                <p class="text-muted">High-rise residential township offering premium 2 & 3 BHK residences with world-class amenities and strong investment growth.</p>
-                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+        {% for site in sites %}
+            <div class="col-lg-4 col-md-6">
+                <div class="white-card h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">{{ site.builder }}</span>
+                        <h4 class="fw-bold" style="color: var(--navy-dark);">{{ site.title }}</h4>
+                        <p class="text-muted small mb-2">📍 {{ site.location }}</p>
+                        <p class="text-muted">{{ site.description }}</p>
+                    </div>
+                    <div class="pt-3">
+                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+                    </div>
+                </div>
             </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-            <div class="white-card h-100">
-                <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">Brigade Group</span>
-                <h4 class="fw-bold" style="color: var(--navy-dark);">Brigade Eldorado</h4>
-                <p class="text-muted small mb-2">📍 Aerospace Park, KIADB, North Bengaluru</p>
-                <p class="text-muted">Modern integrated enclave designed for professionals seeking high rental yields and fast capital appreciation near the airport hub.</p>
-                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted fs-5">No featured property sites published yet. Add new projects from the Admin CMS!</p>
             </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-            <div class="white-card h-100">
-                <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">Sobha Developers</span>
-                <h4 class="fw-bold" style="color: var(--navy-dark);">Sobha Town Park</h4>
-                <p class="text-muted small mb-2">📍 Hosur Road, Near Electronic City</p>
-                <p class="text-muted">Luxury New-York styled residential community built with Sobha's signature German technology construct quality.</p>
-                <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>
 
