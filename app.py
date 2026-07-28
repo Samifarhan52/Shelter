@@ -65,7 +65,7 @@ def init_db():
             )
         ''')
 
-        # Builders Table (Added is_active column)
+        # Builders Table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS builders (
                 id SERIAL PRIMARY KEY,
@@ -73,6 +73,14 @@ def init_db():
                 is_active BOOLEAN DEFAULT TRUE
             )
         ''')
+
+        # Automatically migration check: Ensure 'is_active' column exists on existing Supabase tables
+        try:
+            cursor.execute("ALTER TABLE builders ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;")
+            conn.commit()
+        except Exception as col_err:
+            conn.rollback()
+            print(f"Column check notice: {col_err}")
 
         # Default Admin
         cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
@@ -115,7 +123,7 @@ def get_active_builders():
     try:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM builders WHERE is_active = TRUE ORDER BY name ASC")
+        cursor.execute("SELECT * FROM builders WHERE is_active = TRUE OR is_active IS NULL ORDER BY name ASC")
         builders = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -313,14 +321,18 @@ def admin_toggle_builder(builder_id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE builders SET is_active = NOT is_active WHERE id = %s", (builder_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
-    flash("Builder status updated!", "info")
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE builders SET is_active = COALESCE(NOT is_active, TRUE) WHERE id = %s", (builder_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Builder status updated!", "info")
+    except Exception as e:
+        print(f"Error toggling builder: {e}")
+        flash("Could not update status.", "danger")
+        
     return redirect(url_for('admin'))
 
 # CMS Actions: Delete Builder
@@ -329,14 +341,18 @@ def admin_delete_builder(builder_id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM builders WHERE id = %s", (builder_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
-    flash("Builder removed.", "warning")
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM builders WHERE id = %s", (builder_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Builder removed.", "warning")
+    except Exception as e:
+        print(f"Error deleting builder: {e}")
+        flash("Could not delete builder.", "danger")
+        
     return redirect(url_for('admin'))
 
 @app.route('/admin/logout')
