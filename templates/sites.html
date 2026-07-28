@@ -11,15 +11,26 @@
     <div class="row g-4">
         {% for site in sites %}
             <div class="col-lg-4 col-md-6">
-                <div class="white-card h-100 d-flex flex-column justify-content-between">
-                    <div>
-                        <span class="badge mb-2" style="background-color: var(--gold-accent); color: #fff;">{{ site.builder }}</span>
-                        <h4 class="fw-bold" style="color: var(--navy-dark);">{{ site.title }}</h4>
-                        <p class="text-muted small mb-2">📍 {{ site.location }}</p>
-                        <p class="text-muted">{{ site.description }}</p>
+                <div class="white-card h-100 d-flex flex-column justify-content-between p-0 overflow-hidden shadow-sm">
+                    <div style="height: 200px; overflow: hidden; position: relative;">
+                        <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
+                             alt="{{ site.title }}" 
+                             class="w-100 h-100" 
+                             style="object-fit: cover;"
+                             onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                        <span class="badge position-absolute top-0 start-0 m-3" style="background-color: var(--gold-accent); color: #fff;">
+                            {{ site.builder }}
+                        </span>
                     </div>
-                    <div class="pt-3">
-                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+                    <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
+                        <div>
+                            <h4 class="fw-bold" style="color: var(--navy-dark);">{{ site.title }}</h4>
+                            <p class="text-muted small mb-2">📍 {{ site.location }}</p>
+                            <p class="text-muted" style="line-height: 1.6;">{{ site.description }}</p>
+                        </div>
+                        <div class="pt-3">
+                            <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -4,11 +4,19 @@ import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "shelter_hunt_secret_key_2026")
 
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://postgres:password@localhost:5432/shelter_hunt')
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_db():
     url = DATABASE_URL
@@ -53,7 +61,7 @@ def init_db():
             )
         ''')
 
-        # Featured Sites / Projects
+        # Featured Sites / Projects (added image_filename column)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sites (
                 id SERIAL PRIMARY KEY,
@@ -61,9 +69,17 @@ def init_db():
                 builder VARCHAR(255) NOT NULL,
                 location VARCHAR(255) NOT NULL,
                 description TEXT NOT NULL,
+                image_filename VARCHAR(255) DEFAULT 'head.jpeg',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+
+        # Migration check: Ensure 'image_filename' column exists on existing table
+        try:
+            cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename VARCHAR(255) DEFAULT 'head.jpeg';")
+            conn.commit()
+        except Exception:
+            conn.rollback()
 
         # Builders Table
         cursor.execute('''
@@ -81,13 +97,6 @@ def init_db():
         except Exception:
             conn.rollback()
 
-        # Ensure all existing builders have is_active = TRUE if NULL
-        try:
-            cursor.execute("UPDATE builders SET is_active = TRUE WHERE is_active IS NULL;")
-            conn.commit()
-        except Exception:
-            conn.rollback()
-
         # Default Admin
         cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
         if not cursor.fetchone():
@@ -95,25 +104,29 @@ def init_db():
             cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
                            ("Admin", "admin@shelterhunt.com", hashed_pwd))
 
-        # Default Builders
+        # Seed Builders
         cursor.execute("SELECT COUNT(*) as count FROM builders")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany("INSERT INTO builders (name, is_active) VALUES (%s, %s)", 
                                [('Prestige Group', True), ('Brigade Group', True), ('Sobha Developers', True), ('Godrej Properties', True)])
 
-        # Default Sites
+        # Seed Default Sites including Blue Bells
         cursor.execute("SELECT COUNT(*) as count FROM sites")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany('''
-                INSERT INTO sites (title, builder, location, description)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO sites (title, builder, location, description, image_filename)
+                VALUES (%s, %s, %s, %s, %s)
             ''', [
-                ('Prestige City - Luxury Apartments', 'Prestige Group', 'Sarjapur Road, Bengaluru', 'High-rise residential township offering premium 2 & 3 BHK residences.'),
-                ('Brigade Eldorado', 'Brigade Group', 'Aerospace Park, KIADB, Bengaluru', 'Modern integrated enclave designed for professionals seeking high rental yields.'),
-                ('Sobha Town Park', 'Sobha Developers', 'Hosur Road, Bengaluru', 'Luxury New-York styled residential community built with Sobha German technology.')
+                ('Blue Bells Luxury Enclave', 'Prestige Group', 'Electronic City, Bengaluru', 'Premium residential township with modern architecture, clubhouse, and lush green views.', 'bluebells.jpeg'),
+                ('Prestige City - Luxury Apartments', 'Prestige Group', 'Sarjapur Road, Bengaluru', 'High-rise residential township offering premium 2 & 3 BHK residences.', 'head.jpeg'),
+                ('Brigade Eldorado', 'Brigade Group', 'Aerospace Park, KIADB, Bengaluru', 'Modern integrated enclave designed for professionals seeking high rental yields.', 'head.jpeg'),
+                ('Sobha Town Park', 'Sobha Developers', 'Hosur Road, Bengaluru', 'Luxury New-York styled residential community built with Sobha German technology.', 'head.jpeg')
             ])
 
+        # Ensure any site titled 'Blue Bells' or containing 'Blue Bells' points to 'bluebells.jpeg'
+        cursor.execute("UPDATE sites SET image_filename = 'bluebells.jpeg' WHERE LOWER(title) LIKE '%blue%bell%' OR LOWER(title) LIKE '%bluebells%';")
         conn.commit()
+
         cursor.close()
         conn.close()
     except Exception as e:
@@ -262,7 +275,7 @@ def admin():
         
     return render_template('admin_login.html')
 
-# CMS Actions: Add Site
+# CMS Actions: Add Site (with image upload / custom filename)
 @app.route('/admin/add-site', methods=['POST'])
 def admin_add_site():
     if not session.get('admin_logged_in'):
@@ -272,16 +285,66 @@ def admin_add_site():
     builder = request.form.get('builder')
     location = request.form.get('location')
     description = request.form.get('description')
+    custom_filename = request.form.get('custom_filename')
+    
+    image_filename = 'head.jpeg'
+    
+    if custom_filename and custom_filename.strip():
+        image_filename = custom_filename.strip()
+        
+    if 'site_image' in request.files:
+        file = request.files['site_image']
+        if file and file.filename != '' and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_filename = filename
     
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO sites (title, builder, location, description) VALUES (%s, %s, %s, %s)",
-                   (title, builder, location, description))
+    cursor.execute("INSERT INTO sites (title, builder, location, description, image_filename) VALUES (%s, %s, %s, %s, %s)",
+                   (title, builder, location, description, image_filename))
     conn.commit()
     cursor.close()
     conn.close()
     
     flash("New Featured Site published successfully!", "success")
+    return redirect(url_for('admin'))
+
+# CMS Actions: Edit Site
+@app.route('/admin/edit-site/<int:site_id>', methods=['POST'])
+def admin_edit_site(site_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    title = request.form.get('title')
+    builder = request.form.get('builder')
+    location = request.form.get('location')
+    description = request.form.get('description')
+    image_filename = request.form.get('existing_image', 'head.jpeg')
+    
+    if 'site_image' in request.files:
+        file = request.files['site_image']
+        if file and file.filename != '' and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_filename = filename
+            
+    custom_filename = request.form.get('custom_filename')
+    if custom_filename and custom_filename.strip():
+        image_filename = custom_filename.strip()
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute('''
+        UPDATE sites 
+        SET title = %s, builder = %s, location = %s, description = %s, image_filename = %s
+        WHERE id = %s
+    ''', (title, builder, location, description, image_filename, site_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    flash("Site updated successfully!", "success")
     return redirect(url_for('admin'))
 
 # CMS Actions: Delete Site
