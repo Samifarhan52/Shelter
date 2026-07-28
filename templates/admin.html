@@ -182,16 +182,16 @@
                     </div>
                 </div>
 
-               <!-- TAB 2: Manage Featured Sites / Projects -->
+              <!-- TAB 2: Manage Featured Sites / Projects -->
 <div class="tab-pane fade" id="sites">
     <div class="row g-4">
         <div class="col-12 col-lg-5">
             <div class="bg-white p-3 p-md-4 rounded shadow-sm">
                 <h5 class="fw-bold mb-3">Add New Featured Site</h5>
-                <form method="POST" action="{{ url_for('admin_add_site') }}">
+                <form method="POST" action="{{ url_for('admin_add_site') }}" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Project Title</label>
-                        <input type="text" name="title" class="form-control" placeholder="e.g. Blue Bells Luxury Enclave" required>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Blue Bells" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Builder / Brand</label>
@@ -203,16 +203,17 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Location</label>
-                        <input type="text" name="location" class="form-control" placeholder="e.g. Electronic City, Bengaluru" required>
+                        <input type="text" name="location" class="form-control" placeholder="e.g. Shanthi Nagar" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Description</label>
-                        <textarea name="description" class="form-control" rows="3" placeholder="Brief details about specs..." required></textarea>
+                        <textarea name="description" class="form-control" rows="3" placeholder="PG for gents and ladies..." required></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Image Filename or Web URL</label>
-                        <input type="text" name="image_filename" class="form-control" placeholder="e.g. bluebells.jpeg or https://..." value="head.jpeg">
-                        <small class="text-muted">Use static project image (e.g. <code>bluebells.jpeg</code>, <code>head.jpeg</code>) or paste an image URL.</small>
+                        <label class="form-label fw-semibold">Choose Image or Video File</label>
+                        <input type="file" name="media_file" class="form-control" accept="image/*,video/*">
+                        <small class="text-muted d-block mt-1">Or enter filename / web URL below:</small>
+                        <input type="text" name="image_filename" class="form-control form-control-sm mt-1" placeholder="e.g. bluebells.jpeg or https://...">
                     </div>
                     <button type="submit" class="btn btn-warning w-100 fw-bold py-2">Publish Featured Site</button>
                 </form>
@@ -227,7 +228,9 @@
                     <div class="list-group-item p-3">
                         <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                {% if 'http://' in site.image_filename or 'https://' in site.image_filename %}
+                                {% if site.image_filename and ('.mp4' in site.image_filename or '.webm' in site.image_filename or 'video' in site.image_filename) %}
+                                    <video src="{% if 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" style="width: 70px; height: 55px; object-fit: cover; border-radius: 6px;" muted></video>
+                                {% elif 'http://' in site.image_filename or 'https://' in site.image_filename or 'data:image' in site.image_filename %}
                                     <img src="{{ site.image_filename }}" style="width: 70px; height: 55px; object-fit: cover; border-radius: 6px;">
                                 {% else %}
                                     <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" style="width: 70px; height: 55px; object-fit: cover; border-radius: 6px;" onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
@@ -239,17 +242,17 @@
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit</button>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit & Upload Media</button>
                                 <a href="{{ url_for('admin_delete_site', site_id=site.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this project listing?')">Delete</a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Edit Site Modal -->
+                    <!-- Edit Site Modal with Real File Picker -->
                     <div class="modal fade" id="editModal{{ site.id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <form method="POST" action="{{ url_for('admin_edit_site', site_id=site.id) }}">
+                                <form method="POST" action="{{ url_for('admin_edit_site', site_id=site.id) }}" enctype="multipart/form-data">
                                     <div class="modal-header">
                                         <h5 class="modal-title fw-bold">Edit {{ site.title }}</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -275,10 +278,17 @@
                                             <label class="form-label fw-semibold">Description</label>
                                             <textarea name="description" class="form-control" rows="3" required>{{ site.description }}</textarea>
                                         </div>
+                                        
+                                        <!-- REAL FILE PICKER FOR IMAGE OR VIDEO -->
                                         <div class="mb-3">
-                                            <label class="form-label fw-semibold">Image Filename or Web URL</label>
-                                            <input type="text" name="image_filename" class="form-control" value="{{ site.image_filename or 'head.jpeg' }}" required>
-                                            <small class="text-muted">e.g. <code>bluebells.jpeg</code>, <code>head.jpeg</code>, or an image link starting with <code>https://</code></small>
+                                            <label class="form-label fw-semibold">Upload New Image or Video</label>
+                                            <input type="file" name="media_file" class="form-control" accept="image/*,video/*">
+                                            <small class="text-muted d-block mt-1">Upload an image (.jpg, .png) or short showcase video (.mp4).</small>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Or Keep Existing Filename / Web URL</label>
+                                            <input type="text" name="image_filename" class="form-control" value="{{ site.image_filename or 'head.jpeg' }}">
                                         </div>
                                     </div>
                                     <div class="modal-footer">

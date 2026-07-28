@@ -1,5 +1,6 @@
 import os
 import datetime
+import base64
 import psycopg2
 import psycopg2.extras
 from flask import Flask, render_template, request, redirect, url_for, session, flash
@@ -53,7 +54,7 @@ def init_db():
             )
         ''')
 
-        # Featured Sites / Projects
+        # Featured Sites / Projects (TEXT type for image_filename to support long base64 strings and URLs)
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sites (
                 id SERIAL PRIMARY KEY,
@@ -61,7 +62,7 @@ def init_db():
                 builder VARCHAR(255) NOT NULL,
                 location VARCHAR(255) NOT NULL,
                 description TEXT NOT NULL,
-                image_filename VARCHAR(500) DEFAULT 'head.jpeg',
+                image_filename TEXT DEFAULT 'head.jpeg',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
@@ -75,9 +76,10 @@ def init_db():
             )
         ''')
 
-        # Run Auto-Migrations for column safety
+        # Auto-Migrations for Schema Upgrades
         try:
-            cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename VARCHAR(500) DEFAULT 'head.jpeg';")
+            cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename TEXT DEFAULT 'head.jpeg';")
+            cursor.execute("ALTER TABLE sites ALTER COLUMN image_filename TYPE TEXT;")
             conn.commit()
         except Exception:
             conn.rollback()
@@ -108,7 +110,7 @@ def init_db():
             cursor.executemany("INSERT INTO builders (name, is_active) VALUES (%s, %s)", 
                                [('Prestige Group', True), ('Brigade Group', True), ('Sobha Developers', True), ('Godrej Properties', True)])
 
-        # Seed Default Sites including Blue Bells
+        # Seed Default Sites
         cursor.execute("SELECT COUNT(*) as count FROM sites")
         if cursor.fetchone()['count'] == 0:
             cursor.executemany('''
@@ -121,8 +123,8 @@ def init_db():
                 ('Sobha Town Park', 'Sobha Developers', 'Hosur Road, Bengaluru', 'Luxury New-York styled residential community built with Sobha German technology.', 'head.jpeg')
             ])
 
-        # Ensure Blue Bells points to bluebells.jpeg
-        cursor.execute("UPDATE sites SET image_filename = 'bluebells.jpeg' WHERE LOWER(title) LIKE '%blue%bell%' OR LOWER(title) LIKE '%bluebells%';")
+        # Ensure Blue Bells project points to bluebells.jpeg
+        cursor.execute("UPDATE sites SET image_filename = 'bluebells.jpeg' WHERE (LOWER(title) LIKE '%blue%bell%' OR LOWER(title) LIKE '%bluebells%') AND image_filename = 'head.jpeg';")
         conn.commit()
 
         cursor.close()
@@ -273,7 +275,7 @@ def admin():
         
     return render_template('admin_login.html')
 
-# CMS Actions: Add Site
+# CMS Actions: Add Site (Handles direct file uploads as well as text links)
 @app.route('/admin/add-site', methods=['POST'])
 def admin_add_site():
     if not session.get('admin_logged_in'):
@@ -284,6 +286,16 @@ def admin_add_site():
     location = request.form.get('location')
     description = request.form.get('description')
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
+    
+    # Process uploaded media file if user chose a file
+    if 'media_file' in request.files:
+        file = request.files['media_file']
+        if file and file.filename != '':
+            file_bytes = file.read()
+            if len(file_bytes) > 0:
+                mime_type = file.mimetype or 'image/jpeg'
+                encoded = base64.b64encode(file_bytes).decode('utf-8')
+                image_filename = f"data:{mime_type};base64,{encoded}"
     
     try:
         conn = get_db()
@@ -300,7 +312,7 @@ def admin_add_site():
     
     return redirect(url_for('admin'))
 
-# CMS Actions: Edit Site
+# CMS Actions: Edit Site (Handles direct file uploads as well as text links)
 @app.route('/admin/edit-site/<int:site_id>', methods=['POST'])
 def admin_edit_site(site_id):
     if not session.get('admin_logged_in'):
@@ -311,6 +323,16 @@ def admin_edit_site(site_id):
     location = request.form.get('location')
     description = request.form.get('description')
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
+    
+    # Process uploaded media file if a new file was chosen
+    if 'media_file' in request.files:
+        file = request.files['media_file']
+        if file and file.filename != '':
+            file_bytes = file.read()
+            if len(file_bytes) > 0:
+                mime_type = file.mimetype or 'image/jpeg'
+                encoded = base64.b64encode(file_bytes).decode('utf-8')
+                image_filename = f"data:{mime_type};base64,{encoded}"
     
     try:
         conn = get_db()
@@ -323,7 +345,7 @@ def admin_edit_site(site_id):
         conn.commit()
         cursor.close()
         conn.close()
-        flash("Site details updated successfully!", "success")
+        flash("Site details and media updated successfully!", "success")
     except Exception as e:
         print(f"Error updating site: {e}")
         flash("Could not update site.", "danger")
