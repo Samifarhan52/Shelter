@@ -148,7 +148,7 @@ def home():
     try:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM sites ORDER BY id DESC")
+        cursor.execute("SELECT * FROM sites ORDER BY id DESC LIMIT 6")
         sites_list = cursor.fetchall()
         cursor.close()
         conn.close()
@@ -159,17 +159,36 @@ def home():
 
 @app.route('/sites')
 def sites():
+    query = request.args.get('q', '').strip()
+    builder_filter = request.args.get('builder', '').strip()
+    
     try:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM sites ORDER BY id DESC")
+        
+        sql = "SELECT * FROM sites WHERE 1=1"
+        params = []
+        
+        if query:
+            sql += " AND (title ILIKE %s OR location ILIKE %s OR description ILIKE %s OR builder ILIKE %s)"
+            search_param = f"%{query}%"
+            params.extend([search_param, search_param, search_param, search_param])
+            
+        if builder_filter and builder_filter.lower() != 'builder':
+            sql += " AND builder ILIKE %s"
+            params.append(f"%{builder_filter}%")
+            
+        sql += " ORDER BY id DESC"
+        
+        cursor.execute(sql, tuple(params))
         sites_list = cursor.fetchall()
         cursor.close()
         conn.close()
-    except Exception:
+    except Exception as e:
+        print(f"Error searching sites: {e}")
         sites_list = []
         
-    return render_template('sites.html', sites=sites_list, builders=get_active_builders())
+    return render_template('sites.html', sites=sites_list, builders=get_active_builders(), search_query=query, selected_builder=builder_filter)
 
 @app.route('/about')
 def about():

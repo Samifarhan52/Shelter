@@ -47,17 +47,17 @@
                     </div>
                 </a>
 
-                <!-- Centered Desktop Search Bar -->
+                <!-- Centered Desktop Search Bar (Connected to Database) -->
                 <div class="d-none d-lg-block flex-grow-1 mx-lg-5" style="max-width: 540px;">
-                    <form class="input-group">
-                        <input type="text" class="form-control nav-search-input py-2" placeholder="Search projects, locations, or builders...">
-                        <select class="form-select nav-search-input py-2" style="max-width: 150px;">
-                            <option value="" selected>Builder</option>
+                    <form action="{{ url_for('sites') }}" method="GET" class="input-group">
+                        <input type="text" name="q" class="form-control nav-search-input py-2" placeholder="Search projects, locations, or builders..." value="{{ search_query if search_query else '' }}">
+                        <select name="builder" class="form-select nav-search-input py-2" style="max-width: 150px;">
+                            <option value="">Builder</option>
                             {% for b in builders %}
-                                <option value="{{ b.name }}">{{ b.name }}</option>
+                                <option value="{{ b.name }}" {% if selected_builder == b.name %}selected{% endif %}>{{ b.name }}</option>
                             {% endfor %}
                         </select>
-                        <button class="btn btn-gold px-4 fw-bold" type="button">Search</button>
+                        <button class="btn btn-gold px-4 fw-bold" type="submit">Search</button>
                     </form>
                 </div>
 
@@ -80,16 +80,17 @@
         <nav class="navbar navbar-expand-lg navbar-dark p-0 border-0 mb-0" style="background-color: var(--navy-header);">
             <div class="container-fluid px-3 px-lg-5">
                 
+                <!-- Mobile Search Bar (Connected to Database) -->
                 <div class="d-lg-none w-100 py-2">
-                    <form class="input-group input-group-sm">
-                        <input type="text" class="form-control nav-search-input" placeholder="Search projects or location...">
-                        <select class="form-select nav-search-input" style="max-width: 110px;">
-                            <option value="" selected>Builder</option>
+                    <form action="{{ url_for('sites') }}" method="GET" class="input-group input-group-sm">
+                        <input type="text" name="q" class="form-control nav-search-input" placeholder="Search projects or location..." value="{{ search_query if search_query else '' }}">
+                        <select name="builder" class="form-select nav-search-input" style="max-width: 110px;">
+                            <option value="">Builder</option>
                             {% for b in builders %}
-                                <option value="{{ b.name }}">{{ b.name }}</option>
+                                <option value="{{ b.name }}" {% if selected_builder == b.name %}selected{% endif %}>{{ b.name }}</option>
                             {% endfor %}
                         </select>
-                        <button class="btn btn-gold px-2 fw-bold" type="button">Search</button>
+                        <button class="btn btn-gold px-2 fw-bold" type="submit">Search</button>
                     </form>
                 </div>
 
