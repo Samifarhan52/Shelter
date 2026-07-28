@@ -28,92 +28,142 @@ def init_db():
         conn = get_db()
         cursor = conn.cursor()
         
-        # Admin Users Table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                email VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL
-            )
-        ''')
-        
-        # Session Leads Table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sessions (
-                id SERIAL PRIMARY KEY,
-                session_date VARCHAR(50) NOT NULL,
-                slot_time VARCHAR(50) NOT NULL,
-                full_name VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                phone VARCHAR(50) NOT NULL,
-                location VARCHAR(255) NOT NULL,
-                budget VARCHAR(100) NOT NULL,
-                message TEXT,
-                status VARCHAR(50) DEFAULT 'Confirmed',
-                booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-
-        # Featured Sites / Projects Table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sites (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                builder VARCHAR(255) NOT NULL,
-                location VARCHAR(255) NOT NULL,
-                description TEXT NOT NULL,
-                image_filename TEXT DEFAULT 'head.jpeg',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
-
-        # Builders Table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS builders (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) UNIQUE NOT NULL,
-                is_active BOOLEAN DEFAULT TRUE
-            )
-        ''')
-
-        # Schema Safety Migrations
+        # 1. Admin Users Table
         try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    password VARCHAR(255) NOT NULL
+                );
+            ''')
+            conn.commit()
+        except Exception:
+            conn.rollback()
+        
+        # 2. Session Leads Table
+        try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS sessions (
+                    id SERIAL PRIMARY KEY,
+                    session_date VARCHAR(50) NOT NULL,
+                    slot_time VARCHAR(50) NOT NULL,
+                    full_name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    phone VARCHAR(50) NOT NULL,
+                    location VARCHAR(255) NOT NULL,
+                    budget VARCHAR(100) NOT NULL,
+                    message TEXT,
+                    status VARCHAR(50) DEFAULT 'Confirmed',
+                    booked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            ''')
             cursor.execute("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'Confirmed';")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
+        # 3. Featured Sites Table
+        try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS sites (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(255) NOT NULL,
+                    builder VARCHAR(255) NOT NULL,
+                    location VARCHAR(255) NOT NULL,
+                    description TEXT NOT NULL,
+                    image_filename TEXT DEFAULT 'head.jpeg',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            ''')
             cursor.execute("ALTER TABLE sites ADD COLUMN IF NOT EXISTS image_filename TEXT DEFAULT 'head.jpeg';")
             cursor.execute("ALTER TABLE sites ALTER COLUMN image_filename TYPE TEXT;")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
+        # 4. Builders Table
+        try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS builders (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) UNIQUE NOT NULL,
+                    is_active BOOLEAN DEFAULT TRUE
+                );
+            ''')
             cursor.execute("ALTER TABLE builders ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;")
             conn.commit()
         except Exception:
             conn.rollback()
 
+        # 5. Settings Table
+        try:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS settings (
+                    key VARCHAR(255) PRIMARY KEY,
+                    value TEXT NOT NULL
+                );
+            ''')
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
         # Default Admin Account
-        cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
-        if not cursor.fetchone():
-            hashed_pwd = generate_password_hash("Admin@123")
-            cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
-                           ("Admin", "admin@shelterhunt.com", hashed_pwd))
+        try:
+            cursor.execute("SELECT * FROM users WHERE email = %s", ('admin@shelterhunt.com',))
+            if not cursor.fetchone():
+                hashed_pwd = generate_password_hash("Admin@123")
+                cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)",
+                               ("Admin", "admin@shelterhunt.com", hashed_pwd))
+                conn.commit()
+        except Exception:
+            conn.rollback()
 
-        # Seed Builders if empty
-        cursor.execute("SELECT COUNT(*) as count FROM builders")
-        if cursor.fetchone()['count'] == 0:
-            cursor.executemany("INSERT INTO builders (name, is_active) VALUES (%s, %s)", 
-                               [('Prestige Group', True), ('Brigade Group', True), ('Sobha Developers', True), ('Godrej Properties', True)])
+        # Seed Settings
+        default_settings = {
+            'whatsapp_number': '918050749331',
+            'contact_phone': '+91 8050749331',
+            'contact_email': 'contact@shelterhunt.com',
+            'contact_address': 'Bengaluru, Karnataka, India',
+            'hero_title': 'Smart Property Decisions Start Here.',
+            'hero_subtitle': "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time."
+        }
+        
+        try:
+            for key, val in default_settings.items():
+                cursor.execute("INSERT INTO settings (key, value) VALUES (%s, %s) ON CONFLICT (key) DO NOTHING;", (key, val))
+            conn.commit()
+        except Exception:
+            conn.rollback()
 
-        # Seed Sites if empty
-        cursor.execute("SELECT COUNT(*) as count FROM sites")
-        if cursor.fetchone()['count'] == 0:
-            cursor.executemany('''
-                INSERT INTO sites (title, builder, location, description, image_filename)
-                VALUES (%s, %s, %s, %s, %s)
-            ''', [
-                ('Blue Bells Luxury Enclave', 'Prestige Group', 'Electronic City, Bengaluru', 'Premium residential township with modern architecture, clubhouse, and lush green views.', 'bluebells.jpeg'),
-                ('Prestige City - Luxury Apartments', 'Prestige Group', 'Sarjapur Road, Bengaluru', 'High-rise residential township offering premium 2 & 3 BHK residences.', 'head.jpeg'),
-                ('Brigade Eldorado', 'Brigade Group', 'Aerospace Park, KIADB, Bengaluru', 'Modern integrated enclave designed for professionals seeking high rental yields.', 'head.jpeg'),
-                ('Sobha Town Park', 'Sobha Developers', 'Hosur Road, Bengaluru', 'Luxury New-York styled residential community built with Sobha German technology.', 'head.jpeg')
-            ])
+        # Seed Builders
+        try:
+            cursor.execute("SELECT COUNT(*) as count FROM builders")
+            if cursor.fetchone()['count'] == 0:
+                cursor.executemany("INSERT INTO builders (name, is_active) VALUES (%s, %s)", 
+                                   [('Prestige Group', True), ('Brigade Group', True), ('Sobha Developers', True), ('Godrej Properties', True)])
+                conn.commit()
+        except Exception:
+            conn.rollback()
 
-        conn.commit()
+        # Seed Sites
+        try:
+            cursor.execute("SELECT COUNT(*) as count FROM sites")
+            if cursor.fetchone()['count'] == 0:
+                cursor.executemany('''
+                    INSERT INTO sites (title, builder, location, description, image_filename)
+                    VALUES (%s, %s, %s, %s, %s)
+                ''', [
+                    ('Blue Bells Luxury Enclave', 'Prestige Group', 'Electronic City, Bengaluru', 'Premium residential township with modern architecture, clubhouse, and lush green views.', 'bluebells.jpeg'),
+                    ('Prestige City - Luxury Apartments', 'Prestige Group', 'Sarjapur Road, Bengaluru', 'High-rise residential township offering premium 2 & 3 BHK residences.', 'head.jpeg'),
+                    ('Brigade Eldorado', 'Brigade Group', 'Aerospace Park, KIADB, Bengaluru', 'Modern integrated enclave designed for professionals seeking high rental yields.', 'head.jpeg'),
+                    ('Sobha Town Park', 'Sobha Developers', 'Hosur Road, Bengaluru', 'Luxury New-York styled residential community built with Sobha German technology.', 'head.jpeg')
+                ])
+                conn.commit()
+        except Exception:
+            conn.rollback()
+
         cursor.close()
         conn.close()
     except Exception as e:
@@ -139,6 +189,28 @@ def get_active_builders():
     except Exception:
         return [{'name': 'Prestige Group'}, {'name': 'Brigade Group'}, {'name': 'Sobha Developers'}]
 
+def get_site_settings():
+    defaults = {
+        'whatsapp_number': '918050749331',
+        'contact_phone': '+91 8050749331',
+        'contact_email': 'contact@shelterhunt.com',
+        'contact_address': 'Bengaluru, Karnataka, India',
+        'hero_title': 'Smart Property Decisions Start Here.',
+        'hero_subtitle': "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time."
+    }
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT key, value FROM settings")
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for r in rows:
+            defaults[r['key']] = r['value']
+    except Exception:
+        pass
+    return defaults
+
 def get_daily_slots():
     return ["10:00 AM", "12:00 PM", "02:30 PM", "04:30 PM", "06:30 PM"]
 
@@ -155,7 +227,7 @@ def home():
     except Exception:
         sites_list = []
         
-    return render_template('index.html', sites=sites_list, builders=get_active_builders())
+    return render_template('index.html', sites=sites_list, builders=get_active_builders(), settings=get_site_settings())
 
 @app.route('/sites')
 def sites():
@@ -188,15 +260,15 @@ def sites():
         print(f"Error searching sites: {e}")
         sites_list = []
         
-    return render_template('sites.html', sites=sites_list, builders=get_active_builders(), search_query=query, selected_builder=builder_filter)
+    return render_template('sites.html', sites=sites_list, builders=get_active_builders(), settings=get_site_settings(), search_query=query, selected_builder=builder_filter)
 
 @app.route('/about')
 def about():
-    return render_template('about.html', builders=get_active_builders())
+    return render_template('about.html', builders=get_active_builders(), settings=get_site_settings())
 
 @app.route('/services')
 def services():
-    return render_template('services.html', builders=get_active_builders())
+    return render_template('services.html', builders=get_active_builders(), settings=get_site_settings())
 
 # --- Strategy Session Booking ---
 @app.route('/book-session')
@@ -220,7 +292,7 @@ def booking_slots():
     except Exception:
         booked_slots = []
     
-    return render_template('booking.html', date=selected_date, today=today_str, all_slots=all_slots, booked_slots=booked_slots, builders=get_active_builders())
+    return render_template('booking.html', date=selected_date, today=today_str, all_slots=all_slots, booked_slots=booked_slots, builders=get_active_builders(), settings=get_site_settings())
 
 @app.route('/check-availability', methods=['GET'])
 def check_availability():
@@ -264,11 +336,13 @@ def confirm_booking():
         flash("Cannot book consultation slots for past dates.", "danger")
         return redirect(url_for('booking_slots'))
 
+    settings = get_site_settings()
+    target_wa = settings.get('whatsapp_number', '918050749331').replace('+', '').replace(' ', '')
+
     try:
         conn = get_db()
         cursor = conn.cursor()
         
-        # Verify slot is still open
         cursor.execute("SELECT id FROM sessions WHERE session_date = %s AND slot_time = %s AND (status = 'Confirmed' OR status IS NULL)", (session_date, slot_time))
         if cursor.fetchone():
             flash(f"Sorry! The {slot_time} slot on {session_date} was just booked by someone else. Please choose another slot.", "warning")
@@ -276,7 +350,6 @@ def confirm_booking():
             conn.close()
             return redirect(url_for('booking_slots', date=session_date))
 
-        # Insert booking into database
         cursor.execute('''
             INSERT INTO sessions (session_date, slot_time, full_name, email, phone, location, budget, message, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Confirmed')
@@ -285,7 +358,6 @@ def confirm_booking():
         cursor.close()
         conn.close()
         
-        # Pre-format WhatsApp Confirmation Message
         wa_text = (
             f"Hello Shelter Hunt Consultants!\n\n"
             f"I have just booked a Property Strategy Session on your website.\n\n"
@@ -303,9 +375,8 @@ def confirm_booking():
             
         wa_text += "\nPlease confirm my appointment slot. Thank you!"
 
-        # Encode text & redirect directly to WhatsApp (+91 8050749331)
         encoded_message = urllib.parse.quote(wa_text)
-        whatsapp_url = f"https://wa.me/918050749331?text={encoded_message}"
+        whatsapp_url = f"https://wa.me/{target_wa}?text={encoded_message}"
         
         return redirect(whatsapp_url)
 
@@ -321,38 +392,107 @@ def admin():
         email = request.form.get('email')
         password = request.form.get('password')
         
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        
-        if user and check_password_hash(user['password'], password):
-            session['admin_logged_in'] = True
-            return redirect(url_for('admin'))
-        else:
-            flash("Invalid Admin Credentials.", "danger")
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+            user = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            
+            if user and check_password_hash(user['password'], password):
+                session['admin_logged_in'] = True
+                return redirect(url_for('admin'))
+            else:
+                flash("Invalid Admin Credentials.", "danger")
+        except Exception as e:
+            print(f"Login error: {e}")
+            flash("Error during admin login. Please try again.", "danger")
 
     if session.get('admin_logged_in'):
-        conn = get_db()
-        cursor = conn.cursor()
+        leads, sites_list, builders_list = [], [], []
+        try:
+            conn = get_db()
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT * FROM sessions ORDER BY booked_at DESC")
+            leads = cursor.fetchall() or []
+            
+            cursor.execute("SELECT * FROM sites ORDER BY id DESC")
+            sites_list = cursor.fetchall() or []
+            
+            cursor.execute("SELECT * FROM builders ORDER BY id DESC")
+            builders_list = cursor.fetchall() or []
+            
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print(f"Admin fetch error: {e}")
         
-        cursor.execute("SELECT * FROM sessions ORDER BY booked_at DESC")
-        leads = cursor.fetchall()
-        
-        cursor.execute("SELECT * FROM sites ORDER BY id DESC")
-        sites_list = cursor.fetchall()
-        
-        cursor.execute("SELECT * FROM builders ORDER BY id DESC")
-        builders_list = cursor.fetchall()
-        
-        cursor.close()
-        conn.close()
-        
-        return render_template('admin.html', leads=leads, sites=sites_list, builders=builders_list)
+        return render_template('admin.html', leads=leads, sites=sites_list, builders=builders_list, settings=get_site_settings())
         
     return render_template('admin_login.html')
+
+# CMS Actions: Save System Settings
+@app.route('/admin/save-settings', methods=['POST'])
+def admin_save_settings():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    settings_data = {
+        'whatsapp_number': request.form.get('whatsapp_number', '918050749331').strip(),
+        'contact_phone': request.form.get('contact_phone', '+91 8050749331').strip(),
+        'contact_email': request.form.get('contact_email', 'contact@shelterhunt.com').strip(),
+        'contact_address': request.form.get('contact_address', 'Bengaluru, Karnataka, India').strip(),
+        'hero_title': request.form.get('hero_title', 'Smart Property Decisions Start Here.').strip(),
+        'hero_subtitle': request.form.get('hero_subtitle', '').strip()
+    }
+    
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        for key, val in settings_data.items():
+            cursor.execute('''
+                INSERT INTO settings (key, value) VALUES (%s, %s)
+                ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+            ''', (key, val))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("System Settings updated successfully across the entire website!", "success")
+    except Exception as e:
+        print(f"Error saving settings: {e}")
+        flash("Could not update settings.", "danger")
+        
+    return redirect(url_for('admin'))
+
+# CMS Actions: Update Admin Password
+@app.route('/admin/change-password', methods=['POST'])
+def admin_change_password():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+    
+    if not new_password or new_password != confirm_password:
+        flash("Passwords do not match.", "warning")
+        return redirect(url_for('admin'))
+        
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        hashed_pwd = generate_password_hash(new_password)
+        cursor.execute("UPDATE users SET password = %s WHERE email = 'admin@shelterhunt.com';", (hashed_pwd,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        flash("Admin account password successfully updated!", "success")
+    except Exception as e:
+        print(f"Error updating password: {e}")
+        flash("Could not update password.", "danger")
+        
+    return redirect(url_for('admin'))
 
 # Admin Action: Cancel or Reopen Booking
 @app.route('/admin/toggle-session/<int:session_id>')
