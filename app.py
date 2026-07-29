@@ -455,10 +455,13 @@ def admin_add_site():
     
     return redirect(url_for('admin'))
 
-# CMS Actions: Edit Site
-@app.route('/admin/edit-site/<string:site_id>', methods=['POST'])
+# CMS Actions: Edit Site (Handles both GET and POST)
+@app.route('/admin/edit-site/<string:site_id>', methods=['GET', 'POST'])
 def admin_edit_site(site_id):
     if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    if request.method == 'GET':
         return redirect(url_for('admin'))
         
     title = request.form.get('title')
