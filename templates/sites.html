@@ -52,7 +52,7 @@
                             <p class="text-muted" style="line-height: 1.6;">{{ site.description }}</p>
                         </div>
                         <div class="pt-3">
-                            <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
+                            <button type="button" class="btn btn-gold w-100 fw-bold border-0" onclick="openLeadModal()">Request Inspection</button>
                         </div>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                     <p class="text-muted mb-4">We couldn't find any listings matching your search term. Try searching for another location, project title, or builder.</p>
                     <div class="d-flex justify-content-center gap-3">
                         <a href="{{ url_for('sites') }}" class="btn btn-outline-dark fw-bold">View All Sites</a>
-                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold fw-bold">Request Property Advice</a>
+                        <button type="button" class="btn btn-gold fw-bold border-0" onclick="openLeadModal()">Request Property Advice</button>
                     </div>
                 </div>
             </div>

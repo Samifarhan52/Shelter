@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<!-- Dynamic Hero Banner with Dynamic System Settings -->
+<!-- Hero Banner with Dynamic System Settings -->
 <div class="hero-section text-center text-md-start" 
      style="background: linear-gradient(rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92)), url('{{ url_for('static', filename='head.jpeg') }}') center/cover no-repeat;">
     <div class="container">
@@ -13,7 +13,7 @@
                     {{ settings.get('hero_subtitle', "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.") if settings else "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time." }}
                 </p>
                 <div class="pt-2">
-                    <a href="{{ url_for('booking_slots') }}" class="btn-gold btn-lg">Book a Property Strategy Session</a>
+                    <button type="button" class="btn-gold btn-lg border-0" onclick="openLeadModal()">Book a Property Strategy Session</button>
                 </div>
             </div>
         </div>
@@ -30,122 +30,11 @@
     </div>
 </div>
 
-<!-- Dynamic Featured Property Sites Section -->
-<div class="container my-5" id="featured-sites">
-    <h3 class="text-center fw-bold mb-2" style="color: var(--navy-dark);">Featured Property Sites</h3>
-    <p class="text-center text-muted mb-5">Handpicked premium residential projects verified by our advisory team.</p>
-    
-    <div class="row g-4">
-        {% for site in sites %}
-            <div class="col-lg-4 col-md-6">
-                <div class="white-card h-100 d-flex flex-column justify-content-between p-0 overflow-hidden shadow-sm">
-                    <div style="height: 200px; overflow: hidden; position: relative;">
-                        {% if site.image_filename and ('data:video' in site.image_filename or '.mp4' in site.image_filename or '.webm' in site.image_filename) %}
-                            <video src="{% if 'data:' in site.image_filename or 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" 
-                                   class="w-100 h-100" 
-                                   style="object-fit: cover;" 
-                                   autoplay loop muted playsinline></video>
-                        {% elif site.image_filename and ('data:' in site.image_filename or 'http://' in site.image_filename or 'https://' in site.image_filename) %}
-                            <img src="{{ site.image_filename }}" 
-                                 alt="{{ site.title }}" 
-                                 class="w-100 h-100" 
-                                 style="object-fit: cover;">
-                        {% else %}
-                            <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
-                                 alt="{{ site.title }}" 
-                                 class="w-100 h-100" 
-                                 style="object-fit: cover;"
-                                 onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
-                        {% endif %}
-                        <span class="badge position-absolute top-0 start-0 m-3" style="background-color: var(--gold-accent); color: #fff;">
-                            {{ site.builder }}
-                        </span>
-                    </div>
-                    <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
-                        <div>
-                            <h4 class="fw-bold" style="color: var(--navy-dark);">{{ site.title }}</h4>
-                            <p class="text-muted small mb-2">📍 {{ site.location }}</p>
-                            <p class="text-muted" style="line-height: 1.6;">{{ site.description }}</p>
-                        </div>
-                        <div class="pt-3">
-                            <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 fw-bold">Request Inspection</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="col-12 text-center py-4">
-                <p class="text-muted fs-5">No featured property sites published yet.</p>
-            </div>
-        {% endfor %}
-    </div>
-</div>
-
-<!-- Any Query, One Solution Section -->
-<div class="container my-5" id="services">
-    <h3 class="text-center fw-bold mb-2" style="color: var(--navy-dark);">Any Query, One Solution</h3>
-    <p class="text-center text-muted mb-5">Your real estate concerns deserve expert-level answers. Here's how we help.</p>
-    
-    <div class="row g-4">
-        <div class="col-md-4">
-            <div class="white-card h-100">
-                <h5 class="fw-bold mb-3" style="color: var(--gold-accent);">Market Pricing Questions?</h5>
-                <p class="text-muted mb-0">We analyse micro-market trends, comparable sales data, and upcoming infrastructure to give you a realistic valuation — not an inflated number designed to close a deal.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="white-card h-100">
-                <h5 class="fw-bold mb-3" style="color: var(--gold-accent);">Investment Viability?</h5>
-                <p class="text-muted mb-0">From rental yield projections to capital appreciation forecasts, we provide data-backed investment opinions so you can commit with confidence.</p>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="white-card h-100">
-                <h5 class="fw-bold mb-3" style="color: var(--gold-accent);">Risk Analysis?</h5>
-                <p class="text-muted mb-0">Title disputes, encumbrance certificates, RERA compliance — we flag every red flag before you sign, protecting your investment and peace of mind.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Beyond the Purchase Section -->
-<div class="container my-5">
-    <h3 class="text-center fw-bold mb-2" style="color: var(--navy-dark);">Beyond the Purchase</h3>
-    <p class="text-center text-muted mb-5">End-to-end property services — from legal verification to post-purchase management.</p>
-    
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="white-card">
-                <h5 class="fw-bold mb-2" style="color: var(--navy-dark);">⚖️ Legal & Title Verification</h5>
-                <p class="text-muted mb-0">Comprehensive title search, encumbrance checks, mutation verification, and agreement drafting handled by qualified legal professionals.</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="white-card">
-                <h5 class="fw-bold mb-2" style="color: var(--navy-dark);">🛡️ Property Advocate Work</h5>
-                <p class="text-muted mb-0">Dedicated advocate representation for registration, stamp duty compliance, power-of-attorney execution, and dispute resolution.</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="white-card">
-                <h5 class="fw-bold mb-2" style="color: var(--navy-dark);">📋 Professional Inspections</h5>
-                <p class="text-muted mb-0">Structural assessments, plumbing & electrical audits, and RERA compliance checks performed by certified engineers before you commit.</p>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="white-card">
-                <h5 class="fw-bold mb-2" style="color: var(--navy-dark);">🏠 Post-Purchase Support</h5>
-                <p class="text-muted mb-0">Society transfer, utility connections, property tax setup, and ongoing maintenance coordination — so ownership begins stress-free.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Bottom Call To Action Banner -->
 <div class="container text-center my-5 py-5 text-light rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 4px solid var(--gold-accent);">
     <h2 class="fw-bold text-light mb-2">Ready for Expert Property Guidance?</h2>
     <p class="text-light mb-4 fs-5" style="color: whitesmoke !important;">No obligations, no hard sells — just a focused strategy session to understand your goals and chart the best path forward.</p>
-    <a href="{{ url_for('booking_slots') }}" class="btn-gold btn-lg">Book a Property Strategy Session</a>
+    <button type="button" class="btn-gold btn-lg border-0" onclick="openLeadModal()">Book a Property Strategy Session</button>
 </div>
 
 {% endblock %}
