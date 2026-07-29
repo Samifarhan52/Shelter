@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
     <style>
         .nav-search-input {
             background-color: #1e293b !important;
@@ -26,9 +27,115 @@
             border-color: var(--gold-accent) !important;
             box-shadow: 0 0 0 0.2rem rgba(197, 155, 39, 0.25) !important;
         }
+
+        /* --- LUXURY ENTRY REVEAL SPLASH SCREEN --- */
+        #entry-reveal-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .reveal-logo-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            padding: 4px;
+            background: linear-gradient(135deg, var(--gold-accent), #fef08a);
+            box-shadow: 0 0 35px rgba(197, 155, 39, 0.5);
+            animation: pulseAura 2s infinite alternate ease-in-out;
+        }
+
+        .reveal-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .reveal-brand-title {
+            color: #ffffff;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            margin-top: 24px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s forwards 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-brand-tagline {
+            color: var(--gold-accent);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 6px;
+            text-uppercase;
+            margin-top: 6px;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeInUp 0.8s forwards 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-progress-bar {
+            width: 140px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .reveal-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-accent), #fef08a);
+            animation: fillProgress 1.4s ease-in-out forwards;
+        }
+
+        @keyframes pulseAura {
+            0% { transform: scale(0.96); box-shadow: 0 0 20px rgba(197, 155, 39, 0.3); }
+            100% { transform: scale(1.04); box-shadow: 0 0 45px rgba(197, 155, 39, 0.7); }
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .reveal-hide {
+            opacity: 0 !important;
+            transform: translateY(-100%) !important;
+            pointer-events: none !important;
+        }
     </style>
 </head>
 <body>
+
+    <!-- LUXURY ENTRY REVEAL OVERLAY -->
+    <div id="entry-reveal-loader">
+        <div class="reveal-logo-wrapper">
+            <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Shelter Hunt Logo" class="reveal-logo-img">
+        </div>
+        <div class="reveal-brand-title">SHELTER HUNT</div>
+        <div class="reveal-brand-tagline">C O N S U L T A N T S</div>
+        <div class="reveal-progress-bar">
+            <div class="reveal-progress-fill"></div>
+        </div>
+    </div>
 
     <!-- Executive Navigation Header -->
     <header class="navbar-custom sticky-top">
@@ -197,5 +304,18 @@
 
     <!-- Bootstrap 5 JavaScript Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ENTRY REVEAL SCRIPT -->
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loader = document.getElementById('entry-reveal-loader');
+                if (loader) {
+                    loader.classList.add('reveal-hide');
+                    setTimeout(() => loader.style.display = 'none', 800);
+                }
+            }, 1200);
+        });
+    </script>
 </body>
 </html>
