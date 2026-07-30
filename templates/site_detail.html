@@ -5,18 +5,18 @@
     
     <!-- Breadcrumb Navigation -->
     <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('home') }}" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('sites') }}" class="text-decoration-none">Sites</a></li>
-            <li class="breadcrumb-item active text-truncate" style="max-width: 250px;" aria-current="page">{{ site.title }}</li>
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}" class="text-decoration-none text-muted">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('sites') }}" class="text-decoration-none text-muted">Property Sites</a></li>
+            <li class="breadcrumb-item active text-truncate fw-semibold text-dark" style="max-width: 250px;" aria-current="page">{{ site.title }}</li>
         </ol>
     </nav>
 
     <div class="row g-4 g-lg-5 align-items-start">
         
-        <!-- Media Showcase Banner (Left/Top) -->
+        <!-- Media Showcase Banner (Left) -->
         <div class="col-lg-7">
-            <div class="rounded-4 overflow-hidden shadow-sm border bg-dark position-relative" style="min-height: 380px; max-height: 500px;">
+            <div class="rounded-4 overflow-hidden shadow-sm border bg-dark position-relative" style="min-height: 420px; max-height: 520px;">
                 {% if site.image_filename and ('data:video' in site.image_filename or '.mp4' in site.image_filename or '.webm' in site.image_filename) %}
                     <video src="{% if 'data:' in site.image_filename or 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" 
                            class="w-100 h-100" 
@@ -35,66 +35,145 @@
                          onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
                 {% endif %}
                 
-                <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 shadow-sm" style="background-color: var(--gold-accent); color: #fff;">
+                <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 shadow-sm fw-bold" style="background-color: var(--gold-accent); color: #fff; letter-spacing: 0.5px;">
                     {{ site.builder }}
                 </span>
             </div>
         </div>
 
-        <!-- Property Specifications & Pricing (Right/Top) -->
+        <!-- High-End Property Overview Card (Right) -->
         <div class="col-lg-5">
             <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
-                <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">VERIFIED LISTING</p>
-                <h2 class="fw-bold mb-2" style="color: var(--navy-dark);">{{ site.title }}</h2>
-                <p class="text-muted fs-6 mb-4">📍 {{ site.location }}</p>
+                
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge bg-warning text-dark fw-bold px-2.5 py-1" style="font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase;">VERIFIED LISTING</span>
+                    <small class="text-muted fw-semibold" style="font-size: 0.8rem;">Ref ID: {{ site.id[:8] }}</small>
+                </div>
 
-                <hr class="my-3">
+                <h2 class="fw-bold mb-2" style="color: var(--navy-dark); font-size: 1.85rem; letter-spacing: -0.5px;">{{ site.title }}</h2>
+                
+                <div class="d-flex align-items-center gap-1.5 text-muted mb-4 fs-6">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-secondary">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>{{ site.location }}</span>
+                </div>
 
-                <!-- Key Property Metrics Grid -->
-                <div class="row g-3 my-2">
+                <hr class="my-4 opacity-25">
+
+                <!-- Clean Spec Metrics Grid -->
+                <div class="row g-3 mb-4">
+                    
+                    <!-- Estimated Price -->
                     <div class="col-6">
-                        <div class="p-3 rounded-3 bg-light border">
-                            <small class="text-muted d-block fw-semibold mb-1">💰 Estimated Price</small>
-                            <span class="fw-bold text-dark fs-6">{{ site.price if site.price else 'Price on Request' }}</span>
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                <span>Est. Price</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
+                                {% if site.price %}
+                                    {% if '₹' in site.price or 'Cr' in site.price or 'Lakh' in site.price %}
+                                        {{ site.price }}
+                                    {% else %}
+                                        ₹{{ site.price }}
+                                    {% endif %}
+                                {% else %}
+                                    On Request
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
+
+                    <!-- Total Area -->
                     <div class="col-6">
-                        <div class="p-3 rounded-3 bg-light border">
-                            <small class="text-muted d-block fw-semibold mb-1">📐 Total Area</small>
-                            <span class="fw-bold text-dark fs-6">{{ site.sqft if site.sqft else 'Contact for Area' }}</span>
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <path d="M3 9h18"></path>
+                                    <path d="M9 21V9"></path>
+                                </svg>
+                                <span>Total Area</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
+                                {% if site.sqft %}
+                                    {% if 'sq' in site.sqft.lower() or 'ft' in site.sqft.lower() %}
+                                        {{ site.sqft }}
+                                    {% else %}
+                                        {{ site.sqft }} Sq. Ft.
+                                    {% endif %}
+                                {% else %}
+                                    On Request
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
+
+                    <!-- Rate per Sq.Ft. -->
                     <div class="col-12">
-                        <div class="p-3 rounded-3 bg-light border">
-                            <small class="text-muted d-block fw-semibold mb-1">📊 Rate per Sq.Ft.</small>
-                            <span class="fw-bold text-dark fs-6">{{ site.price_per_sqft if site.price_per_sqft else 'Rate available on request' }}</span>
+                        <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background-color: #f8fafc; border: 1px solid #edf2f7;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                <span>Rate per Sq. Ft.</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-6">
+                                {% if site.price_per_sqft %}
+                                    {% if '₹' in site.price_per_sqft or '/ sq' in site.price_per_sqft.lower() %}
+                                        {{ site.price_per_sqft }}
+                                    {% else %}
+                                        ₹{{ site.price_per_sqft }} / Sq. Ft.
+                                    {% endif %}
+                                {% else %}
+                                    Available on Request
+                                {% endif %}
+                            </span>
                         </div>
+                    </div>
+
+                </div>
+
+                <!-- Primary Action Button -->
+                <div class="pt-2">
+                    <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 btn-lg fw-bold py-3 border-0 shadow-sm text-decoration-none d-flex align-items-center justify-content-center gap-2" style="font-size: 1.05rem;">
+                        <span>Book Consultation Session</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                    <div class="d-flex align-items-center justify-content-center gap-2 mt-2.5 text-muted" style="font-size: 0.78rem;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>Direct advisory connect • Zero sales pressure</span>
                     </div>
                 </div>
 
-                <!-- Direct Link to Calendar Slot Booking Page -->
-                <div class="mt-4 pt-2">
-                    <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 btn-lg fw-bold py-3 border-0 shadow-sm text-decoration-none">
-                        Book Consultation Session
-                    </a>
-                    <small class="text-muted d-block text-center mt-2">Pick date & time slot • Zero sales pressure</small>
-                </div>
             </div>
         </div>
 
     </div>
 
-    <!-- Full Overview / Description Section -->
+    <!-- Description & Overview Section -->
     <div class="mt-5 bg-white p-4 p-md-5 rounded-4 shadow-sm border">
-        <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">Property Overview & Highlights</h4>
-        <p class="text-muted fs-5" style="line-height: 1.8; white-space: pre-line;">{{ site.description }}</p>
+        <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">Property Overview & Specifications</h4>
+        <p class="text-muted fs-6" style="line-height: 1.85; white-space: pre-line;">{{ site.description }}</p>
 
-        <!-- Bottom Action CTA -->
-        <div class="mt-5 p-4 text-center rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+        <!-- Bottom Banner Call To Action -->
+        <div class="mt-5 p-4 p-md-5 text-center rounded-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 3px solid var(--gold-accent);">
             <h4 class="fw-bold text-white mb-2">Interested in {{ site.title }}?</h4>
-            <p class="text-light opacity-75 mb-3">Our legal and structural experts will guide you through verification, pricing, and site inspection.</p>
-            <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-lg fw-bold border-0 px-5 text-decoration-none">
-                Book Strategy Session
+            <p class="text-light opacity-75 mb-4 max-w-lg mx-auto" style="max-width: 580px; font-size: 0.95rem; line-height: 1.6;">
+                Our legal and structural experts will guide you through verification, market pricing comparison, and site inspection with full transparency.
+            </p>
+            <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-lg fw-bold border-0 px-5 py-2.5 text-decoration-none">
+                Reserve Strategy Session
             </a>
         </div>
     </div>
