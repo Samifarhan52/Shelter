@@ -34,6 +34,39 @@ def get_firestore():
         print(f"Firebase connection error: {e}")
         return None
 
+# --- Real-Time Automatic Visit Tracker Hook ---
+@app.before_request
+def track_website_activity():
+    # Ignore static files, admin routes, or API endpoints to keep stats clean
+    path = request.path
+    if path.startswith('/static') or path.startswith('/admin') or path == '/submit-quick-lead' or path == '/check-availability':
+        return
+
+    # Track user session ID for unique visitor calculation
+    if 'visitor_session_id' not in session:
+        session['visitor_session_id'] = os.urandom(12).hex()
+
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            today_str = datetime.date.today().isoformat()
+            now_iso = datetime.datetime.now().isoformat()
+            user_agent = request.user_agent.string
+            
+            # Simple device identifier (Mobile vs Desktop)
+            device = "Mobile" if ("Mobile" in user_agent or "Android" in user_agent or "iPhone" in user_agent) else "Desktop"
+
+            firestore_db.collection('page_views').add({
+                'path': path,
+                'visit_date': today_str,
+                'timestamp': now_iso,
+                'visitor_session': session['visitor_session_id'],
+                'device': device,
+                'ip': request.remote_addr or '127.0.0.1'
+            })
+        except Exception as e:
+            print(f"Tracking error: {e}")
+
 # Helper Functions
 def get_active_builders():
     firestore_db = get_firestore()
@@ -330,8 +363,17 @@ def admin():
 
     if session.get('admin_logged_in'):
         leads, sites_list, builders_list = [], [], []
+        analytics = {
+            'total_views': 0,
+            'today_views': 0,
+            'today_unique': 0,
+            'page_breakdown': {},
+            'recent_views': []
+        }
+
         if firestore_db:
             try:
+                # 1. Fetch Leads
                 leads_docs = firestore_db.collection('sessions').stream()
                 for l in leads_docs:
                     d = l.to_dict()
@@ -339,6 +381,7 @@ def admin():
                     leads.append(d)
                 leads.sort(key=lambda x: x.get('booked_at', ''), reverse=True)
 
+                # 2. Fetch Sites
                 sites_docs = firestore_db.collection('sites').stream()
                 for s in sites_docs:
                     d = s.to_dict()
@@ -346,16 +389,46 @@ def admin():
                     sites_list.append(d)
                 sites_list.reverse()
 
+                # 3. Fetch Builders
                 builders_docs = firestore_db.collection('builders').stream()
                 for b in builders_docs:
                     d = b.to_dict()
                     d['id'] = b.id
                     builders_list.append(d)
                 builders_list.sort(key=lambda x: x.get('name', ''))
+
+                # 4. Fetch Real-Time Analytics & Page Views
+                today_str = datetime.date.today().isoformat()
+                views_ref = firestore_db.collection('page_views').stream()
+                
+                unique_sessions_today = set()
+                page_counts = {}
+                recent_logs = []
+
+                for v in views_ref:
+                    v_data = v.to_dict()
+                    analytics['total_views'] += 1
+
+                    v_date = v_data.get('visit_date', '')
+                    v_path = v_data.get('path', '/')
+
+                    if v_date == today_str:
+                        analytics['today_views'] += 1
+                        unique_sessions_today.add(v_data.get('visitor_session', ''))
+                        page_counts[v_path] = page_counts.get(v_path, 0) + 1
+
+                    recent_logs.append(v_data)
+
+                analytics['today_unique'] = len(unique_sessions_today)
+                analytics['page_breakdown'] = page_counts
+                
+                recent_logs.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+                analytics['recent_views'] = recent_logs[:20] # Keep latest 20 views
+
             except Exception as e:
                 print(f"Admin fetch error: {e}")
         
-        return render_template('admin.html', leads=leads, sites=sites_list, builders=builders_list, settings=get_site_settings())
+        return render_template('admin.html', leads=leads, sites=sites_list, builders=builders_list, analytics=analytics, settings=get_site_settings())
         
     return render_template('admin_login.html')
 

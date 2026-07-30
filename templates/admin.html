@@ -59,6 +59,14 @@
             background-color: #b0851e;
             color: #ffffff;
         }
+
+        .metric-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
@@ -78,6 +86,11 @@
                     <li class="nav-item">
                         <button class="nav-link w-100 text-start active" id="leads-tab" data-bs-toggle="pill" data-bs-target="#leads" type="button" role="tab">
                             📊 Customer Leads
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 text-start" id="analytics-tab" data-bs-toggle="pill" data-bs-target="#analytics" type="button" role="tab">
+                            📈 Real-Time Analytics
                         </button>
                     </li>
                     <li class="nav-item">
@@ -188,7 +201,107 @@
                     </div>
                 </div>
 
-                <!-- TAB 2: Manage Featured Sites / Projects -->
+                <!-- TAB 2: REAL-TIME ANALYTICS TRACKER -->
+                <div class="tab-pane fade" id="analytics" role="tabpanel">
+                    
+                    <!-- Overview Metrics Cards -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-4">
+                            <div class="metric-card border-start border-4 border-warning">
+                                <small class="text-muted fw-semibold text-uppercase d-block mb-1">Today's Visits</small>
+                                <h2 class="fw-bold text-dark m-0">{{ analytics.today_views }}</h2>
+                                <small class="text-success fw-semibold">Live Real-time</small>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="metric-card border-start border-4 border-primary">
+                                <small class="text-muted fw-semibold text-uppercase d-block mb-1">Today's Unique Visitors</small>
+                                <h2 class="fw-bold text-dark m-0">{{ analytics.today_unique }}</h2>
+                                <small class="text-muted">Distinct Sessions</small>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="metric-card border-start border-4 border-success">
+                                <small class="text-muted fw-semibold text-uppercase d-block mb-1">Total Page Views (All Time)</small>
+                                <h2 class="fw-bold text-dark m-0">{{ analytics.total_views }}</h2>
+                                <small class="text-muted">Recorded Views</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Today's Per-Page Traffic Breakdown -->
+                        <div class="col-12 col-lg-5">
+                            <div class="bg-white p-3 p-md-4 rounded-4 shadow-sm border h-100">
+                                <h5 class="fw-bold mb-3 text-dark">Today's Traffic by Page</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Page Path</th>
+                                                <th class="text-end">Visits Today</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for path, count in analytics.page_breakdown.items() %}
+                                            <tr>
+                                                <td><code class="text-dark fw-bold">{{ path }}</code></td>
+                                                <td class="text-end"><span class="badge bg-warning text-dark fw-bold px-3">{{ count }}</span></td>
+                                            </tr>
+                                            {% else %}
+                                            <tr>
+                                                <td colspan="2" class="text-center text-muted py-3">No page visits recorded today yet.</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Recent Activity Log -->
+                        <div class="col-12 col-lg-7">
+                            <div class="bg-white p-3 p-md-4 rounded-4 shadow-sm border h-100">
+                                <h5 class="fw-bold mb-3 text-dark">Live Recent Visitor Log</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Time</th>
+                                                <th>Page Visited</th>
+                                                <th>Device</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for log in analytics.recent_views %}
+                                            <tr>
+                                                <td>
+                                                    <small class="fw-semibold text-dark">{{ log.timestamp[:19].replace('T', ' ') }}</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-dark">{{ log.path }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge {% if log.device == 'Mobile' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+                                                        {{ log.device }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% else %}
+                                            <tr>
+                                                <td colspan="3" class="text-center text-muted py-3">No recent visitors logged.</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TAB 3: Manage Featured Sites / Projects -->
                 <div class="tab-pane fade" id="sites" role="tabpanel">
                     <div class="row g-4">
                         <div class="col-12 col-lg-5">
@@ -336,7 +449,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: Manage Builders / Brands -->
+                <!-- TAB 4: Manage Builders / Brands -->
                 <div class="tab-pane fade" id="builders" role="tabpanel">
                     <div class="row g-4">
                         <div class="col-12 col-lg-5">
@@ -380,7 +493,7 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: System Settings Configuration -->
+                <!-- TAB 5: System Settings Configuration -->
                 <div class="tab-pane fade" id="settings" role="tabpanel">
                     <div class="row g-4">
                         <div class="col-12 col-lg-7">
