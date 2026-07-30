@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-5">
+    
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('sites') }}" class="text-decoration-none">Sites</a></li>
+            <li class="breadcrumb-item active text-truncate" style="max-width: 250px;" aria-current="page">{{ site.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4 g-lg-5 align-items-start">
+        
+        <!-- Media Showcase Banner (Left/Top) -->
+        <div class="col-lg-7">
+            <div class="rounded-4 overflow-hidden shadow-sm border bg-dark position-relative" style="min-height: 380px; max-height: 500px;">
+                {% if site.image_filename and ('data:video' in site.image_filename or '.mp4' in site.image_filename or '.webm' in site.image_filename) %}
+                    <video src="{% if 'data:' in site.image_filename or 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" 
+                           class="w-100 h-100" 
+                           style="object-fit: cover;" 
+                           autoplay loop muted playsinline></video>
+                {% elif site.image_filename and ('data:' in site.image_filename or 'http://' in site.image_filename or 'https://' in site.image_filename) %}
+                    <img src="{{ site.image_filename }}" 
+                         alt="{{ site.title }}" 
+                         class="w-100 h-100" 
+                         style="object-fit: cover;">
+                {% else %}
+                    <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
+                         alt="{{ site.title }}" 
+                         class="w-100 h-100" 
+                         style="object-fit: cover;"
+                         onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                {% endif %}
+                
+                <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 shadow-sm" style="background-color: var(--gold-accent); color: #fff;">
+                    {{ site.builder }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Property Specifications & Pricing (Right/Top) -->
+        <div class="col-lg-5">
+            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">VERIFIED LISTING</p>
+                <h2 class="fw-bold mb-2" style="color: var(--navy-dark);">{{ site.title }}</h2>
+                <p class="text-muted fs-6 mb-4">📍 {{ site.location }}</p>
+
+                <hr class="my-3">
+
+                <!-- Key Property Metrics Grid -->
+                <div class="row g-3 my-2">
+                    <div class="col-6">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <small class="text-muted d-block fw-semibold mb-1">💰 Estimated Price</small>
+                            <span class="fw-bold text-dark fs-6">{{ site.price if site.price else 'Price on Request' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <small class="text-muted d-block fw-semibold mb-1">📐 Total Area</small>
+                            <span class="fw-bold text-dark fs-6">{{ site.sqft if site.sqft else 'Contact for Area' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <small class="text-muted d-block fw-semibold mb-1">📊 Rate per Sq.Ft.</small>
+                            <span class="fw-bold text-dark fs-6">{{ site.price_per_sqft if site.price_per_sqft else 'Rate available on request' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2">
+                    <button type="button" class="btn btn-gold w-100 btn-lg fw-bold py-3 border-0 shadow-sm" onclick="openLeadModal()">
+                        Book Consultation Session
+                    </button>
+                    <small class="text-muted d-block text-center mt-2">Instant advisory connect • Zero sales pressure</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Full Overview / Description Section -->
+    <div class="mt-5 bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+        <h4 class="fw-bold mb-3" style="color: var(--navy-dark);">Property Overview & Highlights</h4>
+        <p class="text-muted fs-5" style="line-height: 1.8; white-space: pre-line;">{{ site.description }}</p>
+
+        <!-- Bottom Action CTA -->
+        <div class="mt-5 p-4 text-center rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+            <h4 class="fw-bold text-white mb-2">Interested in {{ site.title }}?</h4>
+            <p class="text-light opacity-75 mb-3">Our legal and structural experts will guide you through verification, pricing, and site inspection.</p>
+            <button type="button" class="btn btn-gold btn-lg fw-bold border-0 px-5" onclick="openLeadModal()">
+                Book Strategy Session
+            </button>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

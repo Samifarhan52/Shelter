@@ -211,6 +211,20 @@
                                         <label class="form-label fw-semibold">Location</label>
                                         <input type="text" name="location" class="form-control" placeholder="e.g. Shanthi Nagar" required>
                                     </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold">Estimated Price</label>
+                                            <input type="text" name="price" class="form-control" placeholder="e.g. ₹1.2 Cr - 2.5 Cr">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold">Area (Sq.Ft.)</label>
+                                            <input type="text" name="sqft" class="form-control" placeholder="e.g. 1,200 - 2,400 sq.ft">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Price per Sq.Ft.</label>
+                                        <input type="text" name="price_per_sqft" class="form-control" placeholder="e.g. ₹8,500 / sq.ft">
+                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Description</label>
                                         <textarea name="description" class="form-control" rows="3" placeholder="Project details..." required></textarea>
@@ -248,7 +262,7 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex gap-2">
-                                                <button class="btn btn-sm btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit Media</button>
+                                                <button class="btn btn-sm btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit Details</button>
                                                 <a href="{{ url_for('admin_delete_site', site_id=site.id) }}" class="btn btn-sm btn-outline-danger fw-semibold" onclick="return confirm('Delete this project listing?')">Delete</a>
                                             </div>
                                         </div>
@@ -279,6 +293,20 @@
                                                         <div class="mb-3">
                                                             <label class="form-label fw-semibold">Location</label>
                                                             <input type="text" name="location" class="form-control" value="{{ site.location }}" required>
+                                                        </div>
+                                                        <div class="row g-2 mb-3">
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold">Estimated Price</label>
+                                                                <input type="text" name="price" class="form-control" value="{{ site.price or '' }}" placeholder="e.g. ₹1.2 Cr - 2.5 Cr">
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold">Area (Sq.Ft.)</label>
+                                                                <input type="text" name="sqft" class="form-control" value="{{ site.sqft or '' }}" placeholder="e.g. 1,200 - 2,400 sq.ft">
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-semibold">Price per Sq.Ft.</label>
+                                                            <input type="text" name="price_per_sqft" class="form-control" value="{{ site.price_per_sqft or '' }}" placeholder="e.g. ₹8,500 / sq.ft">
                                                         </div>
                                                         <div class="mb-3">
                                                             <label class="form-label fw-semibold">Description</label>
@@ -355,7 +383,6 @@
                 <!-- TAB 4: System Settings Configuration -->
                 <div class="tab-pane fade" id="settings" role="tabpanel">
                     <div class="row g-4">
-                        <!-- Site Global Contact & Content Settings -->
                         <div class="col-12 col-lg-7">
                             <div class="bg-white p-3 p-md-4 rounded-4 shadow-sm border">
                                 <h5 class="fw-bold mb-3 text-dark">Website Contact & Hero Settings</h5>
@@ -363,7 +390,6 @@
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold">Target WhatsApp Number</label>
                                         <input type="text" name="whatsapp_number" class="form-control" value="{{ settings.get('whatsapp_number', '918050749331') }}" placeholder="e.g. 918050749331" required>
-                                        <small class="text-muted">Include country code without + or spaces.</small>
                                     </div>
 
                                     <div class="mb-3">
@@ -398,7 +424,6 @@
                             </div>
                         </div>
 
-                        <!-- Admin Security / Password Update -->
                         <div class="col-12 col-lg-5">
                             <div class="bg-white p-3 p-md-4 rounded-4 shadow-sm border">
                                 <h5 class="fw-bold mb-3 text-dark">Admin Security Settings</h5>

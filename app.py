@@ -116,6 +116,23 @@ def sites():
         
     return render_template('sites.html', sites=sites_list, builders=get_active_builders(), settings=get_site_settings(), search_query=query, selected_builder=builder_filter)
 
+# Detailed Individual Site Route
+@app.route('/site/<string:site_id>')
+def site_detail(site_id):
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            doc = firestore_db.collection('sites').document(site_id).get()
+            if doc.exists:
+                site_data = doc.to_dict()
+                site_data['id'] = doc.id
+                return render_template('site_detail.html', site=site_data, builders=get_active_builders(), settings=get_site_settings())
+        except Exception as e:
+            print(f"Error fetching site details: {e}")
+            
+    flash("Property site not found.", "warning")
+    return redirect(url_for('sites'))
+
 @app.route('/about')
 def about():
     return render_template('about.html', builders=get_active_builders(), settings=get_site_settings())
@@ -425,6 +442,9 @@ def admin_add_site():
     title = request.form.get('title')
     builder = request.form.get('builder')
     location = request.form.get('location')
+    price = request.form.get('price', '').strip()
+    sqft = request.form.get('sqft', '').strip()
+    price_per_sqft = request.form.get('price_per_sqft', '').strip()
     description = request.form.get('description')
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
@@ -444,6 +464,9 @@ def admin_add_site():
                 'title': title,
                 'builder': builder,
                 'location': location,
+                'price': price,
+                'sqft': sqft,
+                'price_per_sqft': price_per_sqft,
                 'description': description,
                 'image_filename': image_filename,
                 'created_at': datetime.datetime.now().isoformat()
@@ -455,7 +478,7 @@ def admin_add_site():
     
     return redirect(url_for('admin'))
 
-# CMS Actions: Edit Site (Handles both GET and POST)
+# CMS Actions: Edit Site (Handles GET & POST)
 @app.route('/admin/edit-site/<string:site_id>', methods=['GET', 'POST'])
 def admin_edit_site(site_id):
     if not session.get('admin_logged_in'):
@@ -467,6 +490,9 @@ def admin_edit_site(site_id):
     title = request.form.get('title')
     builder = request.form.get('builder')
     location = request.form.get('location')
+    price = request.form.get('price', '').strip()
+    sqft = request.form.get('sqft', '').strip()
+    price_per_sqft = request.form.get('price_per_sqft', '').strip()
     description = request.form.get('description')
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
@@ -486,6 +512,9 @@ def admin_edit_site(site_id):
                 'title': title,
                 'builder': builder,
                 'location': location,
+                'price': price,
+                'sqft': sqft,
+                'price_per_sqft': price_per_sqft,
                 'description': description,
                 'image_filename': image_filename
             })

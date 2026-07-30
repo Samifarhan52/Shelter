@@ -22,40 +22,46 @@
     <div class="row g-4">
         {% for site in sites %}
             <div class="col-lg-4 col-md-6">
-                <div class="white-card h-100 d-flex flex-column justify-content-between p-0 overflow-hidden shadow-sm">
-                    <div style="height: 200px; overflow: hidden; position: relative;">
-                        {% if site.image_filename and ('data:video' in site.image_filename or '.mp4' in site.image_filename or '.webm' in site.image_filename) %}
-                            <video src="{% if 'data:' in site.image_filename or 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" 
-                                   class="w-100 h-100" 
-                                   style="object-fit: cover;" 
-                                   autoplay loop muted playsinline></video>
-                        {% elif site.image_filename and ('data:' in site.image_filename or 'http://' in site.image_filename or 'https://' in site.image_filename) %}
-                            <img src="{{ site.image_filename }}" 
-                                 alt="{{ site.title }}" 
-                                 class="w-100 h-100" 
-                                 style="object-fit: cover;">
-                        {% else %}
-                            <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
-                                 alt="{{ site.title }}" 
-                                 class="w-100 h-100" 
-                                 style="object-fit: cover;"
-                                 onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
-                        {% endif %}
-                        <span class="badge position-absolute top-0 start-0 m-3" style="background-color: var(--gold-accent); color: #fff;">
-                            {{ site.builder }}
-                        </span>
-                    </div>
-                    <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
-                        <div>
-                            <h4 class="fw-bold" style="color: var(--navy-dark);">{{ site.title }}</h4>
-                            <p class="text-muted small mb-2">📍 {{ site.location }}</p>
-                            <p class="text-muted" style="line-height: 1.6;">{{ site.description }}</p>
+                <!-- Card is wrapped in link to redirect to its dedicated detail page -->
+                <a href="{{ url_for('site_detail', site_id=site.id) }}" class="text-decoration-none">
+                    <div class="white-card h-100 d-flex flex-column justify-content-between p-0 overflow-hidden shadow-sm border text-start" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                        <div style="height: 220px; overflow: hidden; position: relative;">
+                            {% if site.image_filename and ('data:video' in site.image_filename or '.mp4' in site.image_filename or '.webm' in site.image_filename) %}
+                                <video src="{% if 'data:' in site.image_filename or 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" 
+                                       class="w-100 h-100" 
+                                       style="object-fit: cover;" 
+                                       autoplay loop muted playsinline></video>
+                            {% elif site.image_filename and ('data:' in site.image_filename or 'http://' in site.image_filename or 'https://' in site.image_filename) %}
+                                <img src="{{ site.image_filename }}" 
+                                     alt="{{ site.title }}" 
+                                     class="w-100 h-100" 
+                                     style="object-fit: cover;">
+                            {% else %}
+                                <img src="{{ url_for('static', filename=site.image_filename or 'head.jpeg') }}" 
+                                     alt="{{ site.title }}" 
+                                     class="w-100 h-100" 
+                                     style="object-fit: cover;"
+                                     onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                            {% endif %}
+                            <span class="badge position-absolute top-0 start-0 m-3" style="background-color: var(--gold-accent); color: #fff;">
+                                {{ site.builder }}
+                            </span>
                         </div>
-                        <div class="pt-3">
-                            <button type="button" class="btn btn-gold w-100 fw-bold border-0" onclick="openLeadModal()">Request Inspection</button>
+                        <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
+                            <div>
+                                <h4 class="fw-bold mb-1" style="color: var(--navy-dark);">{{ site.title }}</h4>
+                                <p class="text-muted small mb-2">📍 {{ site.location }}</p>
+                                <p class="text-muted small mb-3" style="line-height: 1.5;">{{ site.description[:110] }}...</p>
+                            </div>
+                            <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-dark" style="font-size: 0.95rem;">
+                                    {{ site.price if site.price else 'Price on Request' }}
+                                </span>
+                                <span class="btn btn-sm btn-outline-dark fw-bold">View Details →</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
         {% else %}
             <div class="col-12 text-center py-5">
