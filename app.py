@@ -34,15 +34,13 @@ def get_firestore():
         print(f"Firebase connection error: {e}")
         return None
 
-# --- Real-Time Automatic Visit Tracker Hook ---
+# Real-Time Visitor Tracking Hook
 @app.before_request
 def track_website_activity():
-    # Ignore static files, admin routes, or API endpoints to keep stats clean
     path = request.path
     if path.startswith('/static') or path.startswith('/admin') or path == '/submit-quick-lead' or path == '/check-availability':
         return
 
-    # Track user session ID for unique visitor calculation
     if 'visitor_session_id' not in session:
         session['visitor_session_id'] = os.urandom(12).hex()
 
@@ -52,8 +50,6 @@ def track_website_activity():
             today_str = datetime.date.today().isoformat()
             now_iso = datetime.datetime.now().isoformat()
             user_agent = request.user_agent.string
-            
-            # Simple device identifier (Mobile vs Desktop)
             device = "Mobile" if ("Mobile" in user_agent or "Android" in user_agent or "iPhone" in user_agent) else "Desktop"
 
             firestore_db.collection('page_views').add({
@@ -87,12 +83,17 @@ def get_active_builders():
 
 def get_site_settings():
     defaults = {
+        'brand_name': 'SHELTER HUNT',
+        'brand_tagline': 'CONSULTANTS',
         'whatsapp_number': '918050749331',
         'contact_phone': '+91 8050749331',
         'contact_email': 'contact@shelterhunt.com',
         'contact_address': 'Bengaluru, Karnataka, India',
         'hero_title': 'Smart Property Decisions Start Here.',
-        'hero_subtitle': "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time."
+        'hero_subtitle': "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.",
+        'philosophy_text': 'Shelter Hunt Consultants is a knowledge-first agency built on the belief that real estate decisions deserve expert guidance, not sales pressure.',
+        'about_tagline': 'Our Philosophy & Expertise',
+        'footer_copyright': '© 2026 Shelter Hunt Consultants. All rights reserved.'
     }
     firestore_db = get_firestore()
     if not firestore_db:
@@ -149,7 +150,6 @@ def sites():
         
     return render_template('sites.html', sites=sites_list, builders=get_active_builders(), settings=get_site_settings(), search_query=query, selected_builder=builder_filter)
 
-# Detailed Individual Site Route
 @app.route('/site/<string:site_id>')
 def site_detail(site_id):
     firestore_db = get_firestore()
@@ -174,7 +174,6 @@ def about():
 def services():
     return render_template('services.html', builders=get_active_builders(), settings=get_site_settings())
 
-# --- Quick Modal Lead Submission API ---
 @app.route('/submit-quick-lead', methods=['POST'])
 def submit_quick_lead():
     full_name = request.form.get('full_name', '').strip()
@@ -205,7 +204,6 @@ def submit_quick_lead():
         except Exception as e:
             print(f"Quick lead save error: {e}")
 
-    # Build WhatsApp URL
     wa_text = (
         f"Hello Shelter Hunt Consultants!\n\n"
         f"I would like to request a callback for property consultation.\n\n"
@@ -220,7 +218,6 @@ def submit_quick_lead():
 
     return jsonify({'success': True, 'whatsapp_url': whatsapp_url})
 
-# --- Strategy Session Booking ---
 @app.route('/book-session')
 def booking_slots():
     today_str = datetime.date.today().isoformat()
@@ -335,7 +332,7 @@ def confirm_booking():
     
     return redirect(whatsapp_url)
 
-# --- CMS Admin Dashboard ---
+# CMS Admin Control Panel
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     firestore_db = get_firestore()
@@ -373,7 +370,6 @@ def admin():
 
         if firestore_db:
             try:
-                # 1. Fetch Leads
                 leads_docs = firestore_db.collection('sessions').stream()
                 for l in leads_docs:
                     d = l.to_dict()
@@ -381,7 +377,6 @@ def admin():
                     leads.append(d)
                 leads.sort(key=lambda x: x.get('booked_at', ''), reverse=True)
 
-                # 2. Fetch Sites
                 sites_docs = firestore_db.collection('sites').stream()
                 for s in sites_docs:
                     d = s.to_dict()
@@ -389,7 +384,6 @@ def admin():
                     sites_list.append(d)
                 sites_list.reverse()
 
-                # 3. Fetch Builders
                 builders_docs = firestore_db.collection('builders').stream()
                 for b in builders_docs:
                     d = b.to_dict()
@@ -397,7 +391,6 @@ def admin():
                     builders_list.append(d)
                 builders_list.sort(key=lambda x: x.get('name', ''))
 
-                # 4. Fetch Real-Time Analytics & Page Views
                 today_str = datetime.date.today().isoformat()
                 views_ref = firestore_db.collection('page_views').stream()
                 
@@ -423,7 +416,7 @@ def admin():
                 analytics['page_breakdown'] = page_counts
                 
                 recent_logs.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
-                analytics['recent_views'] = recent_logs[:20] # Keep latest 20 views
+                analytics['recent_views'] = recent_logs[:20]
 
             except Exception as e:
                 print(f"Admin fetch error: {e}")
@@ -432,34 +425,38 @@ def admin():
         
     return render_template('admin_login.html')
 
-# CMS Actions: Save System Settings
 @app.route('/admin/save-settings', methods=['POST'])
 def admin_save_settings():
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
     settings_data = {
+        'brand_name': request.form.get('brand_name', 'SHELTER HUNT').strip(),
+        'brand_tagline': request.form.get('brand_tagline', 'CONSULTANTS').strip(),
         'whatsapp_number': request.form.get('whatsapp_number', '918050749331').strip(),
         'contact_phone': request.form.get('contact_phone', '+91 8050749331').strip(),
         'contact_email': request.form.get('contact_email', 'contact@shelterhunt.com').strip(),
         'contact_address': request.form.get('contact_address', 'Bengaluru, Karnataka, India').strip(),
         'hero_title': request.form.get('hero_title', 'Smart Property Decisions Start Here.').strip(),
-        'hero_subtitle': request.form.get('hero_subtitle', '').strip()
+        'hero_subtitle': request.form.get('hero_subtitle', '').strip(),
+        'philosophy_text': request.form.get('philosophy_text', '').strip(),
+        'about_tagline': request.form.get('about_tagline', '').strip(),
+        'footer_copyright': request.form.get('footer_copyright', '').strip()
     }
     
     firestore_db = get_firestore()
     if firestore_db:
         try:
             for key, val in settings_data.items():
-                firestore_db.collection('settings').document(key).set({'value': val})
-            flash("System Settings updated successfully across the entire website!", "success")
+                if val:
+                    firestore_db.collection('settings').document(key).set({'value': val})
+            flash("Global settings and dynamic site content updated successfully!", "success")
         except Exception as e:
             print(f"Error saving settings: {e}")
             flash("Could not update settings.", "danger")
         
     return redirect(url_for('admin'))
 
-# CMS Actions: Update Admin Password
 @app.route('/admin/change-password', methods=['POST'])
 def admin_change_password():
     if not session.get('admin_logged_in'):
@@ -484,7 +481,6 @@ def admin_change_password():
         
     return redirect(url_for('admin'))
 
-# Admin Action: Cancel or Reopen Booking
 @app.route('/admin/toggle-session/<string:session_id>')
 def admin_toggle_session(session_id):
     if not session.get('admin_logged_in'):
@@ -506,7 +502,6 @@ def admin_toggle_session(session_id):
         
     return redirect(url_for('admin'))
 
-# CMS Actions: Add Site
 @app.route('/admin/add-site', methods=['POST'])
 def admin_add_site():
     if not session.get('admin_logged_in'):
@@ -544,14 +539,13 @@ def admin_add_site():
                 'image_filename': image_filename,
                 'created_at': datetime.datetime.now().isoformat()
             })
-            flash("New Featured Site published successfully!", "success")
+            flash("New Property Site published successfully!", "success")
         except Exception as e:
             print(f"Error adding site: {e}")
             flash("Could not add site.", "danger")
     
     return redirect(url_for('admin'))
 
-# CMS Actions: Edit Site (Handles GET & POST)
 @app.route('/admin/edit-site/<string:site_id>', methods=['GET', 'POST'])
 def admin_edit_site(site_id):
     if not session.get('admin_logged_in'):
@@ -591,14 +585,13 @@ def admin_edit_site(site_id):
                 'description': description,
                 'image_filename': image_filename
             })
-            flash("Site details updated successfully!", "success")
+            flash("Property details updated successfully!", "success")
         except Exception as e:
             print(f"Error updating site: {e}")
             flash("Could not update site.", "danger")
         
     return redirect(url_for('admin'))
 
-# CMS Actions: Delete Site
 @app.route('/admin/delete-site/<string:site_id>')
 def admin_delete_site(site_id):
     if not session.get('admin_logged_in'):
@@ -608,14 +601,13 @@ def admin_delete_site(site_id):
     if firestore_db:
         try:
             firestore_db.collection('sites').document(site_id).delete()
-            flash("Site entry removed.", "info")
+            flash("Property listing removed.", "info")
         except Exception as e:
             print(f"Error deleting site: {e}")
             flash("Could not delete site.", "danger")
         
     return redirect(url_for('admin'))
 
-# CMS Actions: Add Builder / Brand
 @app.route('/admin/add-builder', methods=['POST'])
 def admin_add_builder():
     if not session.get('admin_logged_in'):
@@ -627,14 +619,13 @@ def admin_add_builder():
     if firestore_db:
         try:
             firestore_db.collection('builders').add({'name': builder_name, 'is_active': True})
-            flash("New Builder / Brand added to filter options!", "success")
+            flash("New Builder Brand added!", "success")
         except Exception as e:
             print(f"Error adding builder: {e}")
             flash("Could not add builder.", "danger")
             
     return redirect(url_for('admin'))
 
-# CMS Actions: Toggle Builder Status
 @app.route('/admin/toggle-builder/<string:builder_id>')
 def admin_toggle_builder(builder_id):
     if not session.get('admin_logged_in'):
@@ -655,7 +646,6 @@ def admin_toggle_builder(builder_id):
         
     return redirect(url_for('admin'))
 
-# CMS Actions: Delete Builder
 @app.route('/admin/delete-builder/<string:builder_id>')
 def admin_delete_builder(builder_id):
     if not session.get('admin_logged_in'):
@@ -675,7 +665,7 @@ def admin_delete_builder(builder_id):
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin_logged_in', None)
-    flash("Logged out from Admin CMS Dashboard.", "info")
+    flash("Logged out from CMS Dashboard.", "info")
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
