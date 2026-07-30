@@ -102,6 +102,20 @@
             animation: fillProgress 1.1s ease-in-out forwards;
         }
 
+        .option-choice-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .option-choice-card:hover {
+            border-color: var(--gold-accent);
+            background-color: #f8fafc;
+            transform: translateY(-2px);
+        }
+
         @keyframes pulseAura {
             0% { transform: scale(0.96); box-shadow: 0 0 20px rgba(197, 155, 39, 0.3); }
             100% { transform: scale(1.04); box-shadow: 0 0 45px rgba(197, 155, 39, 0.7); }
@@ -176,7 +190,7 @@
 
                 <!-- Right Action Button & Mobile Menu Toggle -->
                 <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-gold btn-header-cta px-3 border-0" onclick="openLeadModal()">Book Session</button>
+                    <button type="button" class="btn btn-gold btn-header-cta px-3 border-0" onclick="openChoiceModal()">Book Session</button>
                     
                     <button class="mobile-menu-btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -236,7 +250,47 @@
 
     {% block content %}{% endblock %}
 
-    <!-- 2-STEP POPUP LEAD MODAL -->
+    <!-- 1. SESSION TYPE CHOICE MODAL -->
+    <div class="modal fade" id="choiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="badge bg-warning text-dark fw-bold mb-1">SELECT PREFERENCE</span>
+                            <h4 class="fw-bold text-dark m-0">How would you like to connect?</h4>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <p class="text-muted small mb-4">Choose your preferred consultation format below:</p>
+                    
+                    <div class="d-grid gap-3">
+                        <!-- Option 1: Phone Call Callback -->
+                        <div class="option-choice-card d-flex align-items-center gap-3" onclick="selectCallOption()">
+                            <div class="fs-2 text-warning">📞</div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">1. Quick Phone Call Callback</h6>
+                                <p class="text-muted small mb-0">Share your contact number and our advisor will call you directly.</p>
+                            </div>
+                        </div>
+
+                        <!-- Option 2: Direct In-Person / Detailed Slot Meeting -->
+                        <a href="{{ url_for('booking_slots') }}" class="text-decoration-none">
+                            <div class="option-choice-card d-flex align-items-center gap-3">
+                                <div class="fs-2 text-primary">🤝</div>
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-1">2. Direct Strategy Meeting / Calendar Slot</h6>
+                                    <p class="text-muted small mb-0">Pick your preferred date, time slot, budget, and consultation requirements.</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. QUICK CALL LEAD FORM MODAL -->
     <div class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
@@ -245,12 +299,12 @@
                 <div id="modalStep1" class="p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <span class="badge bg-warning text-dark fw-bold mb-1">FREE CONSULTATION</span>
-                            <h4 class="fw-bold text-dark m-0">Book Strategy Session</h4>
+                            <span class="badge bg-warning text-dark fw-bold mb-1">PHONE CALLBACK</span>
+                            <h4 class="fw-bold text-dark m-0">Request a Call</h4>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <p class="text-muted small mb-4">Please share your details. Our lead advisor will contact you shortly via WhatsApp.</p>
+                    <p class="text-muted small mb-4">Please share your details below. Our lead advisor will connect with you via phone/WhatsApp.</p>
                     
                     <form id="quickLeadForm" onsubmit="handleLeadSubmit(event)">
                         <div class="mb-3">
@@ -265,7 +319,7 @@
                             <label class="form-label fw-semibold text-dark small mb-1">Email ID (Optional)</label>
                             <input type="email" id="lead_email" class="form-control py-2" placeholder="e.g. rahul@gmail.com">
                         </div>
-                        <button type="submit" id="submitLeadBtn" class="btn btn-gold w-100 fw-bold py-2 fs-6">Submit & Connect via WhatsApp</button>
+                        <button type="submit" id="submitLeadBtn" class="btn btn-gold w-100 fw-bold py-2 fs-6">Submit Call Request</button>
                     </form>
                 </div>
 
@@ -274,12 +328,12 @@
                     <div class="mb-3">
                         <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle" style="width: 60px; height: 60px; font-size: 1.8rem;">✓</div>
                     </div>
-                    <h4 class="fw-bold text-white mb-2">Booking Confirmed & Details Sent!</h4>
+                    <h4 class="fw-bold text-white mb-2">Request Submitted!</h4>
                     <p class="text-light opacity-75 small mb-4" style="line-height: 1.6;">
-                        Our lead advisor has been notified and will get in touch with you shortly. In the meantime, feel free to explore our website or browse featured property sites.
+                        Our lead advisor has been notified and will get in touch with you shortly. In the meantime, feel free to explore our website or book a detailed strategy slot.
                     </p>
                     <div class="d-grid gap-2">
-                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold fw-bold py-2">Select Date & Time Slot</a>
+                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold fw-bold py-2">Select Meeting Slot & Time</a>
                         <a href="{{ url_for('sites') }}" class="btn btn-outline-light fw-bold py-2">Explore Property Sites</a>
                         <button type="button" class="btn btn-link text-muted text-decoration-none small pt-2" data-bs-dismiss="modal">Continue Exploring Website</button>
                     </div>
@@ -315,7 +369,7 @@
                         <li class="mb-2"><a href="{{ url_for('home') }}" class="text-light-slate text-decoration-none">Home</a></li>
                         <li class="mb-2"><a href="{{ url_for('about') }}" class="text-light-slate text-decoration-none">Our Philosophy</a></li>
                         <li class="mb-2"><a href="{{ url_for('services') }}" class="text-light-slate text-decoration-none">Services</a></li>
-                        <li class="mb-2"><a href="javascript:void(0)" onclick="openLeadModal()" class="text-warning text-decoration-none fw-bold">Book Session</a></li>
+                        <li class="mb-2"><a href="javascript:void(0)" onclick="openChoiceModal()" class="text-warning text-decoration-none fw-bold">Book Session</a></li>
                     </ul>
                 </div>
 
@@ -341,8 +395,8 @@
                     <p class="text-light-slate small mb-3">
                         <strong class="text-white">✉️ Email:</strong> {{ settings.get('contact_email', 'contact@shelterhunt.com') if settings else 'contact@shelterhunt.com' }}
                     </p>
-                    <button type="button" class="btn btn-gold btn-sm fw-bold w-100 py-2 border-0" onclick="openLeadModal()">
-                        💬 Instant WhatsApp Connect
+                    <button type="button" class="btn btn-gold btn-sm fw-bold w-100 py-2 border-0" onclick="openChoiceModal()">
+                        💬 Instant Connect
                     </button>
                 </div>
 
@@ -363,8 +417,9 @@
     <!-- Bootstrap 5 JavaScript Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ENTRY REVEAL & POPUP LEAD HANDLER -->
+    <!-- ENTRY REVEAL & MODAL HANDLERS -->
     <script>
+        let choiceModalObj = null;
         let leadModalObj = null;
 
         document.addEventListener("DOMContentLoaded", function() {
@@ -381,22 +436,26 @@
                 loader.style.display = 'none';
             }
 
+            choiceModalObj = new bootstrap.Modal(document.getElementById('choiceModal'));
             leadModalObj = new bootstrap.Modal(document.getElementById('leadModal'));
         });
 
-        function openLeadModal() {
+        function openChoiceModal() {
+            if (choiceModalObj) choiceModalObj.show();
+        }
+
+        function selectCallOption() {
+            if (choiceModalObj) choiceModalObj.hide();
             document.getElementById('modalStep1').classList.remove('d-none');
             document.getElementById('modalStep2').classList.add('d-none');
-            if (leadModalObj) {
-                leadModalObj.show();
-            }
+            if (leadModalObj) leadModalObj.show();
         }
 
         function handleLeadSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('submitLeadBtn');
             btn.disabled = true;
-            btn.innerText = "Submitting Lead...";
+            btn.innerText = "Submitting Request...";
 
             const name = document.getElementById('lead_name').value;
             const phone = document.getElementById('lead_phone').value;
@@ -414,7 +473,7 @@
             .then(res => res.json())
             .then(data => {
                 btn.disabled = false;
-                btn.innerText = "Submit & Connect via WhatsApp";
+                btn.innerText = "Submit Call Request";
                 if (data.success) {
                     window.open(data.whatsapp_url, '_blank');
                     document.getElementById('modalStep1').classList.add('d-none');
@@ -425,7 +484,7 @@
             })
             .catch(err => {
                 btn.disabled = false;
-                btn.innerText = "Submit & Connect via WhatsApp";
+                btn.innerText = "Submit Call Request";
                 alert('Connection error. Please try again.');
             });
         }

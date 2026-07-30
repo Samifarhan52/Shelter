@@ -72,11 +72,12 @@
                     </div>
                 </div>
 
+                <!-- Direct Link to Calendar Slot Booking Page -->
                 <div class="mt-4 pt-2">
-                    <button type="button" class="btn btn-gold w-100 btn-lg fw-bold py-3 border-0 shadow-sm" onclick="openLeadModal()">
+                    <a href="{{ url_for('booking_slots') }}" class="btn btn-gold w-100 btn-lg fw-bold py-3 border-0 shadow-sm text-decoration-none">
                         Book Consultation Session
-                    </button>
-                    <small class="text-muted d-block text-center mt-2">Instant advisory connect • Zero sales pressure</small>
+                    </a>
+                    <small class="text-muted d-block text-center mt-2">Pick date & time slot • Zero sales pressure</small>
                 </div>
             </div>
         </div>
@@ -92,9 +93,9 @@
         <div class="mt-5 p-4 text-center rounded-3" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
             <h4 class="fw-bold text-white mb-2">Interested in {{ site.title }}?</h4>
             <p class="text-light opacity-75 mb-3">Our legal and structural experts will guide you through verification, pricing, and site inspection.</p>
-            <button type="button" class="btn btn-gold btn-lg fw-bold border-0 px-5" onclick="openLeadModal()">
+            <a href="{{ url_for('booking_slots') }}" class="btn btn-gold btn-lg fw-bold border-0 px-5 text-decoration-none">
                 Book Strategy Session
-            </button>
+            </a>
         </div>
     </div>
 
