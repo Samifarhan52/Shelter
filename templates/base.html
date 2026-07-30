@@ -102,18 +102,45 @@
             animation: fillProgress 1.1s ease-in-out forwards;
         }
 
+        /* --- PROFESSIONAL CUSTOM MODAL OPTIONS --- */
         .option-choice-card {
-            border: 2px solid #e2e8f0;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 20px;
+            padding: 22px;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #ffffff;
         }
 
         .option-choice-card:hover {
             border-color: var(--gold-accent);
-            background-color: #f8fafc;
+            background-color: #fdfbf7;
             transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+        }
+
+        .icon-box-gold {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(197, 155, 39, 0.12);
+            color: var(--gold-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .icon-box-navy {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.08);
+            color: var(--navy-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         @keyframes pulseAura {
@@ -250,37 +277,48 @@
 
     {% block content %}{% endblock %}
 
-    <!-- 1. SESSION TYPE CHOICE MODAL -->
+    <!-- 1. SESSION TYPE CHOICE MODAL (PRO SVG ICONS) -->
     <div class="modal fade" id="choiceModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="p-4">
+                <div class="p-4 p-md-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <span class="badge bg-warning text-dark fw-bold mb-1">SELECT PREFERENCE</span>
+                            <span class="badge bg-warning text-dark fw-bold mb-1" style="letter-spacing: 0.5px;">CONSULTATION FORMAT</span>
                             <h4 class="fw-bold text-dark m-0">How would you like to connect?</h4>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <p class="text-muted small mb-4">Choose your preferred consultation format below:</p>
+                    <p class="text-muted small mb-4">Select your preferred advisory channel below:</p>
                     
                     <div class="d-grid gap-3">
-                        <!-- Option 1: Phone Call Callback -->
+                        <!-- Option 1: Phone Callback -->
                         <div class="option-choice-card d-flex align-items-center gap-3" onclick="selectCallOption()">
-                            <div class="fs-2 text-warning">📞</div>
+                            <div class="icon-box-gold">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.79 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                </svg>
+                            </div>
                             <div>
-                                <h6 class="fw-bold text-dark mb-1">1. Quick Phone Call Callback</h6>
-                                <p class="text-muted small mb-0">Share your contact number and our advisor will call you directly.</p>
+                                <h6 class="fw-bold text-dark mb-1">Direct Phone Call Callback</h6>
+                                <p class="text-muted small mb-0">Provide your contact details and our senior advisor will call you directly.</p>
                             </div>
                         </div>
 
-                        <!-- Option 2: Direct In-Person / Detailed Slot Meeting -->
+                        <!-- Option 2: Meeting / Calendar Slot -->
                         <a href="{{ url_for('booking_slots') }}" class="text-decoration-none">
                             <div class="option-choice-card d-flex align-items-center gap-3">
-                                <div class="fs-2 text-primary">🤝</div>
+                                <div class="icon-box-navy">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                </div>
                                 <div>
-                                    <h6 class="fw-bold text-dark mb-1">2. Direct Strategy Meeting / Calendar Slot</h6>
-                                    <p class="text-muted small mb-0">Pick your preferred date, time slot, budget, and consultation requirements.</p>
+                                    <h6 class="fw-bold text-dark mb-1">In-Person Advisory / Reserved Slot</h6>
+                                    <p class="text-muted small mb-0">Pick an exact date, time slot, budget, and specific consultation requirements.</p>
                                 </div>
                             </div>
                         </a>
@@ -296,15 +334,15 @@
             <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
                 
                 <!-- Modal Step 1: Input Contact Details -->
-                <div id="modalStep1" class="p-4">
+                <div id="modalStep1" class="p-4 p-md-5">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <span class="badge bg-warning text-dark fw-bold mb-1">PHONE CALLBACK</span>
-                            <h4 class="fw-bold text-dark m-0">Request a Call</h4>
+                            <span class="badge bg-warning text-dark fw-bold mb-1">PHONE CONSULTATION</span>
+                            <h4 class="fw-bold text-dark m-0">Request a Callback</h4>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <p class="text-muted small mb-4">Please share your details below. Our lead advisor will connect with you via phone/WhatsApp.</p>
+                    <p class="text-muted small mb-4">Please share your details. Our lead advisor will contact you shortly.</p>
                     
                     <form id="quickLeadForm" onsubmit="handleLeadSubmit(event)">
                         <div class="mb-3">
@@ -316,26 +354,30 @@
                             <input type="tel" id="lead_phone" class="form-control py-2" placeholder="e.g. +91 9876543210" required>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark small mb-1">Email ID (Optional)</label>
+                            <label class="form-label fw-semibold text-dark small mb-1">Email Address (Optional)</label>
                             <input type="email" id="lead_email" class="form-control py-2" placeholder="e.g. rahul@gmail.com">
                         </div>
-                        <button type="submit" id="submitLeadBtn" class="btn btn-gold w-100 fw-bold py-2 fs-6">Submit Call Request</button>
+                        <button type="submit" id="submitLeadBtn" class="btn btn-gold w-100 fw-bold py-2 fs-6">Submit Callback Request</button>
                     </form>
                 </div>
 
-                <!-- Modal Step 2: Confirmation & Action Options -->
-                <div id="modalStep2" class="p-4 text-center d-none" style="background-color: #0f172a; color: #ffffff;">
+                <!-- Modal Step 2: Confirmation -->
+                <div id="modalStep2" class="p-4 p-md-5 text-center d-none" style="background-color: #0f172a; color: #ffffff;">
                     <div class="mb-3">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle" style="width: 60px; height: 60px; font-size: 1.8rem;">✓</div>
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle" style="width: 56px; height: 56px;">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
                     </div>
-                    <h4 class="fw-bold text-white mb-2">Request Submitted!</h4>
+                    <h4 class="fw-bold text-white mb-2">Request Confirmed</h4>
                     <p class="text-light opacity-75 small mb-4" style="line-height: 1.6;">
-                        Our lead advisor has been notified and will get in touch with you shortly. In the meantime, feel free to explore our website or book a detailed strategy slot.
+                        Our senior real estate advisor has been notified and will reach out to you shortly. Feel free to explore our verified property listings in the meantime.
                     </p>
                     <div class="d-grid gap-2">
-                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold fw-bold py-2">Select Meeting Slot & Time</a>
+                        <a href="{{ url_for('booking_slots') }}" class="btn btn-gold fw-bold py-2">Schedule Reserved Time Slot</a>
                         <a href="{{ url_for('sites') }}" class="btn btn-outline-light fw-bold py-2">Explore Property Sites</a>
-                        <button type="button" class="btn btn-link text-muted text-decoration-none small pt-2" data-bs-dismiss="modal">Continue Exploring Website</button>
+                        <button type="button" class="btn btn-link text-muted text-decoration-none small pt-2" data-bs-dismiss="modal">Continue Browsing</button>
                     </div>
                 </div>
 
@@ -374,29 +416,29 @@
                 </div>
 
                 <div class="col-lg-3 col-md-6 col-6">
-                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">Our Services</h6>
+                    <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">Our Advisory Scope</h6>
                     <ul class="list-unstyled mb-0 footer-links small">
-                        <li class="mb-2 text-light-slate">⚖️ Legal Verification</li>
-                        <li class="mb-2 text-light-slate">🛡️ Advocate Work</li>
-                        <li class="mb-2 text-light-slate">📋 Structural Audits</li>
-                        <li class="mb-2 text-light-slate">📊 Valuation</li>
-                        <li class="mb-2 text-light-slate">🏠 Registration</li>
+                        <li class="mb-2 text-light-slate">Legal & Title Search</li>
+                        <li class="mb-2 text-light-slate">Advocate Representation</li>
+                        <li class="mb-2 text-light-slate">Structural & RERA Audits</li>
+                        <li class="mb-2 text-light-slate">Market Valuation</li>
+                        <li class="mb-2 text-light-slate">Property Registration</li>
                     </ul>
                 </div>
 
                 <div class="col-lg-3 col-md-6 col-12">
                     <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">Get in Touch</h6>
                     <p class="text-light-slate small mb-2">
-                        <strong class="text-white">📍 Address:</strong> {{ settings.get('contact_address', 'Bengaluru, Karnataka, India') if settings else 'Bengaluru, Karnataka, India' }}
+                        <strong class="text-white">Address:</strong> {{ settings.get('contact_address', 'Bengaluru, Karnataka, India') if settings else 'Bengaluru, Karnataka, India' }}
                     </p>
                     <p class="text-light-slate small mb-2">
-                        <strong class="text-white">📞 Phone:</strong> {{ settings.get('contact_phone', '+91 8050749331') if settings else '+91 8050749331' }}
+                        <strong class="text-white">Phone:</strong> {{ settings.get('contact_phone', '+91 8050749331') if settings else '+91 8050749331' }}
                     </p>
                     <p class="text-light-slate small mb-3">
-                        <strong class="text-white">✉️ Email:</strong> {{ settings.get('contact_email', 'contact@shelterhunt.com') if settings else 'contact@shelterhunt.com' }}
+                        <strong class="text-white">Email:</strong> {{ settings.get('contact_email', 'contact@shelterhunt.com') if settings else 'contact@shelterhunt.com' }}
                     </p>
                     <button type="button" class="btn btn-gold btn-sm fw-bold w-100 py-2 border-0" onclick="openChoiceModal()">
-                        💬 Instant Connect
+                        Request Consultation
                     </button>
                 </div>
 
@@ -473,7 +515,7 @@
             .then(res => res.json())
             .then(data => {
                 btn.disabled = false;
-                btn.innerText = "Submit Call Request";
+                btn.innerText = "Submit Callback Request";
                 if (data.success) {
                     window.open(data.whatsapp_url, '_blank');
                     document.getElementById('modalStep1').classList.add('d-none');
@@ -484,7 +526,7 @@
             })
             .catch(err => {
                 btn.disabled = false;
-                btn.innerText = "Submit Call Request";
+                btn.innerText = "Submit Callback Request";
                 alert('Connection error. Please try again.');
             });
         }
