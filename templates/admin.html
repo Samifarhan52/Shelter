@@ -37,24 +37,19 @@
                 top: 0;
                 height: 100vh;
             }
+            .admin-sidebar-collapse {
+                height: calc(100% - 60px);
+            }
         }
 
         @media (max-width: 767px) {
             .admin-sidebar {
                 border-right: none;
                 border-bottom: 1px solid #1e293b;
+                padding: 10px 15px !important;
             }
-            .nav-pill-custom {
-                flex-wrap: wrap;
-                margin-bottom: 12px !important;
-            }
-            .nav-pill-custom .nav-link {
-                width: auto !important;
-                flex-grow: 1;
-                font-size: 0.8rem;
-                padding: 8px 12px;
-                justify-content: center;
-                margin-bottom: 0;
+            #adminSidebarCollapse {
+                margin-top: 15px;
             }
         }
 
@@ -119,6 +114,10 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        .table-custom table {
+            min-width: 900px;
+        }
+
         .table-custom th {
             background: #f8fafc;
             color: #475569;
@@ -159,69 +158,89 @@
 <body>
 
 <div class="container-fluid p-0">
+    <!-- Mobile Top Header Bar -->
+    <div class="bg-dark text-white px-3 py-3 d-md-none d-flex align-items-center justify-content-between border-bottom border-secondary" style="background-color: var(--sidebar-bg) !important;">
+        <div class="d-flex align-items-center gap-2">
+            <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px; object-fit: cover; border: 1.5px solid var(--accent-gold);">
+            <div>
+                <h6 class="fw-bold m-0 text-white" style="font-size: 0.95rem; letter-spacing: -0.3px;">Shelter Hunt</h6>
+                <span class="small" style="font-size: 0.6rem; color: var(--accent-gold, #c59b27); font-weight: bold; letter-spacing: 0.8px; text-transform: uppercase;">EXECUTIVE CMS</span>
+            </div>
+        </div>
+        <button class="btn btn-outline-light border-0 px-2 py-1" type="button" data-bs-toggle="collapse" data-bs-target="#adminSidebarCollapse" aria-expanded="false" aria-controls="adminSidebarCollapse">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
     <div class="row g-0">
         
         <!-- Executive Sidebar -->
-        <div class="col-12 col-md-3 col-lg-2 admin-sidebar p-3 d-flex flex-column justify-content-between">
-            <div>
-                <!-- Brand Header -->
-                <div class="d-flex align-items-center gap-3 mb-4 px-2 pt-2">
-                    <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 2.5px solid var(--accent-gold);">
-                    <div>
-                        <h6 class="fw-bold m-0 text-white" style="letter-spacing: -0.3px;">Shelter Hunt</h6>
-                        <span class="small text-muted" style="font-size: 0.7rem; letter-spacing: 1px;">EXECUTIVE CMS</span>
-                    </div>
+        <div class="col-12 col-md-3 col-lg-2 admin-sidebar p-3">
+            <!-- Brand Header (Desktop Only) -->
+            <div class="d-none d-md-flex align-items-center gap-3 mb-4 px-2 pt-2">
+                <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Logo" style="width: 38px; height: 38px; border-radius: 10px; object-fit: cover; border: 2.5px solid var(--accent-gold);">
+                <div>
+                    <h6 class="fw-bold m-0 text-white" style="letter-spacing: -0.3px;">Shelter Hunt</h6>
+                    <span class="small" style="font-size: 0.7rem; color: var(--accent-gold, #c59b27); font-weight: bold; letter-spacing: 1px;">EXECUTIVE CMS</span>
                 </div>
-
-                <hr class="border-secondary opacity-25 my-3">
-
-                <!-- Navigation Links -->
-                <ul class="nav nav-pills flex-row flex-md-column nav-pill-custom mb-auto gap-1" id="adminTabs" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link w-100 text-start active" id="leads-tab" data-bs-toggle="pill" data-bs-target="#leads" type="button" role="tab">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            <span>Client Leads</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link w-100 text-start" id="analytics-tab" data-bs-toggle="pill" data-bs-target="#analytics" type="button" role="tab">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                            <span>Real-Time Traffic</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link w-100 text-start" id="sites-tab" data-bs-toggle="pill" data-bs-target="#sites" type="button" role="tab">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                            <span>Property Listings</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link w-100 text-start" id="builders-tab" data-bs-toggle="pill" data-bs-target="#builders" type="button" role="tab">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            <span>Builder Brands</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link w-100 text-start" id="content-tab" data-bs-toggle="pill" data-bs-target="#content" type="button" role="tab">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            <span>Site Page Content</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link w-100 text-start" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                            <span>Global Settings</span>
-                        </button>
-                    </li>
-                </ul>
             </div>
 
-            <div class="pt-3 border-top border-secondary">
-               
-                <a href="{{ url_for('admin_logout') }}" class="nav-link text-danger px-2 d-flex align-items-center gap-2 text-decoration-none fw-bold small">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                    <span>Logout Panel</span>
-                </a>
+            <!-- Collapse wrapper for mobile menu links -->
+            <div class="collapse d-md-flex flex-column justify-content-between admin-sidebar-collapse" id="adminSidebarCollapse">
+                <div>
+                    <hr class="border-secondary opacity-25 my-3 d-none d-md-block">
+
+                    <!-- Navigation Links -->
+                    <ul class="nav nav-pills flex-column nav-pill-custom mb-auto gap-1" id="adminTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link w-100 text-start active" id="leads-tab" data-bs-toggle="pill" data-bs-target="#leads" type="button" role="tab">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                <span>Client Leads</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link w-100 text-start" id="analytics-tab" data-bs-toggle="pill" data-bs-target="#analytics" type="button" role="tab">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                                <span>Real-Time Traffic</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link w-100 text-start" id="sites-tab" data-bs-toggle="pill" data-bs-target="#sites" type="button" role="tab">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                <span>Property Listings</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link w-100 text-start" id="builders-tab" data-bs-toggle="pill" data-bs-target="#builders" type="button" role="tab">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <span>Builder Brands</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link w-100 text-start" id="content-tab" data-bs-toggle="pill" data-bs-target="#content" type="button" role="tab">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span>Site Page Content</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link w-100 text-start" id="settings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Global Settings</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="pt-3 mt-3 border-top border-secondary">
+                    <a href="{{ url_for('admin_logout') }}" class="nav-link text-danger px-2 d-flex align-items-center gap-2 text-decoration-none fw-bold small">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span>Logout Panel</span>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -257,12 +276,36 @@
             {% endwith %}
 
             <div class="tab-content" id="adminTabsContent">
-
                 <!-- TAB 1: CLIENT LEADS -->
                 <div class="tab-pane fade show active" id="leads" role="tabpanel">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
                         <h5 class="fw-bold m-0 text-dark">Client Callback & Consultation Leads</h5>
                         <span class="badge bg-secondary px-3 py-2">{{ leads|length }} Total Records</span>
+                    </div>
+
+                    <!-- Search and Export Toolbar -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6">
+                            <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-white border-end-0 text-muted px-3">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                </span>
+                                <input type="text" id="leadsSearchInput" class="form-control border-start-0 ps-0 py-2.5" placeholder="Search by name, email, phone, location, budget..." onkeyup="filterLeadsTable()">
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 text-md-end d-flex gap-2 justify-content-md-end">
+                            <button onclick="openExportModal('pdf')" class="btn btn-outline-danger fw-bold d-inline-flex align-items-center gap-2 px-3 py-2.5 rounded-3 shadow-sm">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <span>Export as PDF</span>
+                            </button>
+                            <button onclick="openExportModal('csv')" class="btn btn-outline-success fw-bold d-inline-flex align-items-center gap-2 px-3 py-2.5 rounded-3 shadow-sm">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+                                <span>Export as Excel/CSV</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="table-custom">
@@ -277,7 +320,7 @@
                                     <th class="text-end">Management</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="leadsTableBody">
                                 {% for lead in leads %}
                                 <tr>
                                     <td>
@@ -323,26 +366,10 @@
                 <!-- TAB 2: REAL-TIME TRAFFIC & ANALYTICS -->
                 <div class="tab-pane fade" id="analytics" role="tabpanel">
                     
-                    <!-- Action Bar for Analytics Export -->
-                    <div class="bg-white rounded-4 border p-4 mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 no-pdf">
-                        <div>
-                            <h5 class="fw-bold text-dark mb-1">Real-Time Traffic & Analytics</h5>
-                            <p class="text-muted small mb-0">Download, analyze, and export active visitor logs and route analytics.</p>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button onclick="exportAnalyticsToPDF()" class="btn btn-outline-danger fw-bold d-inline-flex align-items-center gap-2 btn-sm px-3 py-2">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                Export PDF Report
-                            </button>
-                            <button onclick="exportTableToCSV('page-visits-table', 'page_visits_today.csv')" class="btn btn-outline-primary fw-bold d-inline-flex align-items-center gap-2 btn-sm px-3 py-2">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                Export Page Visits (CSV)
-                            </button>
-                            <button onclick="exportTableToCSV('recent-visitors-table', 'recent_visitor_log.csv')" class="btn btn-outline-success fw-bold d-inline-flex align-items-center gap-2 btn-sm px-3 py-2">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                Export Visitor Log (CSV)
-                            </button>
-                        </div>
+                    <!-- Action Bar for Analytics Export (Buttons Removed) -->
+                    <div class="bg-white rounded-4 border p-4 mb-4">
+                        <h5 class="fw-bold text-dark mb-1">Real-Time Traffic & Analytics</h5>
+                        <p class="text-muted small mb-0">Monitor active visitor traffic logs and route analytics.</p>
                     </div>
 
                     <!-- Wrapper for PDF snapshot -->
@@ -513,7 +540,7 @@
                                 <div class="list-group gap-2">
                                     {% for site in sites %}
                                     <div class="list-group-item p-3 rounded-3 border">
-                                        <div class="d-flex align-items-center justify-content-between gap-3">
+                                        <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3">
                                             <div class="d-flex align-items-center gap-3">
                                                 {% if site.image_filename and ('.mp4' in site.image_filename or 'video' in site.image_filename) %}
                                                     <video src="{% if 'data:' in site.image_filename or 'http' in site.image_filename %}{{ site.image_filename }}{% else %}{{ url_for('static', filename=site.image_filename) }}{% endif %}" style="width: 70px; height: 55px; object-fit: cover; border-radius: 8px;" muted></video>
@@ -526,7 +553,7 @@
                                                     <small class="text-muted">📍 {{ site.location }}</small>
                                                 </div>
                                             </div>
-                                            <div class="d-flex gap-2">
+                                            <div class="d-flex gap-2 align-self-end align-self-sm-auto mt-2 mt-sm-0">
                                                 <button class="btn btn-sm btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit</button>
                                                 <a href="{{ url_for('admin_delete_site', site_id=site.id) }}" class="btn btn-sm btn-outline-danger fw-semibold" onclick="return confirm('Delete this listing?')">Delete</a>
                                             </div>
@@ -618,9 +645,9 @@
                                 <h5 class="fw-bold mb-3 text-dark">Builder Filter Options</h5>
                                 <div class="list-group gap-2">
                                     {% for b in builders %}
-                                    <div class="list-group-item d-flex justify-content-between align-items-center p-3 rounded-3 border">
+                                    <div class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center p-3 rounded-3 border gap-2">
                                         <span class="fw-bold text-dark">{{ b.name }}</span>
-                                        <div class="d-flex gap-2">
+                                        <div class="d-flex gap-2 align-self-end align-self-sm-auto mt-1 mt-sm-0">
                                             <a href="{{ url_for('admin_toggle_builder', builder_id=b.id) }}" class="btn btn-sm {% if b.is_active %}btn-outline-secondary{% else %}btn-outline-success{% endif %} fw-semibold">
                                                 {% if b.is_active %}Mark Inactive{% else %}Mark Active{% endif %}
                                             </a>
@@ -791,36 +818,324 @@ function exportTableToCSV(tableId, filename) {
     }
 }
 
-function exportAnalyticsToPDF() {
-    const element = document.getElementById('analytics-content-wrapper');
-    if (!element) return;
+
+
+// Dynamic leads array loaded from jinja context
+const allLeadsData = [
+    {% for lead in leads %}
+    {
+        id: "{{ lead.id }}",
+        session_date: "{{ lead.session_date }}",
+        slot_time: "{{ lead.slot_time }}",
+        full_name: "{{ lead.full_name | replace('\"', '\\\"') }}",
+        email: "{{ lead.email | replace('\"', '\\\"') }}",
+        phone: "{{ lead.phone }}",
+        location: "{{ lead.location | replace('\"', '\\\"') }}",
+        budget: "{{ lead.budget | replace('\"', '\\\"') }}",
+        status: "{{ lead.status }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+function filterLeadsTable() {
+    const query = document.getElementById('leadsSearchInput').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#leadsTableBody tr');
+    let hasVisible = false;
     
-    // Populate the generation time inside the PDF
-    const genTimeSpan = document.getElementById('pdf-generation-time');
-    if (genTimeSpan) {
-        genTimeSpan.innerText = new Date().toLocaleString();
+    rows.forEach(row => {
+        // Skip empty row
+        if (row.querySelector('.py-5') || row.id === 'noLeadsSearchResultsRow') {
+            return;
+        }
+        
+        const text = row.innerText.toLowerCase();
+        if (text.includes(query)) {
+            row.style.display = '';
+            hasVisible = true;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Check if we should display "No results" row
+    const existingNoResults = document.getElementById('noLeadsSearchResultsRow');
+    if (!hasVisible) {
+        if (!existingNoResults) {
+            const tr = document.createElement('tr');
+            tr.id = 'noLeadsSearchResultsRow';
+            tr.innerHTML = `<td colspan="6" class="text-center text-muted py-5">No client records match search term "${query}".</td>`;
+            document.getElementById('leadsTableBody').appendChild(tr);
+        } else {
+            existingNoResults.style.display = '';
+            existingNoResults.querySelector('td').innerText = `No client records match search term "${query}".`;
+        }
+    } else if (existingNoResults) {
+        existingNoResults.style.display = 'none';
+    }
+}
+
+let currentExportFormat = 'pdf';
+
+function openExportModal(format) {
+    currentExportFormat = format;
+    document.getElementById('exportFormatLabel').innerText = format.toUpperCase();
+    
+    // Reset inputs
+    document.getElementById('exportRangeType').value = 'full';
+    document.getElementById('exportStartDate').value = '';
+    document.getElementById('exportEndDate').value = '';
+    
+    toggleDateInputs();
+    
+    const exportModal = new bootstrap.Modal(document.getElementById('exportLeadsModal'));
+    exportModal.show();
+}
+
+function toggleDateInputs() {
+    const rangeType = document.getElementById('exportRangeType').value;
+    const customDatesDiv = document.getElementById('customExportDates');
+    if (rangeType === 'custom') {
+        customDatesDiv.style.display = 'block';
+        document.getElementById('exportStartDate').setAttribute('required', 'true');
+        document.getElementById('exportEndDate').setAttribute('required', 'true');
+    } else {
+        customDatesDiv.style.display = 'none';
+        document.getElementById('exportStartDate').removeAttribute('required');
+        document.getElementById('exportEndDate').removeAttribute('required');
+    }
+}
+
+function generateExportReport(event) {
+    event.preventDefault();
+    
+    const rangeType = document.getElementById('exportRangeType').value;
+    let filteredLeads = [...allLeadsData];
+    
+    // Apply Date Range Filter
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth(); // 0-indexed
+    
+    if (rangeType === 'monthly') {
+        filteredLeads = allLeadsData.filter(lead => {
+            const leadDate = new Date(lead.session_date);
+            return leadDate.getFullYear() === currentYear && leadDate.getMonth() === currentMonth;
+        });
+    } else if (rangeType === 'custom') {
+        const startDateStr = document.getElementById('exportStartDate').value;
+        const endDateStr = document.getElementById('exportEndDate').value;
+        
+        if (startDateStr && endDateStr) {
+            filteredLeads = allLeadsData.filter(lead => {
+                return lead.session_date >= startDateStr && lead.session_date <= endDateStr;
+            });
+        }
     }
     
-    // Temporarily hide buttons and styling adjustments for printing
-    const exportButtons = document.querySelectorAll('.no-pdf');
-    exportButtons.forEach(btn => btn.style.display = 'none');
+    // Perform Export
+    if (currentExportFormat === 'csv') {
+        exportLeadsToCSV(filteredLeads);
+    } else {
+        exportLeadsToPDF(filteredLeads);
+    }
+    
+    // Close modal
+    const modalEl = document.getElementById('exportLeadsModal');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) {
+        modalInstance.hide();
+    }
+}
+
+function exportLeadsToCSV(leads) {
+    if (leads.length === 0) {
+        alert("No leads found for the selected range.");
+        return;
+    }
+    
+    let csv = [];
+    csv.push(["Booking Date", "Slot Time", "Client Name", "Email", "Phone", "Target Location", "Budget", "Status"].map(h => `"${h}"`).join(","));
+    
+    leads.forEach(lead => {
+        const row = [
+            lead.session_date,
+            lead.slot_time,
+            lead.full_name,
+            lead.email,
+            lead.phone,
+            lead.location,
+            lead.budget,
+            lead.status
+        ].map(val => `"${(val || '').replace(/"/g, '""')}"`);
+        csv.push(row.join(","));
+    });
+    
+    const csvString = csv.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const filename = `client_leads_report_${new Date().toISOString().slice(0,10)}.csv`;
+    
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+function exportLeadsToPDF(leads) {
+    if (leads.length === 0) {
+        alert("No leads found for the selected range.");
+        return;
+    }
+    
+    const printContainer = document.createElement('div');
+    printContainer.style.padding = '25px';
+    printContainer.style.fontFamily = 'Arial, sans-serif';
+    
+    const rangeTypeText = document.getElementById('exportRangeType').options[document.getElementById('exportRangeType').selectedIndex].text;
+    let dateRangeText = rangeTypeText;
+    if (document.getElementById('exportRangeType').value === 'custom') {
+        dateRangeText += ` (${document.getElementById('exportStartDate').value} to ${document.getElementById('exportEndDate').value})`;
+    }
+    
+    printContainer.innerHTML = `
+        <div style="border-bottom: 3px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h2 style="margin: 0; color: #0f172a; font-weight: bold; font-size: 1.6rem; letter-spacing: -0.5px;">SHELTER HUNT CONSULTANTS</h2>
+                <p style="margin: 3px 0 0 0; color: #64748b; font-size: 0.85rem; font-weight: 500;">Advisory Client Leads Report</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin: 0; font-size: 0.8rem; color: #64748b;"><strong>Scope:</strong> ${dateRangeText}</p>
+                <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: #64748b;"><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+        </div>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.82rem; border: 1px solid #e2e8f0;">
+            <thead>
+                <tr style="background-color: #f8fafc; text-align: left; border-bottom: 2px solid #cbd5e1;">
+                    <th style="padding: 12px 10px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px;">Date / Slot</th>
+                    <th style="padding: 12px 10px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px;">Client Name / Email</th>
+                    <th style="padding: 12px 10px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px;">Contact Info</th>
+                    <th style="padding: 12px 10px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px;">Target Location & Budget</th>
+                    <th style="padding: 12px 10px; border: 1px solid #e2e8f0; font-weight: bold; color: #334155; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.5px; text-align: center;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${leads.map(lead => `
+                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 12px 10px; border: 1px solid #e2e8f0; vertical-align: top;">
+                            <strong style="color: #0f172a;">${lead.session_date}</strong><br>
+                            <span style="color: #64748b; font-size: 0.75rem;">${lead.slot_time}</span>
+                        </td>
+                        <td style="padding: 12px 10px; border: 1px solid #e2e8f0; vertical-align: top;">
+                            <strong style="color: #0f172a;">${lead.full_name}</strong><br>
+                            <span style="color: #64748b; font-size: 0.75rem;">${lead.email}</span>
+                        </td>
+                        <td style="padding: 12px 10px; border: 1px solid #e2e8f0; vertical-align: top; color: #0f172a; font-weight: 500;">
+                            ${lead.phone}
+                        </td>
+                        <td style="padding: 12px 10px; border: 1px solid #e2e8f0; vertical-align: top;">
+                            <strong style="color: #0f172a;">${lead.location}</strong><br>
+                            <span style="color: #64748b; font-size: 0.75rem;">Budget: ${lead.budget}</span>
+                        </td>
+                        <td style="padding: 12px 10px; border: 1px solid #e2e8f0; text-align: center; vertical-align: middle;">
+                            <span style="display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; 
+                                ${lead.status === 'Cancelled' ? 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;' : 'background-color: #dcfce7; color: #166534; border: 1px solid #86efac;'}">
+                                ${lead.status}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+        
+        <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 15px; text-align: center; color: #94a3b8; font-size: 0.75rem; letter-spacing: 0.5px;">
+            © 2026 Shelter Hunt Consultants • Private CRM Leads System
+        </div>
+    `;
     
     const opt = {
         margin:       [10, 10, 10, 10],
-        filename:     'real_time_traffic_report.pdf',
+        filename:     `client_leads_report_${new Date().toISOString().slice(0,10)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    html2pdf().set(opt).from(element).save().then(() => {
-        exportButtons.forEach(btn => btn.style.display = '');
-    }).catch(err => {
+    html2pdf().set(opt).from(printContainer).save().catch(err => {
         console.error(err);
-        exportButtons.forEach(btn => btn.style.display = '');
+        alert("Failed to generate PDF report.");
     });
 }
+
+// Auto-collapse mobile menu when a tab is clicked
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('#adminTabs .nav-link').forEach(button => {
+        button.addEventListener('click', () => {
+            const collapseEl = document.getElementById('adminSidebarCollapse');
+            if (collapseEl && window.innerWidth < 768 && collapseEl.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getInstance(collapseEl) || new bootstrap.Collapse(collapseEl);
+                bsCollapse.hide();
+            }
+        });
+    });
+});
 </script>
+
+<!-- Export Configuration Modal -->
+<div class="modal fade" id="exportLeadsModal" tabindex="-1" aria-labelledby="exportLeadsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-dark text-white p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 3px solid var(--accent-gold, #c59b27) !important;">
+                <div>
+                    <h5 class="modal-title fw-bold text-white mb-1" id="exportLeadsModalLabel">Export Client Leads Report</h5>
+                    <p class="text-light opacity-75 small mb-0">Format: <span id="exportFormatLabel" class="fw-bold text-warning">PDF</span></p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form onsubmit="generateExportReport(event)">
+                <div class="modal-body p-4 p-md-5">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-secondary">REPORT INTERVAL</label>
+                        <select id="exportRangeType" class="form-select py-2.5 rounded-3 fw-semibold text-dark" onchange="toggleDateInputs()" required>
+                            <option value="full">Full Report (All Time)</option>
+                            <option value="monthly">Monthly Report (Current Month)</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customExportDates" style="display: none;" class="mb-4">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label fw-bold small text-secondary">START DATE</label>
+                                <input type="date" id="exportStartDate" class="form-control py-2.5 rounded-3">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-bold small text-secondary">END DATE</label>
+                                <input type="date" id="exportEndDate" class="form-control py-2.5 rounded-3">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-light border rounded-3 p-3 mb-0" style="background-color: #f8fafc;">
+                        <div class="d-flex gap-2">
+                            <span class="fs-5">📊</span>
+                            <small class="text-muted" style="line-height: 1.5;">This report exports your client advisory inquiries, contact details, properties, target locations, budgets, and status.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-secondary py-2.5 px-4 rounded-3 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-gold py-2.5 px-4 rounded-3 fw-bold border-0">Download Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Bootstrap 5 JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

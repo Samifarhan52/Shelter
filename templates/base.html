@@ -237,15 +237,21 @@
                 
                 <!-- Mobile Search Bar -->
                 <div class="d-lg-none w-100 py-2">
-                    <form action="{{ url_for('sites') }}" method="GET" class="input-group input-group-sm">
-                        <input type="text" name="q" class="form-control nav-search-input" placeholder="Search projects or location..." value="{{ search_query if search_query else '' }}">
-                        <select name="builder" class="form-select nav-search-input" style="max-width: 110px;">
-                            <option value="">Builder</option>
-                            {% for b in builders %}
-                                <option value="{{ b.name }}" {% if selected_builder == b.name %}selected{% endif %}>{{ b.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <button class="btn btn-gold px-2 fw-bold" type="submit">Search</button>
+                    <form action="{{ url_for('sites') }}" method="GET" class="row g-2">
+                        <div class="col-7">
+                            <input type="text" name="q" class="form-control form-control-sm nav-search-input" placeholder="Search projects..." value="{{ search_query if search_query else '' }}">
+                        </div>
+                        <div class="col-5">
+                            <select name="builder" class="form-select form-select-sm nav-search-input">
+                                <option value="">Builder</option>
+                                {% for b in builders %}
+                                    <option value="{{ b.name }}" {% if selected_builder == b.name %}selected{% endif %}>{{ b.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 mt-1">
+                            <button class="btn btn-sm btn-gold w-100 fw-bold py-1.5" type="submit">Search Properties</button>
+                        </div>
                     </form>
                 </div>
 
