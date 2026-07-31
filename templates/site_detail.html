@@ -1,6 +1,53 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{# Dynamically determine zone based on location field #}
+{% set loc = site.location.lower() %}
+{% set zone = 'Central Bengaluru' %}
+{% if 'whitefield' in loc or 'sarjapur' in loc or 'bellandur' in loc or 'hsr' in loc or 'marathahalli' in loc or 'varthur' in loc or 'kadugodi' in loc or 'indiranagar' in loc %}
+    {% set zone = 'East Bengaluru' %}
+{% elif 'jayanagar' in loc or 'jp nagar' in loc or 'j.p. nagar' in loc or 'kanakapura' in loc or 'banashankari' in loc or 'btm' in loc or 'uttarahalli' in loc or 'electronic city' in loc %}
+    {% set zone = 'South Bengaluru' %}
+{% elif 'hebbal' in loc or 'yelahanka' in loc or 'hennur' in loc or 'thanisandra' in loc or 'devanahalli' in loc or 'jalahalli' in loc %}
+    {% set zone = 'North Bengaluru' %}
+{% elif 'rajajinagar' in loc or 'malleshwaram' in loc or 'vijayanagar' in loc or 'kengeri' in loc or 'yeshwanthpur' in loc %}
+    {% set zone = 'West Bengaluru' %}
+{% endif %}
+
+<style>
+    .next-image-btn {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(255, 255, 255, 0.35);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 15;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+    }
+    .next-image-btn:hover {
+        background: var(--gold-accent, #c59b27);
+        border-color: var(--gold-accent, #c59b27);
+        color: #ffffff;
+        transform: translateY(-50%) scale(1.08);
+        box-shadow: 0 6px 20px rgba(197, 155, 39, 0.5);
+    }
+    .next-image-btn:active {
+        transform: translateY(-50%) scale(0.96);
+    }
+</style>
+
 <div class="container py-5">
     
     <!-- Breadcrumb Navigation -->
@@ -38,6 +85,13 @@
                 <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 shadow-sm fw-bold" style="background-color: var(--gold-accent); color: #fff; letter-spacing: 0.5px;">
                     {{ site.builder }}
                 </span>
+                
+                <!-- Next Image Arrow Button -->
+                <button type="button" class="next-image-btn" onclick="openRequestImagesModal()" aria-label="Next Image">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
             </div>
         </div>
 
@@ -115,24 +169,40 @@
                     </div>
 
                     <!-- Rate per Sq.Ft. -->
-                    <div class="col-12">
-                        <div class="p-3 rounded-3 d-flex align-items-center justify-content-between" style="background-color: #f8fafc; border: 1px solid #edf2f7;">
-                            <div class="d-flex align-items-center gap-1.5 text-muted" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                                 </svg>
-                                <span>Rate per Sq. Ft.</span>
+                                <span>Rate / Sq. Ft.</span>
                             </div>
-                            <span class="fw-bold text-dark fs-6">
+                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
                                 {% if site.price_per_sqft %}
                                     {% if '₹' in site.price_per_sqft or '/ sq' in site.price_per_sqft.lower() %}
                                         {{ site.price_per_sqft }}
                                     {% else %}
-                                        ₹{{ site.price_per_sqft }} / Sq. Ft.
+                                        ₹{{ site.price_per_sqft }}
                                     {% endif %}
                                 {% else %}
-                                    Available on Request
+                                    On Request
                                 {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Zone / Region -->
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                                </svg>
+                                <span>Zone / Region</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
+                                {{ zone }}
                             </span>
                         </div>
                     </div>
@@ -180,4 +250,85 @@
 
 </div>
 
+    <!-- Request More Images Modal -->
+    <div class="modal fade" id="requestImagesModal" tabindex="-1" aria-labelledby="requestImagesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <!-- Modal Header -->
+                <div class="modal-header border-0 bg-dark text-white p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-bottom: 3px solid var(--gold-accent) !important;">
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-1" id="requestImagesModalLabel">Request More Images</h5>
+                        <p class="text-light opacity-75 small mb-0">Get the full high-res photo gallery and site plan brochure via WhatsApp.</p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Modal Body -->
+                <form id="requestImagesForm" onsubmit="redirectToWhatsApp(event)">
+                    <div class="modal-body p-4 p-md-5">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary">YOUR FULL NAME</label>
+                            <input type="text" id="reqName" class="form-control py-2.5 rounded-3" placeholder="e.g. Rahul Sharma" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary">WHATSAPP / CONTACT NUMBER</label>
+                            <input type="tel" id="reqPhone" class="form-control py-2.5 rounded-3" placeholder="e.g. +91 9876543210" required>
+                        </div>
+                        
+                        <div class="alert alert-light border rounded-3 p-3 mb-0" style="background-color: #f8fafc;">
+                            <div class="d-flex gap-2">
+                                <span class="fs-5">ℹ️</span>
+                                <small class="text-muted" style="line-height: 1.5;">You will be redirected to WhatsApp to send a prefilled request. Our advisory team will instantly share the full drive link.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="button" class="btn btn-secondary py-2.5 px-4 rounded-3 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-gold py-2.5 px-4 rounded-3 fw-bold border-0 d-inline-flex align-items-center gap-2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.66.986 3.284 1.447 4.908 1.448 5.37 0 9.742-4.337 9.745-9.664.002-2.58-1.002-5.006-2.828-6.834S14.339 1.3 11.758 1.3c-5.372 0-9.747 4.338-9.75 9.667-.001 1.706.467 3.375 1.353 4.887l-.995 3.633 3.689-.958zm12.355-6.852c-.273-.137-1.616-.797-1.866-.889-.25-.09-.432-.137-.614.137-.182.273-.705.889-.864 1.072-.159.182-.318.205-.591.069-.273-.137-1.15-.424-2.19-1.355-.809-.722-1.356-1.616-1.515-1.889-.159-.273-.017-.42.12-.556.123-.122.273-.318.41-.478.136-.159.182-.273.273-.455.09-.182.046-.341-.023-.478-.069-.137-.614-1.477-.841-2.023-.222-.533-.443-.46-.614-.469-.159-.008-.341-.01-.523-.01-.182 0-.477.069-.727.341-.25.273-.954.932-.954 2.273s.977 2.636 1.114 2.818c.137.182 1.92 2.932 4.654 4.114.65.281 1.157.449 1.554.575.653.208 1.248.179 1.718.109.524-.078 1.616-.66 1.844-1.297.227-.637.227-1.183.159-1.297-.069-.114-.25-.182-.523-.319z"/>
+                            </svg>
+                            <span>Request via WhatsApp</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Side Scripts -->
+    <script>
+        function openRequestImagesModal() {
+            const modalElement = document.getElementById('requestImagesModal');
+            if (modalElement) {
+                const myModal = new bootstrap.Modal(modalElement);
+                myModal.show();
+            }
+        }
+
+        function redirectToWhatsApp(event) {
+            event.preventDefault();
+            const name = document.getElementById('reqName').value.trim();
+            const phone = document.getElementById('reqPhone').value.trim();
+            const title = "{{ site.title }}";
+            const location = "{{ site.location }}";
+            
+            // Prefilled message for WhatsApp
+            const message = `Hello Shelter Hunt Consultants, I am interested in learning more about the property "${title}" located in ${location}. Please share the high-resolution photo gallery and brochure.\n\nMy Details:\nName: ${name}\nContact: ${phone}`;
+            
+            const whatsappNum = "{{ settings.get('whatsapp_number', '918050749331') }}";
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/${whatsappNum}?text=${encodedMessage}`;
+            
+            // Open in WhatsApp tab
+            window.open(whatsappUrl, '_blank');
+            
+            // Close the modal cleanly
+            const modalElement = document.getElementById('requestImagesModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        }
+    </script>
 {% endblock %}
