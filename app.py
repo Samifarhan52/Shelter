@@ -669,5 +669,57 @@ def admin_logout():
     flash("Logged out from CMS Dashboard.", "info")
     return redirect(url_for('home'))
 
+@app.route('/sitemap.xml')
+def sitemap():
+    # Fetch all property sites from firestore to dynamically generate urls
+    pages = []
+    
+    # Add static pages
+    host = "https://shelterhuntconsultants.com"
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    
+    # Main pages
+    pages.append({'loc': f"{host}/", 'lastmod': today, 'changefreq': 'daily', 'priority': '1.0'})
+    pages.append({'loc': f"{host}/sites", 'lastmod': today, 'changefreq': 'daily', 'priority': '0.9'})
+    
+    # Fetch dynamic property detail pages
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            sites_ref = firestore_db.collection('sites').get()
+            for doc in sites_ref:
+                pages.append({
+                    'loc': f"{host}/site/{doc.id}",
+                    'lastmod': today,
+                    'changefreq': 'weekly',
+                    'priority': '0.8'
+                })
+        except Exception as e:
+            print(f"Error fetching sites for sitemap: {e}")
+            
+    # Build XML string
+    xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for page in pages:
+        xml_content += '  <url>\n'
+        xml_content += f"    <loc>{page['loc']}</loc>\n"
+        xml_content += f"    <lastmod>{page['lastmod']}</lastmod>\n"
+        xml_content += f"    <changefreq>{page['changefreq']}</changefreq>\n"
+        xml_content += f"    <priority>{page['priority']}</priority>\n"
+        xml_content += '  </url>\n'
+    xml_content += '</urlset>'
+    
+    return app.response_class(xml_content, mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots():
+    content = "User-agent: *\n"
+    content += "Allow: /\n"
+    content += "Disallow: /admin\n"
+    content += "Disallow: /admin/*\n"
+    content += "\n"
+    content += "Sitemap: https://shelterhuntconsultants.com/sitemap.xml\n"
+    return app.response_class(content, mimetype='text/plain')
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
