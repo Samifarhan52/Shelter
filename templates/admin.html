@@ -491,78 +491,21 @@
                 <!-- TAB 3: PROPERTY LISTINGS -->
                 <div class="tab-pane fade" id="sites" role="tabpanel">
                     
-                    <!-- 1. BULK LISTING TOOL CARD -->
-                    <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border mb-4" style="border-left: 5px solid var(--accent-gold) !important;">
-                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-                            <div>
-                                <span class="badge bg-warning text-dark fw-bold px-2.5 py-1 mb-1">BULK IMPORT SYSTEM</span>
-                                <h4 class="fw-bold text-dark m-0">Bulk Property Listing (Excel, CSV, PDF & Text)</h4>
-                            </div>
-                            <span class="badge bg-dark text-white px-3 py-2">Batch Importer</span>
+                    <!-- Top Action Bar -->
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 bg-white p-3 p-md-4 rounded-4 shadow-sm border">
+                        <div>
+                            <h5 class="fw-bold text-dark m-0">Property Listings Management</h5>
+                            <small class="text-muted">Manage active real estate listings or upload bulk properties via Excel/CSV/PDF.</small>
                         </div>
-                        <p class="text-muted small mb-4">
-                            Upload an Excel spreadsheet (<code>.xlsx</code>, <code>.xls</code>), CSV, or PDF file containing bulk property records, or paste spreadsheet rows below. The system automatically maps: 
-                            <strong>Property Name, Zone, Location/Area, Sub Location, Unit Tier, Total Floors, BHK Type, Size (sq.ft), Rate/sq.ft, Quoted Price (INR)</strong>.
-                        </p>
-
-                        <div class="row g-3">
-                            <!-- File Upload Area -->
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold small text-dark">📁 Upload Excel / CSV / PDF File</label>
-                                <input type="file" id="bulkFileInput" class="form-control py-2.5" accept=".xlsx,.xls,.csv,.pdf" onchange="processBulkFile(event)">
-                                <small class="text-muted d-block mt-1">Supports SheetJS auto-parsing for .xlsx, .xls, .csv files.</small>
-                            </div>
-
-                            <!-- Text Paste Area -->
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold small text-dark">📋 Or Paste Tab/Comma-Separated Data</label>
-                                <textarea id="bulkTextInput" class="form-control" rows="2" placeholder="Paste columns: Property Name | Zone | Location | Sub Location | Unit | Floors | BHK | Facing | Age | Size | Rate | Quoted Price"></textarea>
-                                <button type="button" onclick="processBulkText()" class="btn btn-sm btn-secondary mt-1 fw-bold">Parse Pasted Text Data</button>
-                            </div>
-                        </div>
-
-                        <!-- Parsed Data Preview Table Box (Hidden until data parsed) -->
-                        <div id="bulkPreviewContainer" class="d-none mt-4 pt-3 border-top">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div>
-                                    <h6 class="fw-bold text-dark m-0">Parsed Properties Preview (<span id="parsedRowCount">0</span> listings detected)</h6>
-                                    <small class="text-muted">Review and edit columns below before making live in website listings.</small>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="clearBulkPreview()">Clear</button>
-                                    <button type="button" id="publishBulkBtn" onclick="publishBulkPropertiesLive()" class="btn btn-gold fw-bold px-4 py-2 shadow-sm">
-                                        🚀 Publish All Properties Live
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="table-responsive border rounded-3 style-scrollbar" style="max-height: 420px; overflow-y: auto;">
-                                <table class="table table-sm table-hover align-middle mb-0" id="bulkPreviewTable" style="font-size: 0.85rem;">
-                                    <thead class="table-dark sticky-top">
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Property Name</th>
-                                            <th>Zone</th>
-                                            <th>Location / Area</th>
-                                            <th>Sub Location</th>
-                                            <th>Unit Tier</th>
-                                            <th>Floors</th>
-                                            <th>BHK Type</th>
-                                            <th>Facing</th>
-                                            <th>Age</th>
-                                            <th>Size (sq.ft)</th>
-                                            <th>Rate/sqft</th>
-                                            <th>Quoted Price</th>
-                                            <th class="text-end">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="bulkPreviewTbody"></tbody>
-                                </table>
-                            </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-gold fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#bulkListingModal">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <span>Bulk Listing (Excel / CSV)</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- 2. SINGLE PROPERTY ADDITION & LISTINGS LIST -->
+                    <!-- SINGLE PROPERTY ADDITION & LISTINGS LIST -->
                     <div class="row g-4">
                         <!-- Single Property Add Form -->
                         <div class="col-12 col-lg-5">
@@ -799,43 +742,154 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: MASTER OPTIONS & SETTINGS -->
+                <!-- TAB 4: MASTER CONFIGURATIONS & INTEGRATIONS -->
                 <div class="tab-pane fade" id="builders" role="tabpanel">
-                    <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
-                        <h5 class="fw-bold mb-3 text-dark">Property Master Configurations</h5>
-                        <p class="text-muted small mb-4">Master configuration values currently configured in Shelter Hunt Consultants platform:</p>
-                        
-                        <div class="row g-4">
-                            <div class="col-md-3">
-                                <div class="p-3 border rounded-3 bg-light">
-                                    <h6 class="fw-bold text-dark">BHK Configurations</h6>
-                                    <ul class="list-unstyled mb-0 small text-muted">
-                                        {% for b in bhk_options %}<li>• {{ b }}</li>{% endfor %}
-                                    </ul>
+                    <div class="row g-4">
+                        <!-- Master Options Manager -->
+                        <div class="col-12 col-lg-8">
+                            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                                <h5 class="fw-bold mb-3 text-dark">Property Master Configurations</h5>
+                                <p class="text-muted small mb-4">Add or manage master values (BHK types, Facing directions, Zone regions, Building ages) used across property listings and catalog search filters:</p>
+                                
+                                <div class="row g-4">
+                                    <!-- BHK Master -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded-3 bg-light">
+                                            <h6 class="fw-bold text-dark d-flex justify-content-between align-items-center">
+                                                <span>BHK Configurations</span>
+                                            </h6>
+                                            <ul class="list-group list-group-flush mb-3 small">
+                                                {% for b in bhk_options %}
+                                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-1 text-dark">
+                                                    <span>• {{ b }}</span>
+                                                    <form method="POST" action="{{ url_for('admin_delete_master_option') }}" class="d-inline">
+                                                        <input type="hidden" name="master_type" value="bhk_options">
+                                                        <input type="hidden" name="option_value" value="{{ b }}">
+                                                        <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small" style="font-size:0.75rem;" onclick="return confirm('Remove {{ b }}?')">remove</button>
+                                                    </form>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            <form method="POST" action="{{ url_for('admin_add_master_option') }}" class="input-group input-group-sm">
+                                                <input type="hidden" name="master_type" value="bhk_options">
+                                                <input type="text" name="option_value" class="form-control" placeholder="Add BHK (e.g. 5 BHK)" required>
+                                                <button type="submit" class="btn btn-warning fw-bold">+ Add</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- Zone Master -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded-3 bg-light">
+                                            <h6 class="fw-bold text-dark d-flex justify-content-between align-items-center">
+                                                <span>Zone / Regions</span>
+                                            </h6>
+                                            <ul class="list-group list-group-flush mb-3 small">
+                                                {% for z in zone_options %}
+                                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-1 text-dark">
+                                                    <span>• {{ z }}</span>
+                                                    <form method="POST" action="{{ url_for('admin_delete_master_option') }}" class="d-inline">
+                                                        <input type="hidden" name="master_type" value="zone_options">
+                                                        <input type="hidden" name="option_value" value="{{ z }}">
+                                                        <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small" style="font-size:0.75rem;" onclick="return confirm('Remove {{ z }}?')">remove</button>
+                                                    </form>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            <form method="POST" action="{{ url_for('admin_add_master_option') }}" class="input-group input-group-sm">
+                                                <input type="hidden" name="master_type" value="zone_options">
+                                                <input type="text" name="option_value" class="form-control" placeholder="Add Zone (e.g. Whitefield)" required>
+                                                <button type="submit" class="btn btn-warning fw-bold">+ Add</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- Facing Master -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded-3 bg-light">
+                                            <h6 class="fw-bold text-dark d-flex justify-content-between align-items-center">
+                                                <span>Facing Directions</span>
+                                            </h6>
+                                            <ul class="list-group list-group-flush mb-3 small">
+                                                {% for f in facing_options %}
+                                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-1 text-dark">
+                                                    <span>• {{ f }}</span>
+                                                    <form method="POST" action="{{ url_for('admin_delete_master_option') }}" class="d-inline">
+                                                        <input type="hidden" name="master_type" value="facing_options">
+                                                        <input type="hidden" name="option_value" value="{{ f }}">
+                                                        <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small" style="font-size:0.75rem;" onclick="return confirm('Remove {{ f }}?')">remove</button>
+                                                    </form>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            <form method="POST" action="{{ url_for('admin_add_master_option') }}" class="input-group input-group-sm">
+                                                <input type="hidden" name="master_type" value="facing_options">
+                                                <input type="text" name="option_value" class="form-control" placeholder="Add Facing (e.g. North-East)" required>
+                                                <button type="submit" class="btn btn-warning fw-bold">+ Add</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- Building Age Master -->
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded-3 bg-light">
+                                            <h6 class="fw-bold text-dark d-flex justify-content-between align-items-center">
+                                                <span>Building Age</span>
+                                            </h6>
+                                            <ul class="list-group list-group-flush mb-3 small">
+                                                {% for a in age_options %}
+                                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-1 text-dark">
+                                                    <span>• {{ a }}</span>
+                                                    <form method="POST" action="{{ url_for('admin_delete_master_option') }}" class="d-inline">
+                                                        <input type="hidden" name="master_type" value="age_options">
+                                                        <input type="hidden" name="option_value" value="{{ a }}">
+                                                        <button type="submit" class="btn btn-link text-danger p-0 text-decoration-none small" style="font-size:0.75rem;" onclick="return confirm('Remove {{ a }}?')">remove</button>
+                                                    </form>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            <form method="POST" action="{{ url_for('admin_add_master_option') }}" class="input-group input-group-sm">
+                                                <input type="hidden" name="master_type" value="age_options">
+                                                <input type="text" name="option_value" class="form-control" placeholder="Add Age (e.g. New Launch)" required>
+                                                <button type="submit" class="btn btn-warning fw-bold">+ Add</button>
+                                            </form>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <div class="p-3 border rounded-3 bg-light">
-                                    <h6 class="fw-bold text-dark">Facing Directions</h6>
-                                    <ul class="list-unstyled mb-0 small text-muted">
-                                        {% for f in facing_options %}<li>• {{ f }}</li>{% endfor %}
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="p-3 border rounded-3 bg-light">
-                                    <h6 class="fw-bold text-dark">Zone / Regions</h6>
-                                    <ul class="list-unstyled mb-0 small text-muted">
-                                        {% for z in zone_options %}<li>• {{ z }}</li>{% endfor %}
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="p-3 border rounded-3 bg-light">
-                                    <h6 class="fw-bold text-dark">Building Age</h6>
-                                    <ul class="list-unstyled mb-0 small text-muted">
-                                        {% for a in age_options %}<li>• {{ a }}</li>{% endfor %}
-                                    </ul>
+                        </div>
+
+                        <!-- Integrations Status Card -->
+                        <div class="col-12 col-lg-4">
+                            <div class="bg-white p-4 rounded-4 shadow-sm border">
+                                <h5 class="fw-bold mb-3 text-dark">Platform Integrations</h5>
+                                <div class="list-group gap-2 mb-4">
+                                    <div class="list-group-item p-3 border rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold text-dark">WhatsApp Business</span>
+                                            <span class="badge bg-success">Active</span>
+                                        </div>
+                                        <small class="text-muted">Target: +{{ settings.get('whatsapp_number', '918050749331') }}</small>
+                                    </div>
+                                    <div class="list-group-item p-3 border rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold text-dark">Google Analytics (GA4)</span>
+                                            <span class="badge {% if settings.get('ga_tracking_id') %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {% if settings.get('ga_tracking_id') %}Connected{% else %}Not Set{% endif %}
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">{{ settings.get('ga_tracking_id', 'G-XXXXXXXXXX') }}</small>
+                                    </div>
+                                    <div class="list-group-item p-3 border rounded-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold text-dark">Meta Pixel Tracking</span>
+                                            <span class="badge {% if settings.get('meta_pixel_id') %}bg-success{% else %}bg-secondary{% endif %}">
+                                                {% if settings.get('meta_pixel_id') %}Connected{% else %}Not Set{% endif %}
+                                            </span>
+                                        </div>
+                                        <small class="text-muted">{{ settings.get('meta_pixel_id', 'Pixel ID') }}</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -849,11 +903,6 @@
                         <p class="text-muted small mb-4">Manage homepage, about us, and service section text content dynamically across the live website.</p>
                         
                         <form method="POST" action="{{ url_for('admin_save_settings') }}">
-                            <input type="hidden" name="whatsapp_number" value="{{ settings.get('whatsapp_number', '918050749331') }}">
-                            <input type="hidden" name="contact_phone" value="{{ settings.get('contact_phone', '+91 8050749331') }}">
-                            <input type="hidden" name="contact_email" value="{{ settings.get('contact_email', 'contact@shelterhunt.com') }}">
-                            <input type="hidden" name="contact_address" value="{{ settings.get('contact_address', 'Bengaluru, Karnataka, India') }}">
-
                             <div class="mb-4">
                                 <label class="form-label fw-bold text-dark">Homepage Philosophy Statement</label>
                                 <textarea name="philosophy_text" class="form-control" rows="4">{{ settings.get('philosophy_text', 'Shelter Hunt Consultants is a knowledge-first agency built on the belief that real estate decisions deserve expert guidance, not sales pressure.') }}</textarea>
@@ -874,63 +923,109 @@
                     </div>
                 </div>
 
-                <!-- TAB 6: GLOBAL SETTINGS -->
+                <!-- TAB 6: GLOBAL SITE SETTINGS & BRANDING MANAGER -->
                 <div class="tab-pane fade" id="settings" role="tabpanel">
                     <div class="row g-4">
                         <div class="col-12 col-lg-7">
                             <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
-                                <h5 class="fw-bold mb-3 text-dark">Global Contact & Branding Configuration</h5>
-                                <form method="POST" action="{{ url_for('admin_save_settings') }}">
+                                <h5 class="fw-bold mb-3 text-dark">Global Site Branding & Contact Configuration</h5>
+                                <p class="text-muted small mb-4">Updates here instantly change your site logo, brand name, contact details, social links, and SEO titles across the website.</p>
+                                
+                                <form method="POST" action="{{ url_for('admin_save_settings') }}" enctype="multipart/form-data">
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Brand Name</label>
-                                        <input type="text" name="brand_name" class="form-control" value="{{ settings.get('brand_name', 'SHELTER HUNT') }}" required>
+                                    <!-- Logo Upload Section -->
+                                    <div class="p-3 border rounded-3 bg-light mb-4">
+                                        <label class="form-label fw-bold text-dark mb-2">📷 Website Brand Logo</label>
+                                        <div class="d-flex align-items-center gap-3 mb-3">
+                                            <img src="{{ settings.get('brand_logo') if settings.get('brand_logo') else url_for('static', filename='logo.jpeg') }}" 
+                                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 2px solid var(--gold-accent);" 
+                                                 id="adminLogoPreview" onerror="this.src='{{ url_for('static', filename='logo.jpeg') }}'">
+                                            <div>
+                                                <small class="fw-semibold text-dark d-block">Current Logo</small>
+                                                <small class="text-muted">Upload a new image file below to update the header & mobile logo.</small>
+                                            </div>
+                                        </div>
+                                        <div class="row g-2">
+                                            <div class="col-12 col-sm-6">
+                                                <input type="file" name="logo_file" class="form-control form-control-sm" accept="image/*">
+                                            </div>
+                                            <div class="col-12 col-sm-6">
+                                                <input type="text" name="brand_logo_url" class="form-control form-control-sm" value="{{ settings.get('brand_logo', '') }}" placeholder="Or enter Logo Image URL">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Brand Title</label>
+                                            <input type="text" name="brand_name" class="form-control" value="{{ settings.get('brand_name', 'SHELTER HUNT') }}" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Brand Sub-Tagline</label>
+                                            <input type="text" name="brand_tagline" class="form-control" value="{{ settings.get('brand_tagline', 'CONSULTANTS') }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Target WhatsApp Number (10 or 12 digits)</label>
+                                            <input type="text" name="whatsapp_number" class="form-control" value="{{ settings.get('whatsapp_number', '918050749331') }}" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Display Phone Number</label>
+                                            <input type="text" name="contact_phone" class="form-control" value="{{ settings.get('contact_phone', '+91 8050749331') }}" required>
+                                        </div>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Brand Sub-Tagline</label>
-                                        <input type="text" name="brand_tagline" class="form-control" value="{{ settings.get('brand_tagline', 'CONSULTANTS') }}" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Target WhatsApp Number</label>
-                                        <input type="text" name="whatsapp_number" class="form-control" value="{{ settings.get('whatsapp_number', '918050749331') }}" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Display Phone Number</label>
-                                        <input type="text" name="contact_phone" class="form-control" value="{{ settings.get('contact_phone', '+91 8050749331') }}" required>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Admin Contact Email</label>
+                                        <label class="form-label fw-semibold small">Contact Email Address</label>
                                         <input type="email" name="contact_email" class="form-control" value="{{ settings.get('contact_email', 'contact@shelterhunt.com') }}" required>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Physical Address</label>
+                                        <label class="form-label fw-semibold small">Physical Office Address</label>
                                         <input type="text" name="contact_address" class="form-control" value="{{ settings.get('contact_address', 'Bengaluru, Karnataka, India') }}" required>
                                     </div>
 
                                     <hr class="my-4">
 
+                                    <h6 class="fw-bold text-dark mb-3">🔍 SEO & Search Engine Meta Tags</h6>
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Homepage Hero Title</label>
-                                        <input type="text" name="hero_title" class="form-control" value="{{ settings.get('hero_title', 'Smart Property Decisions Start Here.') }}" required>
+                                        <label class="form-label fw-semibold small">Meta Page Title</label>
+                                        <input type="text" name="meta_title" class="form-control" value="{{ settings.get('meta_title', 'Shelter Hunt Consultants | Premium Real Estate Advisory Bengaluru') }}">
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Homepage Hero Subtitle</label>
-                                        <textarea name="hero_subtitle" class="form-control" rows="3" required>{{ settings.get('hero_subtitle', "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.") }}</textarea>
+                                        <label class="form-label fw-semibold small">Meta Page Description</label>
+                                        <textarea name="meta_description" class="form-control" rows="2">{{ settings.get('meta_description', 'Verified premium property listings, site visit coordination, and unbiased property advisory across Bengaluru.') }}</textarea>
                                     </div>
 
-                                    <button type="submit" class="btn btn-warning w-100 fw-bold py-2.5">Save Global Website Settings</button>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small">Meta Keywords (Comma Separated)</label>
+                                        <input type="text" name="meta_keywords" class="form-control" value="{{ settings.get('meta_keywords', 'Real Estate Bengaluru, Property Consultation, 2 BHK Apartments, 3 BHK Flats, Shelter Hunt') }}">
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <h6 class="fw-bold text-dark mb-3">⚡ Analytics & Integration Tracking IDs</h6>
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Google Analytics 4 (GA4 ID)</label>
+                                            <input type="text" name="ga_tracking_id" class="form-control" value="{{ settings.get('ga_tracking_id', '') }}" placeholder="e.g. G-XXXXXXXXXX">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Meta Pixel ID</label>
+                                            <input type="text" name="meta_pixel_id" class="form-control" value="{{ settings.get('meta_pixel_id', '') }}" placeholder="e.g. 1234567890">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-warning w-100 fw-bold py-2.5">Save Global Website Settings & Branding</button>
                                 </form>
                             </div>
                         </div>
 
                         <div class="col-12 col-lg-5">
-                            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border mb-4">
                                 <h5 class="fw-bold mb-3 text-dark">Admin Security Settings</h5>
                                 <form method="POST" action="{{ url_for('admin_change_password') }}">
                                     <div class="mb-3">
@@ -951,6 +1046,85 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- BULK PROPERTY LISTING MODAL -->
+<div class="modal fade" id="bulkListingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-dark text-white p-4">
+                <div>
+                    <h5 class="modal-title fw-bold m-0 text-warning">Bulk Property Listing Import System</h5>
+                    <small class="text-white-50">Upload Excel (.xlsx, .xls), CSV, or PDF file to auto-parse properties live.</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <div class="row g-4">
+                    <!-- File Upload Area -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <label class="form-label fw-bold text-dark mb-1">📁 Upload Excel / CSV / PDF File</label>
+                            <input type="file" id="bulkFileInput" class="form-control py-2.5" accept=".xlsx,.xls,.csv,.pdf" onchange="processBulkFile(event)">
+                            <small class="text-muted d-block mt-1">Supports auto-detecting column names for Property Name, Zone, Location, BHK Type, Facing, Size, and Price.</small>
+                        </div>
+                    </div>
+
+                    <!-- Text Paste Area -->
+                    <div class="col-12 col-md-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <label class="form-label fw-bold text-dark mb-1">📋 Or Paste Tab/Comma-Separated Data</label>
+                            <textarea id="bulkTextInput" class="form-control" rows="2" placeholder="Paste spreadsheet rows: Property Name | Zone | Location | Sub Location | Unit | Floors | BHK | Facing | Age | Size | Rate | Price"></textarea>
+                            <button type="button" onclick="processBulkText()" class="btn btn-sm btn-secondary mt-2 fw-bold">Parse Pasted Text Data</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parsed Data Preview Table Box (Hidden until data parsed) -->
+                <div id="bulkPreviewContainer" class="d-none mt-4 pt-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h6 class="fw-bold text-dark m-0">Parsed Properties Preview (<span id="parsedRowCount">0</span> listings detected)</h6>
+                            <small class="text-muted">Review or edit values directly in table cells before making live.</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="clearBulkPreview()">Clear</button>
+                            <button type="button" id="publishBulkBtn" onclick="publishBulkPropertiesLive()" class="btn btn-gold fw-bold px-4 py-2 shadow-sm">
+                                🚀 Publish All Properties Live
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive border rounded-3 style-scrollbar" style="max-height: 420px; overflow-y: auto;">
+                        <table class="table table-sm table-hover align-middle mb-0" id="bulkPreviewTable" style="font-size: 0.85rem;">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Property Name</th>
+                                    <th>Zone</th>
+                                    <th>Location / Area</th>
+                                    <th>Sub Location</th>
+                                    <th>Unit Tier</th>
+                                    <th>Floors</th>
+                                    <th>BHK Type</th>
+                                    <th>Facing</th>
+                                    <th>Age</th>
+                                    <th>Size (sq.ft)</th>
+                                    <th>Rate/sqft</th>
+                                    <th>Quoted Price</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bulkPreviewTbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light p-3">
+                <button type="button" class="btn btn-secondary fw-semibold px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
 </div>
 

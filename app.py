@@ -66,21 +66,66 @@ def track_website_activity():
 
 # Helper Functions
 def get_bhk_options():
-    return ["1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"]
+    defaults = ["1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"]
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            docs = firestore_db.collection('masters').document('bhk_options').get()
+            if docs.exists:
+                custom = docs.to_dict().get('items', [])
+                if custom:
+                    return custom
+        except Exception:
+            pass
+    return defaults
 
 def get_facing_options():
-    return ["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"]
+    defaults = ["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"]
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            docs = firestore_db.collection('masters').document('facing_options').get()
+            if docs.exists:
+                custom = docs.to_dict().get('items', [])
+                if custom:
+                    return custom
+        except Exception:
+            pass
+    return defaults
 
 def get_zone_options():
-    return ["North Bengaluru", "South Bengaluru", "East Bengaluru", "West Bengaluru", "Central Bengaluru", "IT Corridor"]
+    defaults = ["North Bengaluru", "South Bengaluru", "East Bengaluru", "West Bengaluru", "Central Bengaluru", "IT Corridor"]
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            docs = firestore_db.collection('masters').document('zone_options').get()
+            if docs.exists:
+                custom = docs.to_dict().get('items', [])
+                if custom:
+                    return custom
+        except Exception:
+            pass
+    return defaults
 
 def get_age_options():
-    return ["Under Construction", "Ready to Move", "0-1 Year", "1-5 Years", "5-10 Years", "10+ Years"]
+    defaults = ["Under Construction", "Ready to Move", "0-1 Year", "1-5 Years", "5-10 Years", "10+ Years"]
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            docs = firestore_db.collection('masters').document('age_options').get()
+            if docs.exists:
+                custom = docs.to_dict().get('items', [])
+                if custom:
+                    return custom
+        except Exception:
+            pass
+    return defaults
 
 def get_site_settings():
     defaults = {
         'brand_name': 'SHELTER HUNT',
         'brand_tagline': 'CONSULTANTS',
+        'brand_logo': '',
         'whatsapp_number': '918050749331',
         'contact_phone': '+91 8050749331',
         'contact_email': 'contact@shelterhunt.com',
@@ -89,7 +134,17 @@ def get_site_settings():
         'hero_subtitle': "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.",
         'philosophy_text': 'Shelter Hunt Consultants is a knowledge-first agency built on the belief that real estate decisions deserve expert guidance, not sales pressure.',
         'about_tagline': 'Our Philosophy & Expertise',
-        'footer_copyright': '© 2026 Shelter Hunt Consultants. All rights reserved.'
+        'footer_copyright': '© 2026 Shelter Hunt Consultants. All rights reserved.',
+        'meta_title': 'Shelter Hunt Consultants | Premium Real Estate Advisory Bengaluru',
+        'meta_description': 'Verified premium property listings, site visit coordination, and unbiased property advisory across Bengaluru.',
+        'meta_keywords': 'Real Estate Bengaluru, Property Consultation, 2 BHK Apartments, 3 BHK Flats, Shelter Hunt',
+        'ga_tracking_id': '',
+        'meta_pixel_id': '',
+        'social_facebook': '',
+        'social_instagram': '',
+        'social_linkedin': '',
+        'social_youtube': '',
+        'google_maps_embed_url': ''
     }
     firestore_db = get_firestore()
     if not firestore_db:
@@ -101,6 +156,17 @@ def get_site_settings():
     except Exception:
         pass
     return defaults
+
+# Global Template Context Processor
+@app.context_processor
+def inject_global_data():
+    return {
+        'settings': get_site_settings(),
+        'bhk_options': get_bhk_options(),
+        'facing_options': get_facing_options(),
+        'zone_options': get_zone_options(),
+        'age_options': get_age_options()
+    }
 
 def get_daily_slots():
     return [
@@ -476,20 +542,93 @@ def admin_save_settings():
         'hero_subtitle': request.form.get('hero_subtitle', '').strip(),
         'philosophy_text': request.form.get('philosophy_text', '').strip(),
         'about_tagline': request.form.get('about_tagline', '').strip(),
-        'footer_copyright': request.form.get('footer_copyright', '').strip()
+        'footer_copyright': request.form.get('footer_copyright', '').strip(),
+        'meta_title': request.form.get('meta_title', '').strip(),
+        'meta_description': request.form.get('meta_description', '').strip(),
+        'meta_keywords': request.form.get('meta_keywords', '').strip(),
+        'ga_tracking_id': request.form.get('ga_tracking_id', '').strip(),
+        'meta_pixel_id': request.form.get('meta_pixel_id', '').strip(),
+        'social_facebook': request.form.get('social_facebook', '').strip(),
+        'social_instagram': request.form.get('social_instagram', '').strip(),
+        'social_linkedin': request.form.get('social_linkedin', '').strip(),
+        'social_youtube': request.form.get('social_youtube', '').strip(),
+        'google_maps_embed_url': request.form.get('google_maps_embed_url', '').strip()
     }
+    
+    # Check for Logo File Upload
+    brand_logo = request.form.get('brand_logo_url', '').strip()
+    if 'logo_file' in request.files:
+        file = request.files['logo_file']
+        if file and file.filename != '':
+            file_bytes = file.read()
+            if len(file_bytes) > 0:
+                mime_type = file.mimetype or 'image/jpeg'
+                encoded = base64.b64encode(file_bytes).decode('utf-8')
+                brand_logo = f"data:{mime_type};base64,{encoded}"
+    
+    if brand_logo:
+        settings_data['brand_logo'] = brand_logo
     
     firestore_db = get_firestore()
     if firestore_db:
         try:
             for key, val in settings_data.items():
-                if val:
-                    firestore_db.collection('settings').document(key).set({'value': val})
-            flash("Global settings and dynamic site content updated successfully!", "success")
+                firestore_db.collection('settings').document(key).set({'value': val})
+            flash("Global site settings, logo, branding, and integrations updated successfully!", "success")
         except Exception as e:
             print(f"Error saving settings: {e}")
             flash("Could not update settings.", "danger")
         
+    return redirect(url_for('admin'))
+
+@app.route('/admin/add-master-option', methods=['POST'])
+def admin_add_master_option():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    master_type = request.form.get('master_type', '').strip()
+    new_val = request.form.get('option_value', '').strip()
+    
+    if master_type and new_val:
+        firestore_db = get_firestore()
+        if firestore_db:
+            try:
+                doc_ref = firestore_db.collection('masters').document(master_type)
+                doc = doc_ref.get()
+                items = doc.to_dict().get('items', []) if doc.exists else []
+                if new_val not in items:
+                    items.append(new_val)
+                    doc_ref.set({'items': items})
+                    flash(f"Added '{new_val}' to master configurations.", "success")
+            except Exception as e:
+                print(f"Error adding master option: {e}")
+                flash("Could not add master option.", "danger")
+                
+    return redirect(url_for('admin'))
+
+@app.route('/admin/delete-master-option', methods=['POST'])
+def admin_delete_master_option():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    master_type = request.form.get('master_type', '').strip()
+    target_val = request.form.get('option_value', '').strip()
+    
+    if master_type and target_val:
+        firestore_db = get_firestore()
+        if firestore_db:
+            try:
+                doc_ref = firestore_db.collection('masters').document(master_type)
+                doc = doc_ref.get()
+                if doc.exists:
+                    items = doc.to_dict().get('items', [])
+                    items = [i for i in items if i != target_val]
+                    doc_ref.set({'items': items})
+                    flash(f"Removed '{target_val}' from master configurations.", "info")
+            except Exception as e:
+                print(f"Error deleting master option: {e}")
+                flash("Could not delete master option.", "danger")
+                
     return redirect(url_for('admin'))
 
 @app.route('/admin/change-password', methods=['POST'])
