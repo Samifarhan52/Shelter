@@ -3,10 +3,10 @@ import datetime
 import urllib.parse
 import json
 import base64
+import re
 import firebase_admin
 from firebase_admin import credentials, firestore
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "shelter_hunt_secret_key_2026")
@@ -39,7 +39,7 @@ def get_firestore():
 @app.before_request
 def track_website_activity():
     path = request.path
-    if path.startswith('/static') or path.startswith('/admin') or path == '/submit-quick-lead' or path == '/check-availability':
+    if path.startswith('/static') or path.startswith('/admin') or path in ['/submit-quick-lead', '/check-availability', '/admin/bulk-add-sites']:
         return
 
     if 'visitor_session_id' not in session:
@@ -65,22 +65,17 @@ def track_website_activity():
             print(f"Tracking error: {e}")
 
 # Helper Functions
-def get_active_builders():
-    firestore_db = get_firestore()
-    if not firestore_db:
-        return [{'name': 'Prestige Group'}, {'name': 'Brigade Group'}, {'name': 'Sobha Developers'}]
-    try:
-        docs = firestore_db.collection('builders').stream()
-        builders = []
-        for d in docs:
-            data = d.to_dict()
-            data['id'] = d.id
-            if data.get('is_active', True):
-                builders.append(data)
-        builders.sort(key=lambda x: x.get('name', ''))
-        return builders if builders else [{'name': 'Prestige Group'}, {'name': 'Brigade Group'}, {'name': 'Sobha Developers'}]
-    except Exception:
-        return [{'name': 'Prestige Group'}, {'name': 'Brigade Group'}, {'name': 'Sobha Developers'}]
+def get_bhk_options():
+    return ["1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"]
+
+def get_facing_options():
+    return ["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"]
+
+def get_zone_options():
+    return ["North Bengaluru", "South Bengaluru", "East Bengaluru", "West Bengaluru", "Central Bengaluru", "IT Corridor"]
+
+def get_age_options():
+    return ["Under Construction", "Ready to Move", "0-1 Year", "1-5 Years", "5-10 Years", "10+ Years"]
 
 def get_site_settings():
     defaults = {
@@ -108,17 +103,26 @@ def get_site_settings():
     return defaults
 
 def get_daily_slots():
-    return ["10:00 AM", "12:00 PM", "02:30 PM", "04:30 PM", "06:30 PM"]
+    return [
+        "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+        "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
+        "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
+        "06:00 PM", "06:30 PM", "07:00 PM"
+    ]
 
 # --- Public Routes ---
 @app.route('/')
 def home():
-    return render_template('index.html', builders=get_active_builders(), settings=get_site_settings())
+    return render_template('index.html', bhk_options=get_bhk_options(), settings=get_site_settings())
 
 @app.route('/sites')
 def sites():
     query = request.args.get('q', '').strip().lower()
-    builder_filter = request.args.get('builder', '').strip().lower()
+    bhk_filter = request.args.get('bhk', '').strip()
+    facing_filter = request.args.get('facing', '').strip()
+    zone_filter = request.args.get('zone', '').strip()
+    age_filter = request.args.get('age', '').strip()
+    
     sites_list = []
     
     firestore_db = get_firestore()
@@ -129,27 +133,54 @@ def sites():
                 data = d.to_dict()
                 data['id'] = d.id
                 
-                title = data.get('title', '').lower()
-                location = data.get('location', '').lower()
-                description = data.get('description', '').lower()
-                builder = data.get('builder', '').lower()
+                title = str(data.get('title', '')).lower()
+                location = str(data.get('location', '')).lower()
+                sub_location = str(data.get('sub_location', '')).lower()
+                description = str(data.get('description', '')).lower()
+                bhk_type = str(data.get('bhk_type', ''))
+                facing = str(data.get('facing', ''))
+                zone = str(data.get('zone', ''))
+                building_age = str(data.get('building_age', ''))
                 
                 matches_q = True
                 if query:
-                    matches_q = (query in title or query in location or query in description or query in builder)
+                    matches_q = (query in title or query in location or query in sub_location or query in description or query in bhk_type.lower() or query in zone.lower())
                     
-                matches_builder = True
-                if builder_filter and builder_filter != 'builder':
-                    matches_builder = (builder_filter in builder)
+                matches_bhk = True
+                if bhk_filter and bhk_filter.lower() != 'all':
+                    matches_bhk = (bhk_filter.lower() in bhk_type.lower())
+
+                matches_facing = True
+                if facing_filter and facing_filter.lower() != 'all':
+                    matches_facing = (facing_filter.lower() == facing.lower())
+
+                matches_zone = True
+                if zone_filter and zone_filter.lower() != 'all':
+                    matches_zone = (zone_filter.lower() in zone.lower() or zone_filter.lower() in location.lower())
+
+                matches_age = True
+                if age_filter and age_filter.lower() != 'all':
+                    matches_age = (age_filter.lower() == building_age.lower())
                     
-                if matches_q and matches_builder:
+                if matches_q and matches_bhk and matches_facing and matches_zone and matches_age:
                     sites_list.append(data)
                     
             sites_list.reverse()
         except Exception as e:
             print(f"Search error: {e}")
         
-    return render_template('sites.html', sites=sites_list, builders=get_active_builders(), settings=get_site_settings(), search_query=query, selected_builder=builder_filter)
+    return render_template('sites.html', 
+                           sites=sites_list, 
+                           bhk_options=get_bhk_options(),
+                           facing_options=get_facing_options(),
+                           zone_options=get_zone_options(),
+                           age_options=get_age_options(),
+                           settings=get_site_settings(), 
+                           search_query=query, 
+                           selected_bhk=bhk_filter,
+                           selected_facing=facing_filter,
+                           selected_zone=zone_filter,
+                           selected_age=age_filter)
 
 @app.route('/site/<string:site_id>')
 def site_detail(site_id):
@@ -160,7 +191,7 @@ def site_detail(site_id):
             if doc.exists:
                 site_data = doc.to_dict()
                 site_data['id'] = doc.id
-                return render_template('site_detail.html', site=site_data, builders=get_active_builders(), settings=get_site_settings())
+                return render_template('site_detail.html', site=site_data, bhk_options=get_bhk_options(), settings=get_site_settings())
         except Exception as e:
             print(f"Error fetching site details: {e}")
             
@@ -169,11 +200,11 @@ def site_detail(site_id):
 
 @app.route('/about')
 def about():
-    return render_template('about.html', builders=get_active_builders(), settings=get_site_settings())
+    return render_template('about.html', bhk_options=get_bhk_options(), settings=get_site_settings())
 
 @app.route('/services')
 def services():
-    return render_template('services.html', builders=get_active_builders(), settings=get_site_settings())
+    return render_template('services.html', bhk_options=get_bhk_options(), settings=get_site_settings())
 
 @app.route('/submit-quick-lead', methods=['POST'])
 def submit_quick_lead():
@@ -181,8 +212,9 @@ def submit_quick_lead():
     phone = request.form.get('phone', '').strip()
     email = request.form.get('email', '').strip()
     
-    if not full_name or not phone:
-        return jsonify({'success': False, 'message': 'Name and phone number are required.'}), 400
+    digits_only = re.sub(r'\D', '', phone)
+    if not full_name or len(digits_only) != 10:
+        return jsonify({'success': False, 'message': 'Please provide a valid full name and exactly 10-digit mobile number.'}), 400
 
     settings = get_site_settings()
     target_wa = settings.get('whatsapp_number', '918050749331').replace('+', '').replace(' ', '')
@@ -195,7 +227,7 @@ def submit_quick_lead():
                 'slot_time': 'Quick Lead Callback',
                 'full_name': full_name,
                 'email': email or 'N/A',
-                'phone': phone,
+                'phone': digits_only,
                 'location': 'General Inquiry',
                 'budget': 'N/A',
                 'message': 'Quick Lead Callback requested via Website Popup',
@@ -210,7 +242,7 @@ def submit_quick_lead():
         f"I would like to request a callback for property consultation.\n\n"
         f"📌 *Contact Details:*\n"
         f"• *Name:* {full_name}\n"
-        f"• *Phone:* {phone}\n"
+        f"• *Phone:* {digits_only}\n"
         f"• *Email:* {email if email else 'N/A'}\n\n"
         f"Please connect with me shortly. Thank you!"
     )
@@ -241,7 +273,7 @@ def booking_slots():
         except Exception:
             pass
     
-    return render_template('booking.html', date=selected_date, today=today_str, all_slots=all_slots, booked_slots=booked_slots, builders=get_active_builders(), settings=get_site_settings())
+    return render_template('booking.html', date=selected_date, today=today_str, all_slots=all_slots, booked_slots=booked_slots, bhk_options=get_bhk_options(), settings=get_site_settings())
 
 @app.route('/check-availability', methods=['GET'])
 def check_availability():
@@ -272,13 +304,16 @@ def check_availability():
 def confirm_booking():
     session_date = request.form.get('session_date')
     slot_time = request.form.get('slot_time')
-    full_name = request.form.get('full_name')
-    email = request.form.get('email')
-    phone = request.form.get('phone')
-    location = request.form.get('location')
-    budget = request.form.get('budget')
-    message = request.form.get('message', '')
+    full_name = request.form.get('full_name', '').strip()
+    email = request.form.get('email', '').strip()
+    phone = request.form.get('phone', '').strip()
+    message = request.form.get('message', '').strip()
     
+    digits_only = re.sub(r'\D', '', phone)
+    if len(digits_only) != 10:
+        flash("Please enter a valid 10-digit mobile number.", "danger")
+        return redirect(url_for('booking_slots', date=session_date))
+
     today_str = datetime.date.today().isoformat()
     if session_date < today_str:
         flash("Cannot book consultation slots for past dates.", "danger")
@@ -301,9 +336,9 @@ def confirm_booking():
                 'slot_time': slot_time,
                 'full_name': full_name,
                 'email': email,
-                'phone': phone,
-                'location': location,
-                'budget': budget,
+                'phone': digits_only,
+                'location': 'General Property Advisory',
+                'budget': 'N/A',
                 'message': message,
                 'status': 'Confirmed',
                 'booked_at': datetime.datetime.now().isoformat()
@@ -318,13 +353,11 @@ def confirm_booking():
         f"• *Date:* {session_date}\n"
         f"• *Slot Time:* {slot_time}\n"
         f"• *Name:* {full_name}\n"
-        f"• *Phone:* {phone}\n"
-        f"• *Email:* {email}\n"
-        f"• *Location:* {location}\n"
-        f"• *Budget:* {budget}\n"
+        f"• *Phone:* {digits_only}\n"
+        f"• *Email:* {email if email else 'N/A'}\n"
     )
     if message:
-        wa_text += f"• *Notes:* {message}\n"
+        wa_text += f"• *Notes/Requirements:* {message}\n"
         
     wa_text += "\nPlease confirm my appointment slot. Thank you!"
 
@@ -360,7 +393,7 @@ def admin():
         flash("Invalid Admin Credentials.", "danger")
 
     if session.get('admin_logged_in'):
-        leads, sites_list, builders_list = [], [], []
+        leads, sites_list = [], []
         analytics = {
             'total_views': 0,
             'today_views': 0,
@@ -384,13 +417,6 @@ def admin():
                     d['id'] = s.id
                     sites_list.append(d)
                 sites_list.reverse()
-
-                builders_docs = firestore_db.collection('builders').stream()
-                for b in builders_docs:
-                    d = b.to_dict()
-                    d['id'] = b.id
-                    builders_list.append(d)
-                builders_list.sort(key=lambda x: x.get('name', ''))
 
                 today_str = datetime.date.today().isoformat()
                 views_ref = firestore_db.collection('page_views').stream()
@@ -422,7 +448,15 @@ def admin():
             except Exception as e:
                 print(f"Admin fetch error: {e}")
         
-        return render_template('admin.html', leads=leads, sites=sites_list, builders=builders_list, analytics=analytics, settings=get_site_settings())
+        return render_template('admin.html', 
+                               leads=leads, 
+                               sites=sites_list, 
+                               bhk_options=get_bhk_options(),
+                               facing_options=get_facing_options(),
+                               zone_options=get_zone_options(),
+                               age_options=get_age_options(),
+                               analytics=analytics, 
+                               settings=get_site_settings())
         
     return render_template('admin_login.html')
 
@@ -508,13 +542,19 @@ def admin_add_site():
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
-    title = request.form.get('title')
-    builder = request.form.get('builder')
-    location = request.form.get('location')
-    price = request.form.get('price', '').strip()
+    title = request.form.get('title', '').strip()
+    zone = request.form.get('zone', '').strip()
+    location = request.form.get('location', '').strip()
+    sub_location = request.form.get('sub_location', '').strip()
+    unit_tier = request.form.get('unit_tier', '').strip()
+    total_floors = request.form.get('total_floors', '').strip()
+    bhk_type = request.form.get('bhk_type', '2 BHK').strip()
+    facing = request.form.get('facing', 'East').strip()
+    building_age = request.form.get('building_age', 'Ready to Move').strip()
     sqft = request.form.get('sqft', '').strip()
     price_per_sqft = request.form.get('price_per_sqft', '').strip()
-    description = request.form.get('description')
+    price = request.form.get('price', '').strip()
+    description = request.form.get('description', '').strip()
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
     if 'media_file' in request.files:
@@ -531,11 +571,17 @@ def admin_add_site():
         try:
             firestore_db.collection('sites').add({
                 'title': title,
-                'builder': builder,
+                'zone': zone,
                 'location': location,
-                'price': price,
+                'sub_location': sub_location,
+                'unit_tier': unit_tier,
+                'total_floors': total_floors,
+                'bhk_type': bhk_type,
+                'facing': facing,
+                'building_age': building_age,
                 'sqft': sqft,
                 'price_per_sqft': price_per_sqft,
+                'price': price,
                 'description': description,
                 'image_filename': image_filename,
                 'created_at': datetime.datetime.now().isoformat()
@@ -547,6 +593,68 @@ def admin_add_site():
     
     return redirect(url_for('admin'))
 
+@app.route('/admin/bulk-add-sites', methods=['POST'])
+def admin_bulk_add_sites():
+    if not session.get('admin_logged_in'):
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+        
+    try:
+        payload = request.get_json()
+        properties = payload.get('properties', [])
+        
+        if not properties or not isinstance(properties, list):
+            return jsonify({'success': False, 'message': 'No properties provided in request.'}), 400
+            
+        firestore_db = get_firestore()
+        if not firestore_db:
+            return jsonify({'success': False, 'message': 'Database connection error.'}), 500
+            
+        inserted_count = 0
+        now_iso = datetime.datetime.now().isoformat()
+        
+        for p in properties:
+            title = str(p.get('title') or p.get('name') or p.get('property_name') or 'Featured Property').strip()
+            zone = str(p.get('zone') or 'Bengaluru').strip()
+            location = str(p.get('location') or p.get('area') or 'Bengaluru').strip()
+            sub_location = str(p.get('sub_location') or '').strip()
+            unit_tier = str(p.get('unit_tier') or p.get('unit') or '').strip()
+            total_floors = str(p.get('total_floors') or '').strip()
+            bhk_type = str(p.get('bhk_type') or p.get('bhk') or '2 BHK').strip()
+            facing = str(p.get('facing') or 'East').strip()
+            building_age = str(p.get('building_age') or p.get('age') or 'Ready to Move').strip()
+            sqft = str(p.get('sqft') or p.get('size') or '').strip()
+            price_per_sqft = str(p.get('price_per_sqft') or p.get('rate_per_sqft') or '').strip()
+            price = str(p.get('price') or p.get('quoted_price') or '').strip()
+            description = str(p.get('description') or f"Exclusive {bhk_type} property located in {location}, {zone}. Total area approx {sqft} sq.ft.").strip()
+            image_filename = str(p.get('image_filename') or 'head.jpeg').strip()
+
+            doc_data = {
+                'title': title,
+                'zone': zone,
+                'location': location,
+                'sub_location': sub_location,
+                'unit_tier': unit_tier,
+                'total_floors': total_floors,
+                'bhk_type': bhk_type,
+                'facing': facing,
+                'building_age': building_age,
+                'sqft': sqft,
+                'price_per_sqft': price_per_sqft,
+                'price': price,
+                'description': description,
+                'image_filename': image_filename,
+                'created_at': now_iso
+            }
+            
+            firestore_db.collection('sites').add(doc_data)
+            inserted_count += 1
+            
+        flash(f"Successfully uploaded and published {inserted_count} properties live!", "success")
+        return jsonify({'success': True, 'count': inserted_count, 'message': f"Published {inserted_count} properties."})
+    except Exception as e:
+        print(f"Bulk import error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @app.route('/admin/edit-site/<string:site_id>', methods=['GET', 'POST'])
 def admin_edit_site(site_id):
     if not session.get('admin_logged_in'):
@@ -555,13 +663,19 @@ def admin_edit_site(site_id):
     if request.method == 'GET':
         return redirect(url_for('admin'))
         
-    title = request.form.get('title')
-    builder = request.form.get('builder')
-    location = request.form.get('location')
-    price = request.form.get('price', '').strip()
+    title = request.form.get('title', '').strip()
+    zone = request.form.get('zone', '').strip()
+    location = request.form.get('location', '').strip()
+    sub_location = request.form.get('sub_location', '').strip()
+    unit_tier = request.form.get('unit_tier', '').strip()
+    total_floors = request.form.get('total_floors', '').strip()
+    bhk_type = request.form.get('bhk_type', '2 BHK').strip()
+    facing = request.form.get('facing', 'East').strip()
+    building_age = request.form.get('building_age', 'Ready to Move').strip()
     sqft = request.form.get('sqft', '').strip()
     price_per_sqft = request.form.get('price_per_sqft', '').strip()
-    description = request.form.get('description')
+    price = request.form.get('price', '').strip()
+    description = request.form.get('description', '').strip()
     image_filename = request.form.get('image_filename', 'head.jpeg').strip() or 'head.jpeg'
     
     if 'media_file' in request.files:
@@ -578,11 +692,17 @@ def admin_edit_site(site_id):
         try:
             firestore_db.collection('sites').document(site_id).update({
                 'title': title,
-                'builder': builder,
+                'zone': zone,
                 'location': location,
-                'price': price,
+                'sub_location': sub_location,
+                'unit_tier': unit_tier,
+                'total_floors': total_floors,
+                'bhk_type': bhk_type,
+                'facing': facing,
+                'building_age': building_age,
                 'sqft': sqft,
                 'price_per_sqft': price_per_sqft,
+                'price': price,
                 'description': description,
                 'image_filename': image_filename
             })
@@ -609,60 +729,6 @@ def admin_delete_site(site_id):
         
     return redirect(url_for('admin'))
 
-@app.route('/admin/add-builder', methods=['POST'])
-def admin_add_builder():
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin'))
-        
-    builder_name = request.form.get('builder_name')
-    
-    firestore_db = get_firestore()
-    if firestore_db:
-        try:
-            firestore_db.collection('builders').add({'name': builder_name, 'is_active': True})
-            flash("New Builder Brand added!", "success")
-        except Exception as e:
-            print(f"Error adding builder: {e}")
-            flash("Could not add builder.", "danger")
-            
-    return redirect(url_for('admin'))
-
-@app.route('/admin/toggle-builder/<string:builder_id>')
-def admin_toggle_builder(builder_id):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin'))
-        
-    firestore_db = get_firestore()
-    if firestore_db:
-        try:
-            doc_ref = firestore_db.collection('builders').document(builder_id)
-            doc = doc_ref.get()
-            if doc.exists:
-                curr = doc.to_dict().get('is_active', True)
-                doc_ref.update({'is_active': not curr})
-                flash("Builder status updated!", "info")
-        except Exception as e:
-            print(f"Error toggling builder: {e}")
-            flash("Could not update status.", "danger")
-        
-    return redirect(url_for('admin'))
-
-@app.route('/admin/delete-builder/<string:builder_id>')
-def admin_delete_builder(builder_id):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin'))
-        
-    firestore_db = get_firestore()
-    if firestore_db:
-        try:
-            firestore_db.collection('builders').document(builder_id).delete()
-            flash("Builder removed.", "warning")
-        except Exception as e:
-            print(f"Error deleting builder: {e}")
-            flash("Could not delete builder.", "danger")
-        
-    return redirect(url_for('admin'))
-
 @app.route('/admin/logout')
 def admin_logout():
     session.pop('admin_logged_in', None)
@@ -671,18 +737,13 @@ def admin_logout():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    # Fetch all property sites from firestore to dynamically generate urls
     pages = []
-    
-    # Add static pages
     host = "https://shelterhuntconsultants.com"
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     
-    # Main pages
     pages.append({'loc': f"{host}/", 'lastmod': today, 'changefreq': 'daily', 'priority': '1.0'})
     pages.append({'loc': f"{host}/sites", 'lastmod': today, 'changefreq': 'daily', 'priority': '0.9'})
     
-    # Fetch dynamic property detail pages
     firestore_db = get_firestore()
     if firestore_db:
         try:
@@ -697,7 +758,6 @@ def sitemap():
         except Exception as e:
             print(f"Error fetching sites for sitemap: {e}")
             
-    # Build XML string
     xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for page in pages:

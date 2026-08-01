@@ -2,19 +2,80 @@
 {% block content %}
 
 <div class="container py-5">
-    <div class="text-center mb-5">
+    <div class="text-center mb-4">
         <p class="text-warning fw-bold mb-1" style="color: var(--gold-accent) !important; letter-spacing: 2px;">CURATED PORTFOLIO</p>
         <h2 class="fw-bold display-5" style="color: var(--navy-dark);">Featured Property Sites</h2>
         <p class="text-muted fs-5">Handpicked premium residential projects verified by our advisory team.</p>
-        
-        {% if search_query or selected_builder %}
-            <div class="mt-3">
-                <span class="badge bg-light text-dark border p-2 fs-6 fw-normal">
-                    Filtering by: 
-                    {% if search_query %}<strong>"{{ search_query }}"</strong>{% endif %}
-                    {% if selected_builder %} <span class="badge bg-warning text-dark">{{ selected_builder }}</span>{% endif %}
-                </span>
-                <a href="{{ url_for('sites') }}" class="btn btn-sm btn-outline-danger ms-2">Clear Search Filter ✖</a>
+    </div>
+
+    <!-- Enhanced Executive Filter Bar -->
+    <div class="bg-white p-4 rounded-4 shadow-sm border mb-5">
+        <form action="{{ url_for('sites') }}" method="GET" class="row g-3 align-items-end">
+            
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold small text-secondary">Search Keyword</label>
+                <input type="text" name="q" class="form-control py-2" placeholder="Project name, area, location..." value="{{ search_query if search_query else '' }}">
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label fw-semibold small text-secondary">BHK Type</label>
+                <select name="bhk" class="form-select py-2">
+                    <option value="">All BHKs</option>
+                    {% for b in bhk_options %}
+                        <option value="{{ b }}" {% if selected_bhk == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label fw-semibold small text-secondary">Facing</label>
+                <select name="facing" class="form-select py-2">
+                    <option value="">All Facings</option>
+                    {% for f in facing_options %}
+                        <option value="{{ f }}" {% if selected_facing == f %}selected{% endif %}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label fw-semibold small text-secondary">Zone / Region</label>
+                <select name="zone" class="form-select py-2">
+                    <option value="">All Zones</option>
+                    {% for z in zone_options %}
+                        <option value="{{ z }}" {% if selected_zone == z %}selected{% endif %}>{{ z }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-3 d-flex gap-2">
+                <div class="flex-grow-1">
+                    <label class="form-label fw-semibold small text-secondary">Building Age</label>
+                    <select name="age" class="form-select py-2">
+                        <option value="">All Ages</option>
+                        {% for a in age_options %}
+                            <option value="{{ a }}" {% if selected_age == a %}selected{% endif %}>{{ a }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label d-block text-transparent small">&nbsp;</label>
+                    <button type="submit" class="btn btn-gold py-2 px-3 fw-bold border-0">Filter</button>
+                </div>
+            </div>
+
+        </form>
+
+        {% if search_query or selected_bhk or selected_facing or selected_zone or selected_age %}
+            <div class="mt-3 pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="small fw-semibold text-muted">Active Filters:</span>
+                    {% if search_query %}<span class="badge bg-dark">"{{ search_query }}"</span>{% endif %}
+                    {% if selected_bhk %}<span class="badge bg-warning text-dark">{{ selected_bhk }}</span>{% endif %}
+                    {% if selected_facing %}<span class="badge bg-info text-dark">Facing: {{ selected_facing }}</span>{% endif %}
+                    {% if selected_zone %}<span class="badge bg-primary">Zone: {{ selected_zone }}</span>{% endif %}
+                    {% if selected_age %}<span class="badge bg-secondary">Age: {{ selected_age }}</span>{% endif %}
+                </div>
+                <a href="{{ url_for('sites') }}" class="btn btn-sm btn-outline-danger fw-semibold">Clear Filters ✖</a>
             </div>
         {% endif %}
     </div>
@@ -43,14 +104,26 @@
                                      style="object-fit: cover;"
                                      onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
                             {% endif %}
-                            <span class="badge position-absolute top-0 start-0 m-3" style="background-color: var(--gold-accent); color: #fff;">
-                                {{ site.builder }}
+                            
+                            <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 fw-bold" style="background-color: var(--gold-accent); color: #fff;">
+                                {{ site.bhk_type if site.bhk_type else 'Residential Property' }}
                             </span>
+                            
+                            {% if site.zone %}
+                                <span class="badge position-absolute top-0 end-0 m-3 bg-dark text-white fw-semibold">
+                                    {{ site.zone }}
+                                </span>
+                            {% endif %}
                         </div>
+                        
                         <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
                             <div>
-                                <h4 class="fw-bold mb-1" style="color: var(--navy-dark);">{{ site.title }}</h4>
-                                <p class="text-muted small mb-2">📍 {{ site.location }}</p>
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    {% if site.facing %}<span class="badge bg-light text-dark border">🧭 {{ site.facing }} Facing</span>{% endif %}
+                                    {% if site.building_age %}<span class="badge bg-light text-dark border">🏗️ {{ site.building_age }}</span>{% endif %}
+                                </div>
+                                <h4 class="fw-bold mb-1 text-truncate" style="color: var(--navy-dark);">{{ site.title }}</h4>
+                                <p class="text-muted small mb-2">📍 {{ site.location }}{% if site.sub_location %}, {{ site.sub_location }}{% endif %}</p>
                                 <p class="text-muted small mb-3" style="line-height: 1.5;">{{ site.description[:110] }}...</p>
                             </div>
                             <div class="pt-3 border-top d-flex justify-content-between align-items-center">
@@ -68,10 +141,10 @@
                 <div class="bg-white p-5 rounded-4 shadow-sm max-w-lg mx-auto" style="max-width: 600px;">
                     <div class="mb-3 fs-1">🔍</div>
                     <h4 class="fw-bold text-dark mb-2">No Property Sites Found</h4>
-                    <p class="text-muted mb-4">We couldn't find any listings matching your search term. Try searching for another location, project title, or builder.</p>
+                    <p class="text-muted mb-4">We couldn't find any property listings matching your selected search criteria. Try adjusting your filters.</p>
                     <div class="d-flex justify-content-center gap-3">
                         <a href="{{ url_for('sites') }}" class="btn btn-outline-dark fw-bold">View All Sites</a>
-                        <button type="button" class="btn btn-gold fw-bold border-0" onclick="openLeadModal()">Request Property Advice</button>
+                        <button type="button" class="btn btn-gold fw-bold border-0" onclick="openChoiceModal()">Request Property Advice</button>
                     </div>
                 </div>
             </div>

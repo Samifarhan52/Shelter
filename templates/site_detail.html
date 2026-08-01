@@ -83,7 +83,7 @@
                 {% endif %}
                 
                 <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 fs-6 shadow-sm fw-bold" style="background-color: var(--gold-accent); color: #fff; letter-spacing: 0.5px;">
-                    {{ site.builder }}
+                    {{ site.bhk_type if site.bhk_type else 'Residential Property' }}
                 </span>
                 
                 <!-- Next Image Arrow Button -->
@@ -111,23 +111,19 @@
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
-                    <span>{{ site.location }}</span>
+                    <span>{{ site.location }}{% if site.sub_location %}, {{ site.sub_location }}{% endif %}</span>
                 </div>
 
                 <hr class="my-4 opacity-25">
 
                 <!-- Clean Spec Metrics Grid -->
-                <div class="row g-3 mb-4">
+                <div class="row g-2.5 mb-4">
                     
-                    <!-- Estimated Price -->
+                    <!-- Quoted Price -->
                     <div class="col-6">
-                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7;">
-                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                <span>Est. Price</span>
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span>Quoted Price</span>
                             </div>
                             <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
                                 {% if site.price %}
@@ -143,18 +139,61 @@
                         </div>
                     </div>
 
-                    <!-- Total Area -->
+                    <!-- BHK Configuration -->
                     <div class="col-6">
-                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7;">
-                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                    <path d="M3 9h18"></path>
-                                    <path d="M9 21V9"></path>
-                                </svg>
-                                <span>Total Area</span>
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span>BHK Type</span>
                             </div>
                             <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
+                                {{ site.bhk_type if site.bhk_type else '2 BHK' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Facing -->
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span>Facing</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
+                                {{ site.facing if site.facing else 'East' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Zone / Region -->
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span>Zone / Region</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
+                                {{ site.zone if site.zone else zone }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Building Age -->
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span>Age of Building</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-6" style="letter-spacing: -0.3px;">
+                                {{ site.building_age if site.building_age else 'Ready to Move' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Total Area -->
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span>Total Area</span>
+                            </div>
+                            <span class="fw-bold text-dark fs-6" style="letter-spacing: -0.3px;">
                                 {% if site.sqft %}
                                     {% if 'sq' in site.sqft.lower() or 'ft' in site.sqft.lower() %}
                                         {{ site.sqft }}
@@ -171,13 +210,10 @@
                     <!-- Rate per Sq.Ft. -->
                     <div class="col-6">
                         <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
-                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                </svg>
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
                                 <span>Rate / Sq. Ft.</span>
                             </div>
-                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
+                            <span class="fw-bold text-dark fs-6" style="letter-spacing: -0.3px;">
                                 {% if site.price_per_sqft %}
                                     {% if '₹' in site.price_per_sqft or '/ sq' in site.price_per_sqft.lower() %}
                                         {{ site.price_per_sqft }}
@@ -191,18 +227,18 @@
                         </div>
                     </div>
 
-                    <!-- Zone / Region -->
+                    <!-- Total Floors / Unit Tier -->
                     <div class="col-6">
                         <div class="p-3 rounded-3" style="background-color: #f8fafc; border: 1px solid #edf2f7; height: 100%;">
-                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                                </svg>
-                                <span>Zone / Region</span>
+                            <div class="d-flex align-items-center gap-1.5 text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span>Unit / Floors</span>
                             </div>
-                            <span class="fw-bold text-dark fs-5" style="letter-spacing: -0.3px;">
-                                {{ zone }}
+                            <span class="fw-bold text-dark fs-6" style="letter-spacing: -0.3px;">
+                                {% if site.unit_tier or site.total_floors %}
+                                    {{ site.unit_tier if site.unit_tier else '' }}{% if site.unit_tier and site.total_floors %} • {% endif %}{% if site.total_floors %}{{ site.total_floors }} Floors{% endif %}
+                                {% else %}
+                                    Standard
+                                {% endif %}
                             </span>
                         </div>
                     </div>
@@ -266,12 +302,14 @@
                 <form id="requestImagesForm" onsubmit="redirectToWhatsApp(event)">
                     <div class="modal-body p-4 p-md-5">
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary">YOUR FULL NAME</label>
-                            <input type="text" id="reqName" class="form-control py-2.5 rounded-3" placeholder="e.g. Rahul Sharma" required>
+                            <label class="form-label fw-bold small text-secondary">YOUR FULL NAME *</label>
+                            <input type="text" id="reqName" class="form-control py-2.5 rounded-3" placeholder="Enter Full Name" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold small text-secondary">WHATSAPP / CONTACT NUMBER</label>
-                            <input type="tel" id="reqPhone" class="form-control py-2.5 rounded-3" placeholder="e.g. +91 9876543210" required>
+                            <label class="form-label fw-bold small text-secondary">WHATSAPP / CONTACT NUMBER *</label>
+                            <input type="tel" id="reqPhone" class="form-control py-2.5 rounded-3" placeholder="Enter 10-digit Mobile Number" 
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" 
+                                   maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits" required>
                         </div>
                         
                         <div class="alert alert-light border rounded-3 p-3 mb-0" style="background-color: #f8fafc;">

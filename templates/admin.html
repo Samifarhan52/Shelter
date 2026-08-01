@@ -490,59 +490,182 @@
 
                 <!-- TAB 3: PROPERTY LISTINGS -->
                 <div class="tab-pane fade" id="sites" role="tabpanel">
+                    
+                    <!-- 1. BULK LISTING TOOL CARD -->
+                    <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border mb-4" style="border-left: 5px solid var(--accent-gold) !important;">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                            <div>
+                                <span class="badge bg-warning text-dark fw-bold px-2.5 py-1 mb-1">BULK IMPORT SYSTEM</span>
+                                <h4 class="fw-bold text-dark m-0">Bulk Property Listing (Excel, CSV, PDF & Text)</h4>
+                            </div>
+                            <span class="badge bg-dark text-white px-3 py-2">Batch Importer</span>
+                        </div>
+                        <p class="text-muted small mb-4">
+                            Upload an Excel spreadsheet (<code>.xlsx</code>, <code>.xls</code>), CSV, or PDF file containing bulk property records, or paste spreadsheet rows below. The system automatically maps: 
+                            <strong>Property Name, Zone, Location/Area, Sub Location, Unit Tier, Total Floors, BHK Type, Size (sq.ft), Rate/sq.ft, Quoted Price (INR)</strong>.
+                        </p>
+
+                        <div class="row g-3">
+                            <!-- File Upload Area -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small text-dark">📁 Upload Excel / CSV / PDF File</label>
+                                <input type="file" id="bulkFileInput" class="form-control py-2.5" accept=".xlsx,.xls,.csv,.pdf" onchange="processBulkFile(event)">
+                                <small class="text-muted d-block mt-1">Supports SheetJS auto-parsing for .xlsx, .xls, .csv files.</small>
+                            </div>
+
+                            <!-- Text Paste Area -->
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small text-dark">📋 Or Paste Tab/Comma-Separated Data</label>
+                                <textarea id="bulkTextInput" class="form-control" rows="2" placeholder="Paste columns: Property Name | Zone | Location | Sub Location | Unit | Floors | BHK | Facing | Age | Size | Rate | Quoted Price"></textarea>
+                                <button type="button" onclick="processBulkText()" class="btn btn-sm btn-secondary mt-1 fw-bold">Parse Pasted Text Data</button>
+                            </div>
+                        </div>
+
+                        <!-- Parsed Data Preview Table Box (Hidden until data parsed) -->
+                        <div id="bulkPreviewContainer" class="d-none mt-4 pt-3 border-top">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="fw-bold text-dark m-0">Parsed Properties Preview (<span id="parsedRowCount">0</span> listings detected)</h6>
+                                    <small class="text-muted">Review and edit columns below before making live in website listings.</small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger fw-semibold" onclick="clearBulkPreview()">Clear</button>
+                                    <button type="button" id="publishBulkBtn" onclick="publishBulkPropertiesLive()" class="btn btn-gold fw-bold px-4 py-2 shadow-sm">
+                                        🚀 Publish All Properties Live
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive border rounded-3 style-scrollbar" style="max-height: 420px; overflow-y: auto;">
+                                <table class="table table-sm table-hover align-middle mb-0" id="bulkPreviewTable" style="font-size: 0.85rem;">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Property Name</th>
+                                            <th>Zone</th>
+                                            <th>Location / Area</th>
+                                            <th>Sub Location</th>
+                                            <th>Unit Tier</th>
+                                            <th>Floors</th>
+                                            <th>BHK Type</th>
+                                            <th>Facing</th>
+                                            <th>Age</th>
+                                            <th>Size (sq.ft)</th>
+                                            <th>Rate/sqft</th>
+                                            <th>Quoted Price</th>
+                                            <th class="text-end">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bulkPreviewTbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. SINGLE PROPERTY ADDITION & LISTINGS LIST -->
                     <div class="row g-4">
+                        <!-- Single Property Add Form -->
                         <div class="col-12 col-lg-5">
                             <div class="bg-white p-4 rounded-4 shadow-sm border">
-                                <h5 class="fw-bold mb-3 text-dark">Add New Property Site</h5>
+                                <h5 class="fw-bold mb-3 text-dark">Add Single Property Site</h5>
                                 <form method="POST" action="{{ url_for('admin_add_site') }}" enctype="multipart/form-data">
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Project Title</label>
-                                        <input type="text" name="title" class="form-control" placeholder="e.g. Blue Bells Enclave" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Builder / Brand</label>
-                                        <select name="builder" class="form-select" required>
-                                            {% for b in builders %}
-                                                <option value="{{ b.name }}">{{ b.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Location</label>
-                                        <input type="text" name="location" class="form-control" placeholder="e.g. Shanthi Nagar, Bengaluru" required>
+                                        <label class="form-label fw-semibold small">Property Name / Title *</label>
+                                        <input type="text" name="title" class="form-control" placeholder="e.g. Prestige Lavender Enclave" required>
                                     </div>
                                     <div class="row g-2 mb-3">
                                         <div class="col-6">
-                                            <label class="form-label fw-semibold small">Price</label>
-                                            <input type="text" name="price" class="form-control" placeholder="e.g. ₹1.5 Cr">
+                                            <label class="form-label fw-semibold small">Zone / Region *</label>
+                                            <select name="zone" class="form-select" required>
+                                                {% for z in zone_options %}
+                                                    <option value="{{ z }}">{{ z }}</option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
                                         <div class="col-6">
-                                            <label class="form-label fw-semibold small">Area (Sq.Ft.)</label>
-                                            <input type="text" name="sqft" class="form-control" placeholder="e.g. 1500 Sq. Ft.">
+                                            <label class="form-label fw-semibold small">Location / Area *</label>
+                                            <input type="text" name="location" class="form-control" placeholder="e.g. Sarjapur Road" required>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Sub Location</label>
+                                            <input type="text" name="sub_location" class="form-control" placeholder="e.g. Near Wipro SEZ">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Unit Tier / Unit</label>
+                                            <input type="text" name="unit_tier" class="form-control" placeholder="e.g. Tower A / Premium">
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Total Floors</label>
+                                            <input type="text" name="total_floors" class="form-control" placeholder="e.g. G + 14">
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">BHK Type *</label>
+                                            <select name="bhk_type" class="form-select" required>
+                                                {% for b in bhk_options %}
+                                                    <option value="{{ b }}">{{ b }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Facing</label>
+                                            <select name="facing" class="form-select">
+                                                {% for f in facing_options %}
+                                                    <option value="{{ f }}">{{ f }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label fw-semibold small">Age of Building</label>
+                                            <select name="building_age" class="form-select">
+                                                {% for a in age_options %}
+                                                    <option value="{{ a }}">{{ a }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-4">
+                                            <label class="form-label fw-semibold small">Size (Sq.Ft.)</label>
+                                            <input type="text" name="sqft" class="form-control" placeholder="e.g. 1450">
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label fw-semibold small">Rate / Sq.Ft.</label>
+                                            <input type="text" name="price_per_sqft" class="form-control" placeholder="e.g. ₹9,500">
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label fw-semibold small">Quoted Price</label>
+                                            <input type="text" name="price" class="form-control" placeholder="e.g. ₹1.38 Cr">
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Price per Sq.Ft.</label>
-                                        <input type="text" name="price_per_sqft" class="form-control" placeholder="e.g. ₹10,000 / Sq. Ft.">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Description</label>
+                                        <label class="form-label fw-semibold small">Overview Description</label>
                                         <textarea name="description" class="form-control" rows="3" placeholder="Detailed property overview..." required></textarea>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Upload Image / Video</label>
+                                        <label class="form-label fw-semibold small">Upload Image / Media</label>
                                         <input type="file" name="media_file" class="form-control" accept="image/*,video/*">
-                                        <input type="text" name="image_filename" class="form-control form-control-sm mt-1" placeholder="Or enter filename/URL">
+                                        <input type="text" name="image_filename" class="form-control form-control-sm mt-1" placeholder="Or enter image filename/URL">
                                     </div>
-                                    <button type="submit" class="btn btn-gold w-100 fw-bold py-2.5">Publish Property Site</button>
+                                    <button type="submit" class="btn btn-gold w-100 fw-bold py-2.5">Publish Single Site</button>
                                 </form>
                             </div>
                         </div>
 
+                        <!-- Active Featured Listings Showcase -->
                         <div class="col-12 col-lg-7">
                             <div class="bg-white p-4 rounded-4 shadow-sm border">
-                                <h5 class="fw-bold mb-3 text-dark">Active Featured Properties</h5>
-                                <div class="list-group gap-2">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="fw-bold text-dark m-0">Active Published Properties</h5>
+                                    <span class="badge bg-dark">{{ sites|length }} Total Listings</span>
+                                </div>
+
+                                <div class="list-group gap-2 style-scrollbar" style="max-height: 720px; overflow-y: auto;">
                                     {% for site in sites %}
                                     <div class="list-group-item p-3 rounded-3 border">
                                         <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-3">
@@ -553,21 +676,24 @@
                                                     <img src="{{ site.image_filename if 'http' in site.image_filename or 'data:' in site.image_filename else url_for('static', filename=site.image_filename or 'head.jpeg') }}" style="width: 70px; height: 55px; object-fit: cover; border-radius: 8px;" onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
                                                 {% endif %}
                                                 <div>
-                                                    <span class="badge bg-dark mb-1">{{ site.builder }}</span>
+                                                    <div class="d-flex align-items-center gap-1.5 mb-1 flex-wrap">
+                                                        <span class="badge bg-warning text-dark fw-bold">{{ site.bhk_type if site.bhk_type else '2 BHK' }}</span>
+                                                        {% if site.zone %}<span class="badge bg-dark">{{ site.zone }}</span>{% endif %}
+                                                    </div>
                                                     <h6 class="fw-bold mb-0 text-dark">{{ site.title }}</h6>
-                                                    <small class="text-muted">📍 {{ site.location }}</small>
+                                                    <small class="text-muted">📍 {{ site.location }}{% if site.price %} • {{ site.price }}{% endif %}</small>
                                                 </div>
                                             </div>
                                             <div class="d-flex gap-2 align-self-end align-self-sm-auto mt-2 mt-sm-0">
                                                 <button class="btn btn-sm btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#editModal{{ site.id }}">Edit</button>
-                                                <a href="{{ url_for('admin_delete_site', site_id=site.id) }}" class="btn btn-sm btn-outline-danger fw-semibold" onclick="return confirm('Delete this listing?')">Delete</a>
+                                                <a href="{{ url_for('admin_delete_site', site_id=site.id) }}" class="btn btn-sm btn-outline-danger fw-semibold" onclick="return confirm('Delete this property listing?')">Delete</a>
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Edit Site Modal -->
                                     <div class="modal fade" id="editModal{{ site.id }}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog">
+                                        <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
                                                 <form method="POST" action="{{ url_for('admin_edit_site', site_id=site.id) }}" enctype="multipart/form-data">
                                                     <div class="modal-header">
@@ -576,34 +702,78 @@
                                                     </div>
                                                     <div class="modal-body">
                                                         <div class="mb-3">
-                                                            <label class="form-label fw-semibold small">Title</label>
+                                                            <label class="form-label fw-semibold small">Property Name / Title</label>
                                                             <input type="text" name="title" class="form-control" value="{{ site.title }}" required>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-semibold small">Builder</label>
-                                                            <select name="builder" class="form-select" required>
-                                                                {% for b in builders %}
-                                                                    <option value="{{ b.name }}" {% if b.name == site.builder %}selected{% endif %}>{{ b.name }}</option>
-                                                                {% endfor %}
-                                                            </select>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-semibold small">Location</label>
-                                                            <input type="text" name="location" class="form-control" value="{{ site.location }}" required>
                                                         </div>
                                                         <div class="row g-2 mb-3">
                                                             <div class="col-6">
-                                                                <label class="form-label fw-semibold small">Price</label>
-                                                                <input type="text" name="price" class="form-control" value="{{ site.price or '' }}">
+                                                                <label class="form-label fw-semibold small">Zone / Region</label>
+                                                                <select name="zone" class="form-select" required>
+                                                                    {% for z in zone_options %}
+                                                                        <option value="{{ z }}" {% if z == site.zone %}selected{% endif %}>{{ z }}</option>
+                                                                    {% endfor %}
+                                                                </select>
                                                             </div>
                                                             <div class="col-6">
-                                                                <label class="form-label fw-semibold small">Area (Sq.Ft.)</label>
-                                                                <input type="text" name="sqft" class="form-control" value="{{ site.sqft or '' }}">
+                                                                <label class="form-label fw-semibold small">Location / Area</label>
+                                                                <input type="text" name="location" class="form-control" value="{{ site.location }}" required>
                                                             </div>
                                                         </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label fw-semibold small">Price per Sq.Ft.</label>
-                                                            <input type="text" name="price_per_sqft" class="form-control" value="{{ site.price_per_sqft or '' }}">
+                                                        <div class="row g-2 mb-3">
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold small">Sub Location</label>
+                                                                <input type="text" name="sub_location" class="form-control" value="{{ site.sub_location or '' }}">
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold small">Unit Tier / Unit</label>
+                                                                <input type="text" name="unit_tier" class="form-control" value="{{ site.unit_tier or '' }}">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-2 mb-3">
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold small">Total Floors</label>
+                                                                <input type="text" name="total_floors" class="form-control" value="{{ site.total_floors or '' }}">
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold small">BHK Type</label>
+                                                                <select name="bhk_type" class="form-select" required>
+                                                                    {% for b in bhk_options %}
+                                                                        <option value="{{ b }}" {% if b == site.bhk_type %}selected{% endif %}>{{ b }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-2 mb-3">
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold small">Facing</label>
+                                                                <select name="facing" class="form-select">
+                                                                    {% for f in facing_options %}
+                                                                        <option value="{{ f }}" {% if f == site.facing %}selected{% endif %}>{{ f }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <label class="form-label fw-semibold small">Age of Building</label>
+                                                                <select name="building_age" class="form-select">
+                                                                    {% for a in age_options %}
+                                                                        <option value="{{ a }}" {% if a == site.building_age %}selected{% endif %}>{{ a }}</option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-2 mb-3">
+                                                            <div class="col-4">
+                                                                <label class="form-label fw-semibold small">Size (Sq.Ft.)</label>
+                                                                <input type="text" name="sqft" class="form-control" value="{{ site.sqft or '' }}">
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label class="form-label fw-semibold small">Rate / Sq.Ft.</label>
+                                                                <input type="text" name="price_per_sqft" class="form-control" value="{{ site.price_per_sqft or '' }}">
+                                                            </div>
+                                                            <div class="col-4">
+                                                                <label class="form-label fw-semibold small">Quoted Price</label>
+                                                                <input type="text" name="price" class="form-control" value="{{ site.price or '' }}">
+                                                            </div>
                                                         </div>
                                                         <div class="mb-3">
                                                             <label class="form-label fw-semibold small">Description</label>
@@ -629,37 +799,43 @@
                     </div>
                 </div>
 
-                <!-- TAB 4: BUILDER BRANDS -->
+                <!-- TAB 4: MASTER OPTIONS & SETTINGS -->
                 <div class="tab-pane fade" id="builders" role="tabpanel">
-                    <div class="row g-4">
-                        <div class="col-12 col-lg-5">
-                            <div class="bg-white p-4 rounded-4 shadow-sm border">
-                                <h5 class="fw-bold mb-3 text-dark">Add Builder Filter</h5>
-                                <form method="POST" action="{{ url_for('admin_add_builder') }}">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-semibold small">Builder Name</label>
-                                        <input type="text" name="builder_name" class="form-control" placeholder="e.g. Sobha Developers" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-warning w-100 fw-bold py-2">Add Builder Option</button>
-                                </form>
+                    <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                        <h5 class="fw-bold mb-3 text-dark">Property Master Configurations</h5>
+                        <p class="text-muted small mb-4">Master configuration values currently configured in Shelter Hunt Consultants platform:</p>
+                        
+                        <div class="row g-4">
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <h6 class="fw-bold text-dark">BHK Configurations</h6>
+                                    <ul class="list-unstyled mb-0 small text-muted">
+                                        {% for b in bhk_options %}<li>• {{ b }}</li>{% endfor %}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="col-12 col-lg-7">
-                            <div class="bg-white p-4 rounded-4 shadow-sm border">
-                                <h5 class="fw-bold mb-3 text-dark">Builder Filter Options</h5>
-                                <div class="list-group gap-2">
-                                    {% for b in builders %}
-                                    <div class="list-group-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center p-3 rounded-3 border gap-2">
-                                        <span class="fw-bold text-dark">{{ b.name }}</span>
-                                        <div class="d-flex gap-2 align-self-end align-self-sm-auto mt-1 mt-sm-0">
-                                            <a href="{{ url_for('admin_toggle_builder', builder_id=b.id) }}" class="btn btn-sm {% if b.is_active %}btn-outline-secondary{% else %}btn-outline-success{% endif %} fw-semibold">
-                                                {% if b.is_active %}Mark Inactive{% else %}Mark Active{% endif %}
-                                            </a>
-                                            <a href="{{ url_for('admin_delete_builder', builder_id=b.id) }}" class="btn btn-sm btn-outline-danger fw-semibold" onclick="return confirm('Delete builder filter?')">Delete</a>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <h6 class="fw-bold text-dark">Facing Directions</h6>
+                                    <ul class="list-unstyled mb-0 small text-muted">
+                                        {% for f in facing_options %}<li>• {{ f }}</li>{% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <h6 class="fw-bold text-dark">Zone / Regions</h6>
+                                    <ul class="list-unstyled mb-0 small text-muted">
+                                        {% for z in zone_options %}<li>• {{ z }}</li>{% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <h6 class="fw-bold text-dark">Building Age</h6>
+                                    <ul class="list-unstyled mb-0 small text-muted">
+                                        {% for a in age_options %}<li>• {{ a }}</li>{% endfor %}
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -778,8 +954,233 @@
     </div>
 </div>
 
+<!-- SheetJS Library for Excel & CSV Bulk Parsing -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <!-- html2pdf library for PDF generation -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+let parsedBulkProperties = [];
+
+function processBulkFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    
+    if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const rawJson = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+                
+                parseRawRowsToProperties(rawJson);
+            } catch (err) {
+                alert('Error reading spreadsheet file: ' + err.message);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    } else if (fileName.endsWith('.pdf')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const textContent = e.target.result;
+            parseTextToProperties(textContent);
+        };
+        reader.readAsText(file);
+    } else {
+        alert('Unsupported file format. Please upload .xlsx, .xls, .csv, or .pdf');
+    }
+}
+
+function processBulkText() {
+    const text = document.getElementById('bulkTextInput').value.trim();
+    if (!text) {
+        alert('Please paste property table rows in the text area first.');
+        return;
+    }
+    parseTextToProperties(text);
+}
+
+function parseRawRowsToProperties(rows) {
+    parsedBulkProperties = [];
+    
+    rows.forEach(row => {
+        const norm = {};
+        for (let k in row) {
+            norm[k.toString().toLowerCase().trim().replace(/[\s_\/\(\)]+/g, '')] = row[k];
+        }
+
+        const title = norm['propertyname'] || norm['name'] || norm['title'] || norm['property'] || norm['projectname'] || norm['project'] || '';
+        if (!title && Object.keys(norm).length < 2) return;
+
+        const prop = {
+            title: title || 'Featured Property',
+            zone: norm['zone'] || norm['region'] || 'Bengaluru',
+            location: norm['locationarea'] || norm['location'] || norm['area'] || norm['locality'] || 'Bengaluru',
+            sub_location: norm['sublocation'] || norm['subarea'] || '',
+            unit_tier: norm['unittier'] || norm['unit'] || norm['tier'] || '',
+            total_floors: norm['totalfloors'] || norm['floors'] || norm['totalfloor'] || '',
+            bhk_type: norm['bhktype'] || norm['bhk'] || norm['type'] || '2 BHK',
+            facing: norm['facing'] || norm['orientation'] || 'East',
+            building_age: norm['ageofthebuilding'] || norm['ageofbuilding'] || norm['buildingage'] || norm['age'] || 'Ready to Move',
+            sqft: norm['sizesqftapprox'] || norm['sizesqft'] || norm['size'] || norm['sqft'] || '',
+            price_per_sqft: norm['ratepersqft'] || norm['ratesqft'] || norm['rate'] || '',
+            price: norm['quotedpriceinr'] || norm['quotedprice'] || norm['price'] || norm['quotedcost'] || '',
+            description: norm['description'] || `Exclusive property in ${norm['location'] || 'Bengaluru'}. High quality construction with verified title.`,
+            image_filename: norm['image'] || norm['media'] || 'head.jpeg'
+        };
+        parsedBulkProperties.push(prop);
+    });
+
+    renderBulkPreview();
+}
+
+function parseTextToProperties(text) {
+    parsedBulkProperties = [];
+    const lines = text.split(/\r?\n/);
+    
+    lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        
+        let parts = [];
+        if (trimmed.includes('\t')) parts = trimmed.split('\t');
+        else if (trimmed.includes('|')) parts = trimmed.split('|');
+        else if (trimmed.includes(',')) parts = trimmed.split(',');
+        else parts = trimmed.split(/\s{2,}/);
+
+        parts = parts.map(p => p.trim());
+        if (parts.length < 2) return;
+
+        if (parts[0].toLowerCase().includes('property name') || parts[0].toLowerCase().includes('title')) return;
+
+        const prop = {
+            title: parts[0] || 'Featured Property',
+            zone: parts[1] || 'Bengaluru',
+            location: parts[2] || 'Bengaluru',
+            sub_location: parts[3] || '',
+            unit_tier: parts[4] || '',
+            total_floors: parts[5] || '',
+            bhk_type: parts[6] || '2 BHK',
+            facing: parts[7] || 'East',
+            building_age: parts[8] || 'Ready to Move',
+            sqft: parts[9] || '',
+            price_per_sqft: parts[10] || '',
+            price: parts[11] || '',
+            description: parts[12] || `Exclusive property located in ${parts[2] || 'Bengaluru'}.`,
+            image_filename: 'head.jpeg'
+        };
+        parsedBulkProperties.push(prop);
+    });
+
+    renderBulkPreview();
+}
+
+function renderBulkPreview() {
+    const container = document.getElementById('bulkPreviewContainer');
+    const tbody = document.getElementById('bulkPreviewTbody');
+    const countEl = document.getElementById('parsedRowCount');
+    
+    if (parsedBulkProperties.length === 0) {
+        alert('No valid property rows could be detected in the file/text.');
+        container.classList.add('d-none');
+        return;
+    }
+
+    countEl.innerText = parsedBulkProperties.length;
+    tbody.innerHTML = '';
+
+    parsedBulkProperties.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${index + 1}</strong></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.title)}" onchange="updateBulkItem(${index}, 'title', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.zone)}" onchange="updateBulkItem(${index}, 'zone', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.location)}" onchange="updateBulkItem(${index}, 'location', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.sub_location)}" onchange="updateBulkItem(${index}, 'sub_location', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.unit_tier)}" onchange="updateBulkItem(${index}, 'unit_tier', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.total_floors)}" onchange="updateBulkItem(${index}, 'total_floors', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.bhk_type)}" onchange="updateBulkItem(${index}, 'bhk_type', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.facing)}" onchange="updateBulkItem(${index}, 'facing', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.building_age)}" onchange="updateBulkItem(${index}, 'building_age', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.sqft)}" onchange="updateBulkItem(${index}, 'sqft', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.price_per_sqft)}" onchange="updateBulkItem(${index}, 'price_per_sqft', this.value)"></td>
+            <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(item.price)}" onchange="updateBulkItem(${index}, 'price', this.value)"></td>
+            <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger p-1" onclick="removeBulkItem(${index})">✖</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    container.classList.remove('d-none');
+    container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function updateBulkItem(index, key, val) {
+    if (parsedBulkProperties[index]) {
+        parsedBulkProperties[index][key] = val;
+    }
+}
+
+function removeBulkItem(index) {
+    parsedBulkProperties.splice(index, 1);
+    if (parsedBulkProperties.length === 0) {
+        clearBulkPreview();
+    } else {
+        renderBulkPreview();
+    }
+}
+
+function clearBulkPreview() {
+    parsedBulkProperties = [];
+    document.getElementById('bulkPreviewContainer').classList.add('d-none');
+    document.getElementById('bulkFileInput').value = '';
+    document.getElementById('bulkTextInput').value = '';
+}
+
+function escapeHtml(str) {
+    return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function publishBulkPropertiesLive() {
+    if (parsedBulkProperties.length === 0) {
+        alert('No parsed property records to publish.');
+        return;
+    }
+
+    const btn = document.getElementById('publishBulkBtn');
+    btn.disabled = true;
+    btn.innerText = "Publishing to Website...";
+
+    fetch('/admin/bulk-add-sites', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ properties: parsedBulkProperties })
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerText = "🚀 Publish All Properties Live";
+        if (data.success) {
+            alert(`Success! ${data.count} properties have been uploaded and published live on the website.`);
+            window.location.reload();
+        } else {
+            alert('Error publishing properties: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerText = "🚀 Publish All Properties Live";
+        alert('Server connection error. Please try again.');
+    });
+}
+</script>
 
 <script>
 function exportTableToCSV(tableId, filename) {

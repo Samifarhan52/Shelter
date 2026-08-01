@@ -139,31 +139,31 @@
                     </div>
 
                     <!-- Modern Slot Chips Grid -->
-                    <div class="row g-3 mb-4">
+                    <div class="row g-2.5 mb-4">
                         {% for slot in all_slots %}
-                            <div class="col-6 col-md-4">
+                            <div class="col-6 col-sm-4 col-md-3">
                                 {% if slot in booked_slots %}
                                     <!-- Booked Disabled Slot -->
-                                    <div class="slot-chip-disabled d-flex flex-column justify-content-between h-100">
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div class="slot-chip-disabled d-flex flex-column justify-content-between h-100 p-2.5">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
                                             <span class="status-dot bg-danger"></span>
-                                            <small class="text-danger fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; text-uppercase;">Reserved</small>
+                                            <small class="text-danger fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; text-uppercase;">Reserved</small>
                                         </div>
-                                        <div class="fw-bold text-muted mb-2">{{ slot }}</div>
-                                        <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-start text-dark fw-semibold" style="font-size: 0.75rem;" onclick="fetchRecommendations('{{ slot }}', '{{ date }}')">
-                                            Find Open Dates &rarr;
+                                        <div class="fw-bold text-muted small mb-1">{{ slot }}</div>
+                                        <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-start text-dark fw-semibold" style="font-size: 0.7rem;" onclick="fetchRecommendations('{{ slot }}', '{{ date }}')">
+                                            Open Dates &rarr;
                                         </button>
                                     </div>
                                 {% else %}
                                     <!-- Active Selectable Slot Chip -->
-                                    <div class="slot-chip d-flex flex-column justify-content-between h-100" 
+                                    <div class="slot-chip d-flex flex-column justify-content-between h-100 p-2.5" 
                                          id="slot-chip-{{ loop.index }}"
                                          onclick="selectSlot('{{ slot }}', 'slot-chip-{{ loop.index }}')">
-                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
                                             <span class="status-dot bg-success"></span>
-                                            <small class="text-success fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; text-uppercase;">Open</small>
+                                            <small class="text-success fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; text-uppercase;">Open</small>
                                         </div>
-                                        <div class="slot-time-text fw-bold fs-5" style="color: var(--navy-dark);">{{ slot }}</div>
+                                        <div class="slot-time-text fw-bold fs-6" style="color: var(--navy-dark);">{{ slot }}</div>
                                     </div>
                                 {% endif %}
                             </div>
@@ -186,24 +186,18 @@
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold text-secondary small">FULL NAME</label>
-                                <input type="text" name="full_name" class="form-control py-2" placeholder="e.g. Rahul Sharma" required>
+                                <label class="form-label fw-semibold text-secondary small">FULL NAME *</label>
+                                <input type="text" name="full_name" class="form-control py-2" placeholder="Enter Full Name" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold text-secondary small">EMAIL ADDRESS</label>
-                                <input type="email" name="email" class="form-control py-2" placeholder="e.g. rahul@gmail.com" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-secondary small">PHONE NUMBER</label>
-                                <input type="tel" name="phone" class="form-control py-2" placeholder="e.g. +91 9876543210" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold text-secondary small">TARGET LOCATION</label>
-                                <input type="text" name="location" class="form-control py-2" placeholder="e.g. Sarjapur Road / Whitefield" required>
+                                <input type="email" name="email" class="form-control py-2" placeholder="Enter Email Address">
                             </div>
                             <div class="col-md-12">
-                                <label class="form-label fw-semibold text-secondary small">ESTIMATED BUDGET</label>
-                                <input type="text" name="budget" class="form-control py-2" placeholder="e.g. 1.5 Cr - 2 Cr" required>
+                                <label class="form-label fw-semibold text-secondary small">PHONE NUMBER *</label>
+                                <input type="tel" name="phone" class="form-control py-2" placeholder="Enter 10-digit Mobile Number" 
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" 
+                                       maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits" required>
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label fw-semibold text-secondary small">REQUIREMENTS & NOTES (OPTIONAL)</label>
