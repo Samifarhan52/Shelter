@@ -7,6 +7,7 @@ import re
 import firebase_admin
 from firebase_admin import credentials, firestore
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "shelter_hunt_secret_key_2026")
@@ -446,7 +447,8 @@ def admin():
                 doc = firestore_db.collection('users').document(email).get()
                 if doc.exists:
                     user = doc.to_dict()
-                    if check_password_hash(user['password'], password):
+                    stored_pwd = user.get('password', '')
+                    if stored_pwd and (stored_pwd == password or check_password_hash(stored_pwd, password)):
                         session['admin_logged_in'] = True
                         return redirect(url_for('admin'))
             except Exception as e:
@@ -636,22 +638,29 @@ def admin_change_password():
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
-    new_password = request.form.get('new_password')
-    confirm_password = request.form.get('confirm_password')
+    new_password = request.form.get('new_password', '').strip()
+    confirm_password = request.form.get('confirm_password', '').strip()
     
     if not new_password or new_password != confirm_password:
-        flash("Passwords do not match.", "warning")
+        flash("Passwords do not match or field is empty.", "warning")
         return redirect(url_for('admin'))
         
     firestore_db = get_firestore()
     if firestore_db:
         try:
             hashed_pwd = generate_password_hash(new_password)
-            firestore_db.collection('users').document('admin@shelterhunt.com').set({'password': hashed_pwd, 'name': 'Admin', 'email': 'admin@shelterhunt.com'})
+            firestore_db.collection('users').document('admin@shelterhunt.com').set({
+                'password': hashed_pwd,
+                'name': 'Admin',
+                'email': 'admin@shelterhunt.com',
+                'updated_at': datetime.datetime.now().isoformat()
+            })
             flash("Admin account password successfully updated!", "success")
         except Exception as e:
             print(f"Error updating password: {e}")
-            flash("Could not update password.", "danger")
+            flash(f"Could not update password: {e}", "danger")
+    else:
+        flash("Database connection unavailable. Password not updated.", "danger")
         
     return redirect(url_for('admin'))
 
