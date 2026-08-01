@@ -1009,30 +1009,38 @@ function processBulkText() {
 function parseRawRowsToProperties(rows) {
     parsedBulkProperties = [];
     
+    const getString = (val, fallback = '') => {
+        if (val === null || val === undefined) return fallback;
+        return String(val).trim();
+    };
+
     rows.forEach(row => {
         const norm = {};
         for (let k in row) {
-            norm[k.toString().toLowerCase().trim().replace(/[\s_\/\(\)]+/g, '')] = row[k];
+            if (k) {
+                const normKey = String(k).toLowerCase().trim().replace(/[\s_\/\(\)]+/g, '');
+                norm[normKey] = row[k];
+            }
         }
 
         const title = norm['propertyname'] || norm['name'] || norm['title'] || norm['property'] || norm['projectname'] || norm['project'] || '';
         if (!title && Object.keys(norm).length < 2) return;
 
         const prop = {
-            title: title || 'Featured Property',
-            zone: norm['zone'] || norm['region'] || 'Bengaluru',
-            location: norm['locationarea'] || norm['location'] || norm['area'] || norm['locality'] || 'Bengaluru',
-            sub_location: norm['sublocation'] || norm['subarea'] || '',
-            unit_tier: norm['unittier'] || norm['unit'] || norm['tier'] || '',
-            total_floors: norm['totalfloors'] || norm['floors'] || norm['totalfloor'] || '',
-            bhk_type: norm['bhktype'] || norm['bhk'] || norm['type'] || '2 BHK',
-            facing: norm['facing'] || norm['orientation'] || 'East',
-            building_age: norm['ageofthebuilding'] || norm['ageofbuilding'] || norm['buildingage'] || norm['age'] || 'Ready to Move',
-            sqft: norm['sizesqftapprox'] || norm['sizesqft'] || norm['size'] || norm['sqft'] || '',
-            price_per_sqft: norm['ratepersqft'] || norm['ratesqft'] || norm['rate'] || '',
-            price: norm['quotedpriceinr'] || norm['quotedprice'] || norm['price'] || norm['quotedcost'] || '',
-            description: norm['description'] || `Exclusive property in ${norm['location'] || 'Bengaluru'}. High quality construction with verified title.`,
-            image_filename: norm['image'] || norm['media'] || 'head.jpeg'
+            title: getString(title, 'Featured Property'),
+            zone: getString(norm['zone'] || norm['region'], 'Bengaluru'),
+            location: getString(norm['locationarea'] || norm['location'] || norm['area'] || norm['locality'], 'Bengaluru'),
+            sub_location: getString(norm['sublocation'] || norm['subarea']),
+            unit_tier: getString(norm['unittier'] || norm['unit'] || norm['tier']),
+            total_floors: getString(norm['totalfloors'] || norm['floors'] || norm['totalfloor']),
+            bhk_type: getString(norm['bhktype'] || norm['bhk'] || norm['type'], '2 BHK'),
+            facing: getString(norm['facing'] || norm['orientation'], 'East'),
+            building_age: getString(norm['ageofthebuilding'] || norm['ageofbuilding'] || norm['buildingage'] || norm['age'], 'Ready to Move'),
+            sqft: getString(norm['sizesqftapprox'] || norm['sizesqft'] || norm['size'] || norm['sqft']),
+            price_per_sqft: getString(norm['ratepersqft'] || norm['ratesqft'] || norm['rate']),
+            price: getString(norm['quotedpriceinr'] || norm['quotedprice'] || norm['price'] || norm['quotedcost']),
+            description: getString(norm['description'], `Exclusive property in ${getString(norm['location'], 'Bengaluru')}. High quality construction with verified title.`),
+            image_filename: getString(norm['image'] || norm['media'], 'head.jpeg')
         };
         parsedBulkProperties.push(prop);
     });
@@ -1042,7 +1050,7 @@ function parseRawRowsToProperties(rows) {
 
 function parseTextToProperties(text) {
     parsedBulkProperties = [];
-    const lines = text.split(/\r?\n/);
+    const lines = String(text || '').split(/\r?\n/);
     
     lines.forEach(line => {
         const trimmed = line.trim();
@@ -1143,7 +1151,8 @@ function clearBulkPreview() {
 }
 
 function escapeHtml(str) {
-    return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function publishBulkPropertiesLive() {
