@@ -3,16 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 1. Google Search Favicon Link -->
-    <link rel="icon" type="image/jpeg" sizes="48x48" href="{{ settings.brand_logo if settings.brand_logo else url_for('static', filename='logo.jpeg') }}">
-    <link rel="shortcut icon" href="{{ settings.brand_logo if settings.brand_logo else url_for('static', filename='logo.jpeg') }}" type="image/x-icon">
+    <!-- 1. Google Search Favicon Links -->
+    <link rel="icon" type="image/jpeg" sizes="32x32" href="{{ settings.brand_logo if settings.brand_logo else url_for('static', filename='logo.jpeg') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     
-    <!-- 2. Apple / Mobile Touch Icon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ settings.brand_logo if settings.brand_logo else url_for('static', filename='logo.jpeg') }}">
-    
-    <title>{{ settings.meta_title if settings.meta_title else 'Shelter Hunt Consultants' }}</title>
+    <title>{{ settings.meta_title if settings.meta_title else 'Shelter Hunt Consultants | Premium Real Estate Advisory Bengaluru' }}</title>
     {% if settings.meta_description %}<meta name="description" content="{{ settings.meta_description }}">{% endif %}
     {% if settings.meta_keywords %}<meta name="keywords" content="{{ settings.meta_keywords }}">{% endif %}
+
+    <!-- 2. OpenGraph & Social Media Preview Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Shelter Hunt Consultants">
+    <meta property="og:title" content="{{ settings.meta_title if settings.meta_title else 'Shelter Hunt Consultants | Premium Real Estate Advisory Bengaluru' }}">
+    <meta property="og:description" content="{{ settings.meta_description if settings.meta_description else 'Verified premium property listings across Bengaluru.' }}">
+    <meta property="og:image" content="{{ settings.brand_logo if settings.brand_logo else 'https://www.shelterhuntconsultants.com/static/logo.jpeg' }}">
+    <meta property="og:url" content="https://www.shelterhuntconsultants.com">
+
+    <!-- 3. Google Search Organization Structured Data (Logo indexing) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "RealEstateAgent",
+      "name": "Shelter Hunt Consultants",
+      "url": "https://www.shelterhuntconsultants.com",
+      "logo": "https://www.shelterhuntconsultants.com/static/logo.jpeg",
+      "image": "https://www.shelterhuntconsultants.com/static/logo.jpeg",
+      "telephone": "{{ settings.contact_phone if settings and settings.contact_phone else '+91 8050749331' }}",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "58, opposite ganesh temple, Carmelaram, Chikkabellandur",
+        "addressLocality": "Bengaluru",
+        "addressRegion": "Karnataka",
+        "postalCode": "560035",
+        "addressCountry": "IN"
+      }
+    }
+    </script>
 
     <!-- Google Analytics (GA4) Integration -->
     {% if settings.ga_tracking_id %}

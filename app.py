@@ -6,7 +6,7 @@ import base64
 import re
 import firebase_admin
 from firebase_admin import credentials, firestore
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -1018,6 +1018,10 @@ def robots():
     content += "\n"
     content += "Sitemap: https://shelterhuntconsultants.com/sitemap.xml\n"
     return app.response_class(content, mimetype='text/plain')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/x-icon')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
