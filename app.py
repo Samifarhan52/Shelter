@@ -997,13 +997,18 @@ def sitemap():
             print(f"Error fetching sites for sitemap: {e}")
             
     xml_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n'
     for page in pages:
         xml_content += '  <url>\n'
         xml_content += f"    <loc>{page['loc']}</loc>\n"
         xml_content += f"    <lastmod>{page['lastmod']}</lastmod>\n"
         xml_content += f"    <changefreq>{page['changefreq']}</changefreq>\n"
         xml_content += f"    <priority>{page['priority']}</priority>\n"
+        if page['loc'] == f"{host}/":
+            xml_content += '    <image:image>\n'
+            xml_content += f'      <image:loc>{host}/static/logo.jpeg</image:loc>\n'
+            xml_content += '      <image:title>Shelter Hunt Consultants Official Logo</image:title>\n'
+            xml_content += '    </image:image>\n'
         xml_content += '  </url>\n'
     xml_content += '</urlset>'
     
