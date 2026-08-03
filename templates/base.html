@@ -26,18 +26,28 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content="https://www.shelterhuntconsultants.com/static/logo.jpeg">
 
-    <!-- 3. Google Search LocalBusiness & RealEstateAgent Structured Data (Knowledge Graph & Favicon) -->
+    <!-- Trust & Verification Meta Tags -->
+    <meta name="author" content="Shelter Hunt Consultants">
+    <meta name="publisher" content="Shelter Hunt Consultants">
+    <meta name="copyright" content="Shelter Hunt Consultants">
+    <meta name="coverage" content="Bengaluru, Karnataka, India">
+    <meta name="distribution" content="Global">
+    <meta name="rating" content="General">
+
+    <!-- 3. Google Search Knowledge Graph Entity & LocalBusiness Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": ["RealEstateAgent", "LocalBusiness"],
+      "@type": ["RealEstateAgent", "LocalBusiness", "Organization"],
       "name": "Shelter Hunt Consultants",
       "legalName": "Shelter Hunt Consultants",
-      "alternateName": ["Shelter Hunt", "ShelterHuntConsultants"],
+      "alternateName": ["Shelter Hunt", "ShelterHuntConsultants", "Shelter Hunt Real Estate"],
       "url": "https://www.shelterhuntconsultants.com",
       "logo": "https://www.shelterhuntconsultants.com/static/logo.jpeg",
       "image": "https://www.shelterhuntconsultants.com/static/logo.jpeg",
+      "description": "Verified premium property listings, site visit coordination, and unbiased real estate advisory across Bengaluru.",
       "telephone": "{{ settings.contact_phone if settings and settings.contact_phone else '+91 8050749331' }}",
+      "email": "{{ settings.contact_email if settings and settings.contact_email else 'contact@shelterhunt.com' }}",
       "priceRange": "$$$",
       "address": {
         "@type": "PostalAddress",
@@ -59,7 +69,32 @@
         ],
         "opens": "09:00",
         "closes": "19:00"
-      }
+      },
+      "areaServed": [
+        {
+          "@type": "City",
+          "name": "Bengaluru"
+        },
+        {
+          "@type": "State",
+          "name": "Karnataka"
+        }
+      ],
+      "knowsAbout": [
+        "Real Estate Advisory",
+        "Property Consultation Bengaluru",
+        "2 BHK Apartments",
+        "3 BHK Flats",
+        "Luxury Villas",
+        "Residential Plots"
+      ],
+      "sameAs": [
+        "https://www.shelterhuntconsultants.com",
+        "{{ settings.social_facebook if settings and settings.social_facebook else '#' }}",
+        "{{ settings.social_instagram if settings and settings.social_instagram else '#' }}",
+        "{{ settings.social_linkedin if settings and settings.social_linkedin else '#' }}",
+        "{{ settings.social_youtube if settings and settings.social_youtube else '#' }}"
+      ]
     }
     </script>
 
