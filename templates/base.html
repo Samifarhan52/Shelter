@@ -254,6 +254,7 @@
 
                 <!-- Right Action Button & Mobile Menu Toggle -->
                 <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-outline-warning btn-header-cta px-3 fw-bold" onclick="openPostSiteModal()">Post Your Site</button>
                     <button type="button" class="btn btn-gold btn-header-cta px-3 border-0" onclick="openChoiceModal()">Book Session</button>
                     
                     <button class="mobile-menu-btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -297,6 +298,7 @@
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('sites') }}">Sites</a></li>
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('about') }}">About Us</a></li>
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('services') }}">Services</a></li>
+                        <li class="nav-item d-lg-none"><a class="nav-link text-warning px-3 fw-bold" href="javascript:void(0)" onclick="openPostSiteModal()">🏡 Post Your Site</a></li>
                     </ul>
                 </div>
 
@@ -474,7 +476,7 @@
                 <div class="col-lg-3 col-md-6 col-12">
                     <h6 class="fw-bold text-white mb-3 text-uppercase" style="letter-spacing: 1px; font-size: 0.85rem;">Get in Touch</h6>
                     <p class="text-light-slate small mb-2">
-                        <strong class="text-white">Address:</strong> {{ settings.get('contact_address', 'Bengaluru, Karnataka, India') if settings else 'Bengaluru, Karnataka, India' }}
+                        <strong class="text-white">Address:</strong> {{ settings.get('contact_address', '58, opposite ganesh temple, Carmelaram, Chikkabellandur, Bengaluru, Karnataka 560035') if settings else '58, opposite ganesh temple, Carmelaram, Chikkabellandur, Bengaluru, Karnataka 560035' }}
                     </p>
                     <p class="text-light-slate small mb-2">
                         <strong class="text-white">Phone:</strong> {{ settings.get('contact_phone', '+91 8050749331') if settings else '+91 8050749331' }}
@@ -482,6 +484,17 @@
                     <p class="text-light-slate small mb-3">
                         <strong class="text-white">Email:</strong> {{ settings.get('contact_email', 'contact@shelterhunt.com') if settings else 'contact@shelterhunt.com' }}
                     </p>
+                    {% if settings and settings.get('google_maps_embed_url') %}
+                    <div class="mb-3 rounded-3 overflow-hidden shadow-sm border border-secondary" style="height: 110px;">
+                        <iframe src="{{ settings.get('google_maps_embed_url') }}" width="100%" height="110" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                    {% else %}
+                    <div class="mb-3">
+                        <a href="https://maps.google.com/?q={{ settings.get('contact_address', '58,+opposite+ganesh+temple,+Carmelaram,+Chikkabellandur,+Bengaluru,+Karnataka+560035')|urlencode }}" target="_blank" class="btn btn-outline-light btn-sm w-100 py-1.5 fw-semibold d-flex align-items-center justify-content-center gap-2" style="font-size: 0.8rem;">
+                            📍 <span>View Location on Google Maps</span>
+                        </a>
+                    </div>
+                    {% endif %}
                     <button type="button" class="btn btn-gold btn-sm fw-bold w-100 py-2 border-0" onclick="openChoiceModal()">
                         Request Consultation
                     </button>
@@ -501,6 +514,40 @@
         </div>
     </footer>
 
+    <!-- 3. POST YOUR SITE / LIST PROPERTY MODAL -->
+    <div class="modal fade" id="postSiteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="badge bg-warning text-dark fw-bold mb-1">PROPERTY OWNER / LISTING</span>
+                            <h4 class="fw-bold text-dark m-0">Post Your Property</h4>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <p class="text-muted small mb-4">Want to feature your property on Shelter Hunt? Enter your contact details below to initiate owner onboarding via WhatsApp.</p>
+                    
+                    <form id="postSiteForm" onsubmit="handlePostSiteSubmit(event)">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small mb-1">Full Name *</label>
+                            <input type="text" id="post_site_name" class="form-control py-2" placeholder="e.g. Rahul Sharma" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark small mb-1">10-Digit Mobile Number *</label>
+                            <input type="tel" id="post_site_phone" class="form-control py-2" placeholder="Enter 10-digit mobile number" 
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" 
+                                   maxlength="10" pattern="[0-9]{10}" title="Please enter exactly 10 digits" required>
+                        </div>
+                        <button type="submit" id="submitPostSiteBtn" class="btn btn-gold w-100 fw-bold py-2.5 fs-6 shadow-sm">
+                            Continue to WhatsApp Chat 💬
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap 5 JavaScript Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -508,6 +555,7 @@
     <script>
         let choiceModalObj = null;
         let leadModalObj = null;
+        let postSiteModalObj = null;
 
         document.addEventListener("DOMContentLoaded", function() {
             const loader = document.getElementById('entry-reveal-loader');
@@ -525,10 +573,57 @@
 
             choiceModalObj = new bootstrap.Modal(document.getElementById('choiceModal'));
             leadModalObj = new bootstrap.Modal(document.getElementById('leadModal'));
+            const postModalEl = document.getElementById('postSiteModal');
+            if (postModalEl) postSiteModalObj = new bootstrap.Modal(postModalEl);
         });
 
         function openChoiceModal() {
             if (choiceModalObj) choiceModalObj.show();
+        }
+
+        function openPostSiteModal() {
+            if (postSiteModalObj) postSiteModalObj.show();
+        }
+
+        function handlePostSiteSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitPostSiteBtn');
+            btn.disabled = true;
+            btn.innerText = "Connecting to WhatsApp...";
+
+            const name = document.getElementById('post_site_name').value.trim();
+            const phoneRaw = document.getElementById('post_site_phone').value;
+            const phone = phoneRaw.replace(/\D/g, '');
+
+            if (phone.length !== 10) {
+                alert("Please enter a valid 10-digit mobile number.");
+                btn.disabled = false;
+                btn.innerText = "Continue to WhatsApp Chat 💬";
+                return;
+            }
+
+            fetch('/submit-post-site-lead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, phone: phone })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.redirect_url) {
+                    if (postSiteModalObj) postSiteModalObj.hide();
+                    window.open(data.redirect_url, '_blank');
+                } else {
+                    alert(data.message || "An error occurred. Please try again.");
+                }
+            })
+            .catch(err => {
+                console.error("Error submitting post site lead:", err);
+                alert("Network error. Please try again.");
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerText = "Continue to WhatsApp Chat 💬";
+            });
         }
 
         function selectCallOption() {

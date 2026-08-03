@@ -281,90 +281,175 @@
             {% endwith %}
 
             <div class="tab-content" id="adminTabsContent">
-                <!-- TAB 1: CLIENT LEADS -->
+                <!-- TAB 1: CLIENT LEADS & PROPERTY LISTING REQUESTS -->
                 <div class="tab-pane fade show active" id="leads" role="tabpanel">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
-                        <h5 class="fw-bold m-0 text-dark">Client Callback & Consultation Leads</h5>
-                        <span class="badge bg-secondary px-3 py-2">{{ leads|length }} Total Records</span>
-                    </div>
+                    <ul class="nav nav-pills mb-4 bg-white p-2 rounded-3 shadow-sm border gap-2" id="leadSubTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active fw-bold py-2 px-3" id="advisory-tab" data-bs-toggle="pill" data-bs-target="#advisory-leads" type="button" role="tab">
+                                🗓 Advisory Session Bookings ({{ leads|length }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link fw-bold py-2 px-3" id="post-site-tab" data-bs-toggle="pill" data-bs-target="#post-site-leads-pane" type="button" role="tab">
+                                🏡 Property Listing Requests / Post Your Site ({{ post_site_leads|length if post_site_leads else 0 }})
+                            </button>
+                        </li>
+                    </ul>
 
-                    <!-- Search and Export Toolbar -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-12 col-md-6">
-                            <div class="input-group shadow-sm rounded-3 overflow-hidden">
-                                <span class="input-group-text bg-white border-end-0 text-muted px-3">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="11" cy="11" r="8"></circle>
-                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                    </svg>
-                                </span>
-                                <input type="text" id="leadsSearchInput" class="form-control border-start-0 ps-0 py-2.5" placeholder="Search by name, email, phone, location, budget..." onkeyup="filterLeadsTable()">
+                    <div class="tab-content" id="leadSubTabsContent">
+                        <!-- Sub-Pane 1: Advisory Session Bookings -->
+                        <div class="tab-pane fade show active" id="advisory-leads" role="tabpanel">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                                <h5 class="fw-bold m-0 text-dark">Client Callback & Consultation Leads</h5>
+                                <span class="badge bg-secondary px-3 py-2">{{ leads|length }} Total Records</span>
+                            </div>
+
+                            <!-- Search and Export Toolbar -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12 col-md-6">
+                                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                        <span class="input-group-text bg-white border-end-0 text-muted px-3">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="11" cy="11" r="8"></circle>
+                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                            </svg>
+                                        </span>
+                                        <input type="text" id="leadsSearchInput" class="form-control border-start-0 ps-0 py-2.5" placeholder="Search by name, email, phone, location, budget..." onkeyup="filterLeadsTable()">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 text-md-end d-flex gap-2 justify-content-md-end">
+                                    <button onclick="openExportModal('pdf')" class="btn btn-outline-danger fw-bold d-inline-flex align-items-center gap-2 px-3 py-2.5 rounded-3 shadow-sm">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                        <span>Export as PDF</span>
+                                    </button>
+                                    <button onclick="openExportModal('csv')" class="btn btn-outline-success fw-bold d-inline-flex align-items-center gap-2 px-3 py-2.5 rounded-3 shadow-sm">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+                                        <span>Export as Excel/CSV</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-custom">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Booking Date</th>
+                                            <th>Client Info</th>
+                                            <th>Phone / Contact</th>
+                                            <th>Type / Budget</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Management</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leadsTableBody">
+                                        {% for lead in leads %}
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold text-dark">{{ lead.session_date }}</div>
+                                                <small class="text-muted">{{ lead.slot_time }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-dark">{{ lead.full_name }}</div>
+                                                <small class="text-muted">{{ lead.email }}</small>
+                                            </td>
+                                            <td>
+                                                <a href="tel:{{ lead.phone }}" class="text-decoration-none fw-semibold text-primary">
+                                                    {{ lead.phone }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <div class="small fw-semibold text-dark">{{ lead.location }}</div>
+                                                <small class="text-muted">Budget: {{ lead.budget }}</small>
+                                            </td>
+                                            <td>
+                                                {% if lead.status == 'Cancelled' %}
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1">Cancelled</span>
+                                                {% else %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">Confirmed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{{ url_for('admin_toggle_session', session_id=lead.id) }}" class="btn btn-sm {% if lead.status == 'Cancelled' %}btn-outline-success{% else %}btn-outline-danger{% endif %} fw-semibold">
+                                                    {% if lead.status == 'Cancelled' %}Reopen Lead{% else %}Cancel Lead{% endif %}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted py-5">No client strategy submissions recorded yet.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div class="col-12 col-md-6 text-md-end d-flex gap-2 justify-content-md-end">
-                            <button onclick="openExportModal('pdf')" class="btn btn-outline-danger fw-bold d-inline-flex align-items-center gap-2 px-3 py-2.5 rounded-3 shadow-sm">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                <span>Export as PDF</span>
-                            </button>
-                            <button onclick="openExportModal('csv')" class="btn btn-outline-success fw-bold d-inline-flex align-items-center gap-2 px-3 py-2.5 rounded-3 shadow-sm">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
-                                <span>Export as Excel/CSV</span>
-                            </button>
-                        </div>
-                    </div>
 
-                    <div class="table-custom">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Booking Date</th>
-                                    <th>Client Info</th>
-                                    <th>Phone / Contact</th>
-                                    <th>Type / Budget</th>
-                                    <th>Status</th>
-                                    <th class="text-end">Management</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leadsTableBody">
-                                {% for lead in leads %}
-                                <tr>
-                                    <td>
-                                        <div class="fw-bold text-dark">{{ lead.session_date }}</div>
-                                        <small class="text-muted">{{ lead.slot_time }}</small>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold text-dark">{{ lead.full_name }}</div>
-                                        <small class="text-muted">{{ lead.email }}</small>
-                                    </td>
-                                    <td>
-                                        <a href="tel:{{ lead.phone }}" class="text-decoration-none fw-semibold text-primary">
-                                            {{ lead.phone }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <div class="small fw-semibold text-dark">{{ lead.location }}</div>
-                                        <small class="text-muted">Budget: {{ lead.budget }}</small>
-                                    </td>
-                                    <td>
-                                        {% if lead.status == 'Cancelled' %}
-                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1">Cancelled</span>
+                        <!-- Sub-Pane 2: Property Listing Requests (Post Your Site) -->
+                        <div class="tab-pane fade" id="post-site-leads-pane" role="tabpanel">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                                <div>
+                                    <h5 class="fw-bold m-0 text-dark">Property Listing Requests (Post Your Site)</h5>
+                                    <small class="text-muted">Property owners requesting listing & onboarding via WhatsApp.</small>
+                                </div>
+                                <span class="badge bg-warning text-dark px-3 py-2 fw-bold">{{ post_site_leads|length if post_site_leads else 0 }} Submissions</span>
+                            </div>
+
+                            <div class="table-custom">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Submitted Date</th>
+                                            <th>Owner Name</th>
+                                            <th>Mobile Number</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Management Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for p_lead in post_site_leads %}
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold text-dark">{{ p_lead.submitted_at[:10] }}</div>
+                                                <small class="text-muted">{{ p_lead.submitted_at[11:16] }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-dark fs-6">{{ p_lead.name }}</div>
+                                            </td>
+                                            <td>
+                                                <a href="tel:{{ p_lead.phone }}" class="text-decoration-none fw-bold text-primary">
+                                                    {{ p_lead.phone }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if p_lead.status == 'New' %}
+                                                    <span class="badge bg-warning text-dark px-2.5 py-1">New Lead</span>
+                                                {% elif p_lead.status == 'Contacted' %}
+                                                    <span class="badge bg-info text-dark px-2.5 py-1">Contacted</span>
+                                                {% else %}
+                                                    <span class="badge bg-success px-2.5 py-1">Listed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="https://wa.me/91{{ p_lead.phone }}?text=Hello%20{{ p_lead.name }}%2C%20thank%20you%20for%20reaching%20out%20to%20Shelter%20Hunt%20Consultants%20to%20post%20your%20property.%20We%20are%20ready%20to%20assist%20you!" target="_blank" class="btn btn-sm btn-outline-success fw-bold me-1">
+                                                    💬 WhatsApp
+                                                </a>
+                                                <a href="{{ url_for('admin_toggle_post_site_lead', lead_id=p_lead.id) }}" class="btn btn-sm btn-outline-primary fw-semibold me-1">
+                                                    🔄 Status
+                                                </a>
+                                                <a href="{{ url_for('admin_delete_post_site_lead', lead_id=p_lead.id) }}" class="btn btn-sm btn-outline-danger fw-semibold" onclick="return confirm('Delete this property listing lead?')">
+                                                    🗑 Delete
+                                                </a>
+                                            </td>
+                                        </tr>
                                         {% else %}
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">Confirmed</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="{{ url_for('admin_toggle_session', session_id=lead.id) }}" class="btn btn-sm {% if lead.status == 'Cancelled' %}btn-outline-success{% else %}btn-outline-danger{% endif %} fw-semibold">
-                                            {% if lead.status == 'Cancelled' %}Reopen Lead{% else %}Cancel Lead{% endif %}
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-5">No client strategy submissions recorded yet.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-5">No property listing requests submitted yet.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -984,7 +1069,13 @@
 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold small">Physical Office Address</label>
-                                        <input type="text" name="contact_address" class="form-control" value="{{ settings.get('contact_address', 'Bengaluru, Karnataka, India') }}" required>
+                                        <input type="text" name="contact_address" class="form-control" value="{{ settings.get('contact_address', '58, opposite ganesh temple, Carmelaram, Chikkabellandur, Bengaluru, Karnataka 560035') }}" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small">Google Maps Embed URL / Link</label>
+                                        <input type="text" name="google_maps_embed_url" class="form-control" value="{{ settings.get('google_maps_embed_url', 'https://maps.google.com/maps?q=58,+opposite+ganesh+temple,+Carmelaram,+Chikkabellandur,+Bengaluru,+Karnataka+560035&t=&z=15&ie=UTF8&iwloc=&output=embed') }}" placeholder="Enter Google Maps Embed URL">
+                                        <small class="text-muted">Displays interactive location map in website footer.</small>
                                     </div>
 
                                     <hr class="my-4">

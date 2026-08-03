@@ -130,7 +130,7 @@ def get_site_settings():
         'whatsapp_number': '918050749331',
         'contact_phone': '+91 8050749331',
         'contact_email': 'contact@shelterhunt.com',
-        'contact_address': 'Bengaluru, Karnataka, India',
+        'contact_address': '58, opposite ganesh temple, Carmelaram, Chikkabellandur, Bengaluru, Karnataka 560035',
         'hero_title': 'Smart Property Decisions Start Here.',
         'hero_subtitle': "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.",
         'philosophy_text': 'Shelter Hunt Consultants is a knowledge-first agency built on the belief that real estate decisions deserve expert guidance, not sales pressure.',
@@ -145,7 +145,7 @@ def get_site_settings():
         'social_instagram': '',
         'social_linkedin': '',
         'social_youtube': '',
-        'google_maps_embed_url': ''
+        'google_maps_embed_url': 'https://maps.google.com/maps?q=58,+opposite+ganesh+temple,+Carmelaram,+Chikkabellandur,+Bengaluru,+Karnataka+560035&t=&z=15&ie=UTF8&iwloc=&output=embed'
     }
     firestore_db = get_firestore()
     if not firestore_db:
@@ -433,6 +433,51 @@ def confirm_booking():
     
     return redirect(whatsapp_url)
 
+@app.route('/submit-post-site-lead', methods=['POST'])
+def submit_post_site_lead():
+    try:
+        data = request.get_json() or request.form
+        full_name = str(data.get('name', '')).strip()
+        phone = str(data.get('phone', '')).strip()
+
+        digits_only = re.sub(r'\D', '', phone)
+        if not full_name:
+            return jsonify({'success': False, 'message': 'Please enter your full name.'}), 400
+        if len(digits_only) != 10:
+            return jsonify({'success': False, 'message': 'Please enter a valid 10-digit mobile number.'}), 400
+
+        now_iso = datetime.datetime.now().isoformat()
+        firestore_db = get_firestore()
+        if firestore_db:
+            try:
+                firestore_db.collection('post_site_leads').add({
+                    'name': full_name,
+                    'phone': digits_only,
+                    'submitted_at': now_iso,
+                    'status': 'New'
+                })
+            except Exception as e:
+                print(f"Error storing post site lead: {e}")
+
+        settings = get_site_settings()
+        target_wa = settings.get('whatsapp_number', '918050749331')
+
+        wa_text = (
+            f"Hello Shelter Hunt Consultants,\n\n"
+            f"I would like to list/post my property on your platform. "
+            f"Please share the verification and onboarding process with me.\n\n"
+            f"• *Owner Name:* {full_name}\n"
+            f"• *Contact Mobile:* {digits_only}\n\n"
+            f"Looking forward to listing my property!"
+        )
+
+        encoded_message = urllib.parse.quote(wa_text)
+        whatsapp_url = f"https://wa.me/{target_wa}?text={encoded_message}"
+
+        return jsonify({'success': True, 'redirect_url': whatsapp_url})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 # CMS Admin Control Panel
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
@@ -461,7 +506,7 @@ def admin():
         flash("Invalid Admin Credentials.", "danger")
 
     if session.get('admin_logged_in'):
-        leads, sites_list = [], []
+        leads, post_site_leads, sites_list = [], [], []
         analytics = {
             'total_views': 0,
             'today_views': 0,
@@ -478,6 +523,13 @@ def admin():
                     d['id'] = l.id
                     leads.append(d)
                 leads.sort(key=lambda x: x.get('booked_at', ''), reverse=True)
+
+                ps_docs = firestore_db.collection('post_site_leads').stream()
+                for p in ps_docs:
+                    d = p.to_dict()
+                    d['id'] = p.id
+                    post_site_leads.append(d)
+                post_site_leads.sort(key=lambda x: x.get('submitted_at', ''), reverse=True)
 
                 sites_docs = firestore_db.collection('sites').stream()
                 for s in sites_docs:
@@ -518,6 +570,7 @@ def admin():
         
         return render_template('admin.html', 
                                leads=leads, 
+                               post_site_leads=post_site_leads,
                                sites=sites_list, 
                                bhk_options=get_bhk_options(),
                                facing_options=get_facing_options(),
@@ -682,6 +735,43 @@ def admin_toggle_session(session_id):
         except Exception as e:
             print(f"Error toggling session: {e}")
             flash("Could not update booking status.", "danger")
+        
+    return redirect(url_for('admin'))
+
+@app.route('/admin/toggle-post-site-lead/<string:lead_id>')
+def admin_toggle_post_site_lead(lead_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            doc_ref = firestore_db.collection('post_site_leads').document(lead_id)
+            doc = doc_ref.get()
+            if doc.exists:
+                current_status = doc.to_dict().get('status', 'New')
+                new_status = 'Contacted' if current_status == 'New' else ('Listed' if current_status == 'Contacted' else 'New')
+                doc_ref.update({'status': new_status})
+                flash(f"Post Site lead status updated to {new_status}.", "info")
+        except Exception as e:
+            print(f"Error toggling post site lead: {e}")
+            flash("Could not update lead status.", "danger")
+        
+    return redirect(url_for('admin'))
+
+@app.route('/admin/delete-post-site-lead/<string:lead_id>')
+def admin_delete_post_site_lead(lead_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            firestore_db.collection('post_site_leads').document(lead_id).delete()
+            flash("Post Site lead deleted.", "success")
+        except Exception as e:
+            print(f"Error deleting post site lead: {e}")
+            flash("Could not delete lead.", "danger")
         
     return redirect(url_for('admin'))
 
