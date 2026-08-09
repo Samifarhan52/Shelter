@@ -340,3 +340,75 @@ header nav.navbar {
         min-width: 600px;
     }
 }
+
+/* Custom Executive Search Dropdown */
+.custom-search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 8px;
+    background: rgba(9, 13, 22, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(197, 155, 39, 0.4);
+    border-radius: 14px;
+    z-index: 1050;
+    max-height: 380px;
+    overflow-y: auto;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    text-align: left;
+}
+
+.search-suggestion-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(197, 155, 39, 0.25) !important;
+    color: #e2e8f0 !important;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+}
+
+.search-suggestion-chip:hover {
+    background: linear-gradient(135deg, #c5a035 0%, #f7ea97 25%, #b8860b 60%, #d4af37 85%, #aa771c 100%) !important;
+    color: #0f172a !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(197, 155, 39, 0.3);
+}
+
+.search-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: #f8fafc !important;
+    text-decoration: none !important;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.search-suggestion-item:hover {
+    background: rgba(197, 155, 39, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.search-suggestion-item .icon {
+    font-size: 1.25rem;
+}
+
+.search-suggestion-item .title {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #ffffff;
+}
+
+.search-suggestion-item .sub {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}

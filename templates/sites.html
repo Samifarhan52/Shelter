@@ -14,24 +14,7 @@
             
             <div class="col-12 col-md-3">
                 <label class="form-label fw-semibold small text-secondary">Search Keyword</label>
-                <input type="text" name="q" list="builderSearchSuggestions" class="form-control py-2" placeholder="Search project, builder, area..." value="{{ search_query if search_query else '' }}">
-                <datalist id="builderSearchSuggestions">
-                    {% for brand in builder_brands %}
-                        <option value="{{ brand }}">
-                    {% endfor %}
-                    <option value="Sobha Neopolis">
-                    <option value="Prestige Lavender Fields">
-                    <option value="Brigade Eldorado">
-                    <option value="Godrej Woodscapes">
-                    <option value="Purva Park Hill">
-                    <option value="Total Environment">
-                    <option value="Whitefield">
-                    <option value="Panathur">
-                    <option value="Kanakapura Road">
-                    <option value="East Bengaluru">
-                    <option value="South Bengaluru">
-                    <option value="North Bengaluru">
-                </datalist>
+                <input type="text" name="q" class="form-control py-2" placeholder="Search project, builder, area..." value="{{ search_query if search_query else '' }}">
             </div>
 
             <div class="col-6 col-md-2">

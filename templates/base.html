@@ -322,31 +322,75 @@
                     </div>
                 </a>
 
-                <!-- Centered Desktop Search Bar -->
-                <div class="d-none d-lg-block flex-grow-1 mx-lg-5" style="max-width: 480px;">
+                <!-- Centered Desktop Search Bar with Custom Executive Dropdown -->
+                <div class="d-none d-lg-block flex-grow-1 mx-lg-5 position-relative" style="max-width: 500px;">
                     <form action="{{ url_for('sites') }}" method="GET" class="input-group">
-                        <input type="text" name="q" list="headerBuilderSuggestions" class="form-control nav-search-input py-2 ps-3" placeholder="Search builder, project, location..." value="{{ search_query if search_query else '' }}">
+                        <input type="text" name="q" id="headerSearchInput" class="form-control nav-search-input py-2 ps-3" placeholder="Search builder, project, location..." value="{{ search_query if search_query else '' }}" autocomplete="off" onfocus="openCustomSearchDropdown('headerSearchDropdown')" oninput="openCustomSearchDropdown('headerSearchDropdown')">
                         <button class="btn btn-gold px-4 fw-bold" type="submit">Search</button>
                     </form>
-                </div>
 
-                <datalist id="headerBuilderSuggestions">
-                    {% for brand in builder_brands %}
-                        <option value="{{ brand }}">
-                    {% endfor %}
-                    <option value="Sobha Neopolis">
-                    <option value="Prestige Lavender Fields">
-                    <option value="Brigade Eldorado">
-                    <option value="Godrej Woodscapes">
-                    <option value="Purva Park Hill">
-                    <option value="Total Environment">
-                    <option value="Whitefield">
-                    <option value="Panathur">
-                    <option value="Kanakapura Road">
-                    <option value="East Bengaluru">
-                    <option value="South Bengaluru">
-                    <option value="North Bengaluru">
-                </datalist>
+                    <!-- Sleek Custom Dropdown -->
+                    <div id="headerSearchDropdown" class="custom-search-dropdown shadow-lg d-none">
+                        <div class="p-2 border-bottom text-muted fw-bold extra-small text-uppercase tracking-wider" style="font-size: 0.7rem; color: var(--gold-primary) !important;">
+                            🏗️ Popular Builder Brands
+                        </div>
+                        <div class="brand-chips-grid p-2 d-flex flex-wrap gap-1.5">
+                            {% for brand in builder_brands %}
+                                <a href="{{ url_for('sites', q=brand) }}" class="search-suggestion-chip">
+                                    <span>🏗️</span> {{ brand }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="p-2 border-top border-bottom text-muted fw-bold extra-small text-uppercase tracking-wider" style="font-size: 0.7rem; color: var(--gold-primary) !important;">
+                            📍 Top Verified Projects & Areas
+                        </div>
+                        <div class="p-1">
+                            <a href="{{ url_for('sites', q='Sobha Neopolis') }}" class="search-suggestion-item">
+                                <span class="icon">🏡</span>
+                                <div>
+                                    <div class="title">Sobha Neopolis</div>
+                                    <div class="sub">Panathur, Off Marathahalli ORR • East Bengaluru</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('sites', q='Prestige Lavender Fields') }}" class="search-suggestion-item">
+                                <span class="icon">🏛️</span>
+                                <div>
+                                    <div class="title">Prestige Lavender Fields</div>
+                                    <div class="sub">Varthur, Whitefield • East Bengaluru</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('sites', q='Brigade Eldorado') }}" class="search-suggestion-item">
+                                <span class="icon">🏢</span>
+                                <div>
+                                    <div class="title">Brigade Eldorado</div>
+                                    <div class="sub">Aerospace Park, Bagalur • North Bengaluru</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('sites', q='Godrej Woodscapes') }}" class="search-suggestion-item">
+                                <span class="icon">🌳</span>
+                                <div>
+                                    <div class="title">Godrej Woodscapes</div>
+                                    <div class="sub">Budigere Cross, Old Madras Rd • East Bengaluru</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('sites', q='Purva Park Hill') }}" class="search-suggestion-item">
+                                <span class="icon">🏰</span>
+                                <div>
+                                    <div class="title">Purva Park Hill</div>
+                                    <div class="sub">Kanakapura Road • South Bengaluru</div>
+                                </div>
+                            </a>
+                            <a href="{{ url_for('sites', q='Total Environment') }}" class="search-suggestion-item">
+                                <span class="icon">🌿</span>
+                                <div>
+                                    <div class="title">Total Environment In That Quiet Earth</div>
+                                    <div class="sub">Hennur Main Road • North Bengaluru</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Right Action Button & Mobile Menu Toggle -->
                 <div class="d-flex align-items-center gap-2">
@@ -369,11 +413,25 @@
             <div class="container-fluid px-3 px-lg-5">
                 
                 <!-- Mobile Search Bar -->
-                <div class="d-lg-none w-100 py-2">
+                <div class="d-lg-none w-100 py-2 position-relative">
                     <form action="{{ url_for('sites') }}" method="GET" class="input-group">
-                        <input type="text" name="q" list="headerBuilderSuggestions" class="form-control form-control-sm nav-search-input py-2 ps-3" placeholder="Search builder, project, location..." value="{{ search_query if search_query else '' }}">
+                        <input type="text" name="q" id="mobileSearchInput" class="form-control form-control-sm nav-search-input py-2 ps-3" placeholder="Search builder, project, location..." value="{{ search_query if search_query else '' }}" autocomplete="off" onfocus="openCustomSearchDropdown('mobileSearchDropdown')" oninput="openCustomSearchDropdown('mobileSearchDropdown')">
                         <button class="btn btn-sm btn-gold px-3 fw-bold" type="submit">Search</button>
                     </form>
+
+                    <!-- Mobile Sleek Custom Dropdown -->
+                    <div id="mobileSearchDropdown" class="custom-search-dropdown shadow-lg d-none">
+                        <div class="p-2 border-bottom text-muted fw-bold extra-small text-uppercase tracking-wider" style="font-size: 0.7rem; color: var(--gold-primary) !important;">
+                            🏗️ Popular Builder Brands
+                        </div>
+                        <div class="brand-chips-grid p-2 d-flex flex-wrap gap-1.5">
+                            {% for brand in builder_brands %}
+                                <a href="{{ url_for('sites', q=brand) }}" class="search-suggestion-chip">
+                                    <span>🏗️</span> {{ brand }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
@@ -802,6 +860,30 @@
                 flashContainer.addEventListener('closed.bs.alert', handleAlertClose);
             }
         }
+
+        // Custom Executive Search Dropdown Helper Functions
+        function openCustomSearchDropdown(dropdownId) {
+            const dd = document.getElementById(dropdownId);
+            if (dd) {
+                dd.classList.remove('d-none');
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const headerDD = document.getElementById('headerSearchDropdown');
+            if (headerDD && !headerDD.classList.contains('d-none')) {
+                if (!e.target.closest('#headerSearchInput') && !e.target.closest('#headerSearchDropdown')) {
+                    headerDD.classList.add('d-none');
+                }
+            }
+
+            const mobileDD = document.getElementById('mobileSearchDropdown');
+            if (mobileDD && !mobileDD.classList.contains('d-none')) {
+                if (!e.target.closest('#mobileSearchInput') && !e.target.closest('#mobileSearchDropdown')) {
+                    mobileDD.classList.add('d-none');
+                }
+            }
+        });
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initFlashDismissal);

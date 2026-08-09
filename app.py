@@ -158,9 +158,11 @@ def get_site_settings():
     try:
         docs = firestore_db.collection('settings').stream()
         for d in docs:
-            defaults[d.id] = d.to_dict().get('value', '')
-    except Exception:
-        pass
+            d_dict = d.to_dict()
+            if 'value' in d_dict:
+                defaults[d.id] = d_dict['value']
+    except Exception as e:
+        print(f"Error loading live settings: {e}")
     return defaults
 
 def get_builder_brands():
@@ -292,7 +294,28 @@ def get_daily_slots():
 # --- Public Routes ---
 @app.route('/')
 def home():
-    return render_template('index.html', bhk_options=get_bhk_options(), settings=get_site_settings())
+    all_sites = []
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            sites_ref = firestore_db.collection('sites').stream()
+            for d in sites_ref:
+                data = d.to_dict()
+                data['id'] = d.id
+                all_sites.append(data)
+            all_sites.reverse()
+        except Exception as e:
+            print(f"Home sites error: {e}")
+            
+    if not all_sites:
+        all_sites = get_default_sites()
+    else:
+        existing_ids = {p.get('id') for p in all_sites}
+        for d_site in get_default_sites():
+            if d_site['id'] not in existing_ids:
+                all_sites.append(d_site)
+                
+    return render_template('index.html', sites=all_sites[:6], bhk_options=get_bhk_options(), settings=get_site_settings())
 
 @app.route('/sites')
 def sites():
