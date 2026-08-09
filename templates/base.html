@@ -630,7 +630,7 @@
                         <strong class="text-white">Phone:</strong> {{ settings.get('contact_phone', '+91 8050749331') if settings else '+91 8050749331' }}
                     </p>
                     <p class="text-light-slate small mb-3">
-                        <strong class="text-white">Email:</strong> {{ settings.get('contact_email', 'contact@shelterhunt.com') if settings else 'contact@shelterhunt.com' }}
+                        <strong class="text-white">Email:</strong> {{ settings.get('contact_email', 'sudarshan@shelterhuntconsultants.com') if settings else 'sudarshan@shelterhuntconsultants.com' }}
                     </p>
                     {% if settings and settings.get('google_maps_embed_url') %}
                     <div class="mb-3 rounded-3 overflow-hidden shadow-sm border border-secondary" style="height: 110px;">
@@ -846,7 +846,7 @@
                             alert.remove();
                         }
                     });
-                }, 4000);
+                }, 3000);
 
                 // Listen for close/closed events to instantly remove the container and eliminate the gap
                 const handleAlertClose = function() {

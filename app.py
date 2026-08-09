@@ -26,20 +26,28 @@ def get_firestore():
     try:
         if not firebase_admin._apps:
             cred_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
-            if cred_json:
-                cred_dict = json.loads(cred_json)
-                cred = credentials.Certificate(cred_dict)
-            elif os.path.exists("firebase_key.json"):
-                cred = credentials.Certificate("firebase_key.json")
-            else:
-                print("Warning: Firebase service account credentials not found!")
-                return None
-            firebase_admin.initialize_app(cred)
-        db = firestore.client()
-        return db
+            if cred_json and len(cred_json.strip()) > 0:
+                try:
+                    cred_dict = json.loads(cred_json)
+                    cred = credentials.Certificate(cred_dict)
+                    firebase_admin.initialize_app(cred)
+                except Exception as e:
+                    print(f"Error parsing FIREBASE_SERVICE_ACCOUNT env var: {e}")
+
+            if not firebase_admin._apps and os.path.exists("firebase_key.json"):
+                try:
+                    if os.path.getsize("firebase_key.json") > 10:
+                        cred = credentials.Certificate("firebase_key.json")
+                        firebase_admin.initialize_app(cred)
+                except Exception as e:
+                    print(f"Error loading firebase_key.json: {e}")
+
+        if firebase_admin._apps:
+            db = firestore.client()
+            return db
     except Exception as e:
         print(f"Firebase connection error: {e}")
-        return None
+    return None
 
 # Real-Time Visitor Tracking Hook
 @app.before_request
@@ -70,29 +78,43 @@ def track_website_activity():
         except Exception as e:
             print(f"Tracking error: {e}")
 
-# Unified Data Storage Layer
-DATA_FILE = os.path.join(os.path.dirname(__file__), "data_store.json")
+# Unified Data Storage Layer (With Memory & Serverless Writable Storage)
+TMP_DATA_FILE = "/tmp/data_store.json"
+LOCAL_DATA_FILE = os.path.join(os.path.dirname(__file__), "data_store.json")
+
+GLOBAL_MEMORY_STORE = {
+    'settings': {},
+    'masters': {},
+    'sites': [],
+    'post_site_leads': []
+}
 
 def load_local_store():
-    if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error loading local data store: {e}")
-    return {
-        'settings': {},
-        'masters': {},
-        'sites': [],
-        'post_site_leads': []
-    }
+    global GLOBAL_MEMORY_STORE
+    for filepath in [TMP_DATA_FILE, LOCAL_DATA_FILE]:
+        if os.path.exists(filepath):
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if data:
+                        # Sync with memory cache
+                        for k, v in data.items():
+                            if v:
+                                GLOBAL_MEMORY_STORE[k] = v
+                        return GLOBAL_MEMORY_STORE
+            except Exception as e:
+                print(f"Error loading local store from {filepath}: {e}")
+    return GLOBAL_MEMORY_STORE
 
 def save_local_store(data):
-    try:
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
-    except Exception as e:
-        print(f"Error saving local data store: {e}")
+    global GLOBAL_MEMORY_STORE
+    GLOBAL_MEMORY_STORE = data
+    for filepath in [TMP_DATA_FILE, LOCAL_DATA_FILE]:
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2)
+        except Exception:
+            pass
 
 # Helper Functions
 def get_bhk_options():
@@ -170,7 +192,7 @@ def get_site_settings():
         'brand_logo': '',
         'whatsapp_number': '918050749331',
         'contact_phone': '+91 8050749331',
-        'contact_email': 'contact@shelterhunt.com',
+        'contact_email': 'sudarshan@shelterhuntconsultants.com',
         'contact_address': '58, opposite ganesh temple, Carmelaram, Chikkabellandur, Bengaluru, Karnataka 560035',
         'hero_title': 'Smart Property Decisions Start Here.',
         'hero_subtitle': "We don't push properties — we listen, research, and match you with the right one. Expert consultation that puts your requirements first, every single time.",

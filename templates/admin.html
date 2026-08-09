@@ -1078,7 +1078,7 @@
 
                                     <div class="mb-3">
                                         <label class="form-label fw-semibold small">Contact Email Address</label>
-                                        <input type="email" name="contact_email" class="form-control" value="{{ settings.get('contact_email', 'contact@shelterhunt.com') }}" required>
+                                        <input type="email" name="contact_email" class="form-control" value="{{ settings.get('contact_email', 'sudarshan@shelterhuntconsultants.com') }}" required>
                                     </div>
 
                                     <div class="mb-3">
@@ -1954,6 +1954,29 @@ function showLeadDetailsModal(name, email, phone, location, type, price, sqft, r
     const modal = new bootstrap.Modal(document.getElementById('leadDetailsModal'));
     modal.show();
 }
+
+// Auto-dismiss Green & Flash Alerts in 3 Seconds (3000ms)
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            try {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                if (bsAlert) {
+                    bsAlert.close();
+                } else {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 500);
+                }
+            } catch (e) {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            }
+        });
+    }, 3000);
+});
 </script>
 
 <!-- Bootstrap 5 JS Bundle -->
