@@ -302,61 +302,82 @@ def sites():
     zone_filter = request.args.get('zone', '').strip()
     age_filter = request.args.get('age', '').strip()
     
-    # Require active search parameter to display property listings
+    # Require active search parameter or filter to display property listings
     has_searched = bool(query or (bhk_filter and bhk_filter.lower() != 'all') or 
                         (facing_filter and facing_filter.lower() != 'all') or 
                         (zone_filter and zone_filter.lower() != 'all') or 
                         (age_filter and age_filter.lower() != 'all'))
     
+    all_properties = []
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            sites_ref = firestore_db.collection('sites').stream()
+            for d in sites_ref:
+                data = d.to_dict()
+                data['id'] = d.id
+                all_properties.append(data)
+        except Exception as e:
+            print(f"Search fetch error: {e}")
+            
+    # Always merge fallback default sites to guarantee maximum search matching coverage
+    if not all_properties:
+        all_properties = get_default_sites()
+    else:
+        existing_ids = {p.get('id') for p in all_properties}
+        for d_site in get_default_sites():
+            if d_site['id'] not in existing_ids:
+                all_properties.append(d_site)
+                
     sites_list = []
+    recommendations = []
     
     if has_searched:
-        firestore_db = get_firestore()
-        if firestore_db:
-            try:
-                sites_ref = firestore_db.collection('sites').stream()
-                for d in sites_ref:
-                    data = d.to_dict()
-                    data['id'] = d.id
-                    
-                    title = str(data.get('title', '')).lower()
-                    location = str(data.get('location', '')).lower()
-                    sub_location = str(data.get('sub_location', '')).lower()
-                    description = str(data.get('description', '')).lower()
-                    bhk_type = str(data.get('bhk_type', ''))
-                    facing = str(data.get('facing', ''))
-                    zone = str(data.get('zone', ''))
-                    building_age = str(data.get('building_age', ''))
-                    
-                    matches_q = True
-                    if query:
-                        matches_q = (query in title or query in location or query in sub_location or query in description or query in bhk_type.lower() or query in zone.lower())
-                        
-                    matches_bhk = True
-                    if bhk_filter and bhk_filter.lower() != 'all':
-                        matches_bhk = (bhk_filter.lower() in bhk_type.lower())
-
-                    matches_facing = True
-                    if facing_filter and facing_filter.lower() != 'all':
-                        matches_facing = (facing_filter.lower() == facing.lower())
-
-                    matches_zone = True
-                    if zone_filter and zone_filter.lower() != 'all':
-                        matches_zone = (zone_filter.lower() in zone.lower() or zone_filter.lower() in location.lower())
-
-                    matches_age = True
-                    if age_filter and age_filter.lower() != 'all':
-                        matches_age = (age_filter.lower() == building_age.lower())
-                        
-                    if matches_q and matches_bhk and matches_facing and matches_zone and matches_age:
-                        sites_list.append(data)
-                        
-                sites_list.reverse()
-            except Exception as e:
-                print(f"Search error: {e}")
+        q_tokens = [t for t in query.lower().replace(',', ' ').split() if len(t) > 0] if query else []
         
+        for data in all_properties:
+            title = str(data.get('title', '')).lower()
+            location = str(data.get('location', '')).lower()
+            sub_location = str(data.get('sub_location', '')).lower()
+            description = str(data.get('description', '')).lower()
+            bhk_type = str(data.get('bhk_type', '')).lower()
+            facing = str(data.get('facing', '')).lower()
+            zone = str(data.get('zone', '')).lower()
+            building_age = str(data.get('building_age', '')).lower()
+            
+            searchable_text = f"{title} {location} {sub_location} {description} {bhk_type} {facing} {zone} {building_age}"
+            
+            matches_q = True
+            if q_tokens:
+                # Property matches if ANY token matches searchable text
+                matches_q = any(token in searchable_text for token in q_tokens)
+                
+            matches_bhk = True
+            if bhk_filter and bhk_filter.lower() != 'all':
+                matches_bhk = (bhk_filter.lower() in bhk_type)
+
+            matches_facing = True
+            if facing_filter and facing_filter.lower() != 'all':
+                matches_facing = (facing_filter.lower() == facing)
+
+            matches_zone = True
+            if zone_filter and zone_filter.lower() != 'all':
+                matches_zone = (zone_filter.lower() in zone or zone_filter.lower() in location or zone_filter.lower() in sub_location)
+
+            matches_age = True
+            if age_filter and age_filter.lower() != 'all':
+                matches_age = (age_filter.lower() == building_age)
+                
+            if matches_q and matches_bhk and matches_facing and matches_zone and matches_age:
+                sites_list.append(data)
+                
+        # If active search yielded 0 matches, provide recommendations from default sites
+        if not sites_list:
+            recommendations = get_default_sites()
+            
     return render_template('sites.html', 
-                           sites=sites_list, 
+                           sites=sites_list,
+                           recommendations=recommendations,
                            has_searched=has_searched,
                            bhk_options=get_bhk_options(),
                            facing_options=get_facing_options(),
@@ -381,6 +402,11 @@ def site_detail(site_id):
                 return render_template('site_detail.html', site=site_data, bhk_options=get_bhk_options(), settings=get_site_settings())
         except Exception as e:
             print(f"Error fetching site details: {e}")
+            
+    # Check default fallback sites
+    for default_site in get_default_sites():
+        if default_site['id'] == site_id:
+            return render_template('site_detail.html', site=default_site, bhk_options=get_bhk_options(), settings=get_site_settings())
             
     flash("Property site not found.", "warning")
     return redirect(url_for('sites'))

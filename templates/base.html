@@ -332,8 +332,8 @@
 
                 <!-- Right Action Button & Mobile Menu Toggle -->
                 <div class="d-flex align-items-center gap-2">
-                    <a href="{{ url_for('post_your_site') }}" class="btn btn-outline-warning btn-header-cta px-3 fw-bold text-decoration-none">🏡 Post Your Site</a>
-                    <button type="button" class="btn btn-gold btn-header-cta px-3 border-0" onclick="openChoiceModal()">Book Session</button>
+                    <a href="{{ url_for('post_your_site') }}" class="btn btn-outline-warning btn-header-cta px-3 fw-bold text-decoration-none d-none d-lg-inline-flex align-items-center gap-1">🏡 Post Your Site</a>
+                    <button type="button" class="btn btn-gold btn-header-cta px-2.5 px-md-3 border-0" onclick="openChoiceModal()">Book Session</button>
                     
                     <button class="mobile-menu-btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -364,8 +364,14 @@
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('sites') }}">Sites</a></li>
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('about') }}">About Us</a></li>
                         <li class="nav-item"><a class="nav-link text-light px-3 fw-semibold" href="{{ url_for('services') }}">Services</a></li>
-                        <li class="nav-item d-lg-none"><a class="nav-link text-warning px-3 fw-bold" href="{{ url_for('post_your_site') }}">🏡 Post Your Site</a></li>
                     </ul>
+                    <!-- Dedicated Mobile Post Your Site CTA Card -->
+                    <div class="d-lg-none my-2 px-2 pb-2">
+                        <a href="{{ url_for('post_your_site') }}" class="btn w-100 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm text-decoration-none rounded-3" style="background: var(--gold-gradient); color: #0f172a; border: none; font-size: 0.95rem;">
+                            <span>🏡</span>
+                            <span>Post Your Property Site</span>
+                        </a>
+                    </div>
                 </div>
 
             </div>

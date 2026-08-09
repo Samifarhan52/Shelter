@@ -89,17 +89,63 @@
             <p class="text-muted mx-auto" style="max-width: 580px;">Enter a project name, builder, or location in the search bar above, or select your preferred BHK type and Zone to discover matching property listings across Bengaluru.</p>
         </div>
     {% elif sites|length == 0 %}
-        <div class="col-12 text-center py-5">
-            <div class="bg-white p-5 rounded-4 shadow-sm mx-auto" style="max-width: 600px;">
-                <div class="mb-3 fs-1">🏡</div>
-                <h4 class="fw-bold text-dark mb-2">No Property Sites Found</h4>
-                <p class="text-muted mb-4">We couldn't find any property listings matching your search query or selected filters. Try searching with a broader keyword.</p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ url_for('sites') }}" class="btn btn-outline-dark fw-bold">Reset Search</a>
-                    <a href="{{ url_for('post_your_site') }}" class="btn btn-gold fw-bold border-0">Post Your Site</a>
+        {% if recommendations %}
+            <div class="alert alert-warning border-0 text-dark rounded-4 p-4 mb-4 shadow-sm text-center" style="background: linear-gradient(135deg, #fffbeb, #fef3c7);">
+                <h5 class="fw-bold m-0 mb-1" style="color: #92400e;">🔍 No direct match found for "{{ search_query }}"</h5>
+                <p class="small text-muted m-0">Showing top recommended verified luxury properties across Bengaluru based on popular client demand:</p>
+            </div>
+            
+            <div class="row g-4">
+                {% for site in recommendations %}
+                    <div class="col-lg-4 col-md-6">
+                        <a href="{{ url_for('site_detail', site_id=site.id) }}" class="text-decoration-none">
+                            <div class="white-card h-100 d-flex flex-column justify-content-between p-0 overflow-hidden shadow-sm border text-start" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                                <div style="height: 220px; overflow: hidden; position: relative;">
+                                    <img src="{{ site.image_filename }}" alt="{{ site.title }}" class="w-100 h-100" style="object-fit: cover;" onerror="this.src='{{ url_for('static', filename='head.jpeg') }}'">
+                                    <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 fw-bold" style="background: var(--gold-gradient); color: #0f172a;">
+                                        {{ site.bhk_type if site.bhk_type else 'Residential Property' }}
+                                    </span>
+                                    {% if site.zone %}
+                                        <span class="badge position-absolute top-0 end-0 m-3 bg-dark text-white fw-semibold">
+                                            {{ site.zone }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="p-4 d-flex flex-column justify-content-between flex-grow-1">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                            {% if site.facing %}<span class="badge bg-light text-dark border">🧭 {{ site.facing }} Facing</span>{% endif %}
+                                            {% if site.building_age %}<span class="badge bg-light text-dark border">🏗️ {{ site.building_age }}</span>{% endif %}
+                                        </div>
+                                        <h4 class="fw-bold mb-1 text-truncate" style="color: var(--navy-dark);">{{ site.title }}</h4>
+                                        <p class="text-muted small mb-2">📍 {{ site.location }}{% if site.sub_location %}, {{ site.sub_location }}{% endif %}</p>
+                                        <p class="text-muted small mb-3" style="line-height: 1.5;">{{ site.description[:110] }}...</p>
+                                    </div>
+                                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-dark" style="font-size: 0.95rem;">
+                                            {{ site.price if site.price else 'Price on Request' }}
+                                        </span>
+                                        <span class="btn btn-sm btn-outline-dark fw-bold">View Details →</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <div class="bg-white p-5 rounded-4 shadow-sm mx-auto" style="max-width: 600px;">
+                    <div class="mb-3 fs-1">🏡</div>
+                    <h4 class="fw-bold text-dark mb-2">No Property Sites Found</h4>
+                    <p class="text-muted mb-4">We couldn't find any property listings matching your search query or selected filters. Try searching with a broader keyword.</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{{ url_for('sites') }}" class="btn btn-outline-dark fw-bold">Reset Search</a>
+                        <a href="{{ url_for('post_your_site') }}" class="btn btn-gold fw-bold border-0">Post Your Site</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
     {% else %}
         <div class="row g-4">
             {% for site in sites %}
