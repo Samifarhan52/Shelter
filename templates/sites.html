@@ -14,7 +14,24 @@
             
             <div class="col-12 col-md-3">
                 <label class="form-label fw-semibold small text-secondary">Search Keyword</label>
-                <input type="text" name="q" class="form-control py-2" placeholder="Project name, area, location..." value="{{ search_query if search_query else '' }}">
+                <input type="text" name="q" list="builderSearchSuggestions" class="form-control py-2" placeholder="Search project, builder, area..." value="{{ search_query if search_query else '' }}">
+                <datalist id="builderSearchSuggestions">
+                    {% for brand in builder_brands %}
+                        <option value="{{ brand }}">
+                    {% endfor %}
+                    <option value="Sobha Neopolis">
+                    <option value="Prestige Lavender Fields">
+                    <option value="Brigade Eldorado">
+                    <option value="Godrej Woodscapes">
+                    <option value="Purva Park Hill">
+                    <option value="Total Environment">
+                    <option value="Whitefield">
+                    <option value="Panathur">
+                    <option value="Kanakapura Road">
+                    <option value="East Bengaluru">
+                    <option value="South Bengaluru">
+                    <option value="North Bengaluru">
+                </datalist>
             </div>
 
             <div class="col-6 col-md-2">
@@ -59,11 +76,31 @@
                 </div>
                 <div>
                     <label class="form-label d-block text-transparent small">&nbsp;</label>
-                    <button type="submit" class="btn btn-gold py-2 px-3 fw-bold border-0">Filter</button>
+                    <button type="submit" class="btn btn-gold py-2 px-4 fw-bold border-0">Filter</button>
                 </div>
             </div>
 
         </form>
+
+        <!-- Popular Builder Brands & Quick Filter Chips -->
+        <div class="mt-4 pt-3 border-top">
+            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                <span class="small fw-bold text-dark text-uppercase" style="letter-spacing: 0.8px;">
+                    🏗️ Popular Builder Brands & Recommended Searches:
+                </span>
+                <span class="small text-muted" style="font-size: 0.78rem;">Click any brand to search matching sites</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                {% for brand in builder_brands %}
+                    <a href="{{ url_for('sites', q=brand) }}" 
+                       class="btn btn-sm btn-outline-warning text-dark border-0 rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
+                       style="background: rgba(197, 155, 39, 0.08); border: 1px solid rgba(197, 155, 39, 0.3) !important; font-size: 0.82rem; transition: all 0.2s ease;">
+                        <span>🏗️</span>
+                        <span>{{ brand }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
 
         {% if search_query or selected_bhk or selected_facing or selected_zone or selected_age %}
             <div class="mt-3 pt-3 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -86,7 +123,16 @@
                 <span class="p-3 bg-light rounded-circle d-inline-block fs-1" style="color: var(--gold-primary) !important;">🔍</span>
             </div>
             <h4 class="fw-bold text-dark mb-2">Search Verified Property Sites</h4>
-            <p class="text-muted mx-auto" style="max-width: 580px;">Enter a project name, builder, or location in the search bar above, or select your preferred BHK type and Zone to discover matching property listings across Bengaluru.</p>
+            <p class="text-muted mx-auto mb-4" style="max-width: 620px;">Enter a project name, builder brand, or area location above, or click on any of our featured partner builders below to discover matching luxury residential sites across Bengaluru:</p>
+            
+            <div class="d-flex flex-wrap justify-content-center gap-2 max-width-800 mx-auto pt-2">
+                {% for brand in builder_brands %}
+                    <a href="{{ url_for('sites', q=brand) }}" class="btn btn-outline-dark btn-sm rounded-3 px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" style="font-size: 0.85rem;">
+                        <span>🏢</span>
+                        <span>{{ brand }}</span>
+                    </a>
+                {% endfor %}
+            </div>
         </div>
     {% elif sites|length == 0 %}
         {% if recommendations %}

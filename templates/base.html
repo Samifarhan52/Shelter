@@ -325,10 +325,28 @@
                 <!-- Centered Desktop Search Bar -->
                 <div class="d-none d-lg-block flex-grow-1 mx-lg-5" style="max-width: 480px;">
                     <form action="{{ url_for('sites') }}" method="GET" class="input-group">
-                        <input type="text" name="q" class="form-control nav-search-input py-2 ps-3" placeholder="Search projects, locations..." value="{{ search_query if search_query else '' }}">
+                        <input type="text" name="q" list="headerBuilderSuggestions" class="form-control nav-search-input py-2 ps-3" placeholder="Search builder, project, location..." value="{{ search_query if search_query else '' }}">
                         <button class="btn btn-gold px-4 fw-bold" type="submit">Search</button>
                     </form>
                 </div>
+
+                <datalist id="headerBuilderSuggestions">
+                    {% for brand in builder_brands %}
+                        <option value="{{ brand }}">
+                    {% endfor %}
+                    <option value="Sobha Neopolis">
+                    <option value="Prestige Lavender Fields">
+                    <option value="Brigade Eldorado">
+                    <option value="Godrej Woodscapes">
+                    <option value="Purva Park Hill">
+                    <option value="Total Environment">
+                    <option value="Whitefield">
+                    <option value="Panathur">
+                    <option value="Kanakapura Road">
+                    <option value="East Bengaluru">
+                    <option value="South Bengaluru">
+                    <option value="North Bengaluru">
+                </datalist>
 
                 <!-- Right Action Button & Mobile Menu Toggle -->
                 <div class="d-flex align-items-center gap-2">
@@ -353,7 +371,7 @@
                 <!-- Mobile Search Bar -->
                 <div class="d-lg-none w-100 py-2">
                     <form action="{{ url_for('sites') }}" method="GET" class="input-group">
-                        <input type="text" name="q" class="form-control form-control-sm nav-search-input py-2 ps-3" placeholder="Search projects, locations..." value="{{ search_query if search_query else '' }}">
+                        <input type="text" name="q" list="headerBuilderSuggestions" class="form-control form-control-sm nav-search-input py-2 ps-3" placeholder="Search builder, project, location..." value="{{ search_query if search_query else '' }}">
                         <button class="btn btn-sm btn-gold px-3 fw-bold" type="submit">Search</button>
                     </form>
                 </div>
