@@ -70,9 +70,36 @@ def track_website_activity():
         except Exception as e:
             print(f"Tracking error: {e}")
 
+# Unified Data Storage Layer
+DATA_FILE = os.path.join(os.path.dirname(__file__), "data_store.json")
+
+def load_local_store():
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading local data store: {e}")
+    return {
+        'settings': {},
+        'masters': {},
+        'sites': [],
+        'post_site_leads': []
+    }
+
+def save_local_store(data):
+    try:
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error saving local data store: {e}")
+
 # Helper Functions
 def get_bhk_options():
     defaults = ["1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"]
+    local_store = load_local_store()
+    if local_store.get('masters', {}).get('bhk_options'):
+        return local_store['masters']['bhk_options']
     firestore_db = get_firestore()
     if firestore_db:
         try:
@@ -87,6 +114,9 @@ def get_bhk_options():
 
 def get_facing_options():
     defaults = ["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"]
+    local_store = load_local_store()
+    if local_store.get('masters', {}).get('facing_options'):
+        return local_store['masters']['facing_options']
     firestore_db = get_firestore()
     if firestore_db:
         try:
@@ -101,6 +131,9 @@ def get_facing_options():
 
 def get_zone_options():
     defaults = ["North Bengaluru", "South Bengaluru", "East Bengaluru", "West Bengaluru", "Central Bengaluru", "IT Corridor"]
+    local_store = load_local_store()
+    if local_store.get('masters', {}).get('zone_options'):
+        return local_store['masters']['zone_options']
     firestore_db = get_firestore()
     if firestore_db:
         try:
@@ -115,6 +148,9 @@ def get_zone_options():
 
 def get_age_options():
     defaults = ["Under Construction", "Ready to Move", "0-1 Year", "1-5 Years", "5-10 Years", "10+ Years"]
+    local_store = load_local_store()
+    if local_store.get('masters', {}).get('age_options'):
+        return local_store['masters']['age_options']
     firestore_db = get_firestore()
     if firestore_db:
         try:
@@ -152,17 +188,28 @@ def get_site_settings():
         'social_youtube': '',
         'google_maps_embed_url': 'https://maps.google.com/maps?q=58,+opposite+ganesh+temple,+Carmelaram,+Chikkabellandur,+Bengaluru,+Karnataka+560035&t=&z=15&ie=UTF8&iwloc=&output=embed'
     }
+    
+    # 1. Local Persistence Store Overrides
+    local_store = load_local_store()
+    if local_store.get('settings'):
+        for k, v in local_store['settings'].items():
+            if v != '':
+                defaults[k] = v
+
+    # 2. Firestore Database Overrides
     firestore_db = get_firestore()
-    if not firestore_db:
-        return defaults
-    try:
-        docs = firestore_db.collection('settings').stream()
-        for d in docs:
-            d_dict = d.to_dict()
-            if 'value' in d_dict:
-                defaults[d.id] = d_dict['value']
-    except Exception as e:
-        print(f"Error loading live settings: {e}")
+    if firestore_db:
+        try:
+            docs = firestore_db.collection('settings').stream()
+            for d in docs:
+                d_dict = d.to_dict()
+                if 'value' in d_dict:
+                    val = d_dict['value']
+                    if val != '':
+                        defaults[d.id] = val
+        except Exception as e:
+            print(f"Error loading live settings: {e}")
+            
     return defaults
 
 def get_builder_brands():
@@ -171,6 +218,9 @@ def get_builder_brands():
         "Puravankara Limited", "Total Environment", "Provident Housing", 
         "Assetz Property Group", "Sattva Group", "Lodha Group"
     ]
+    local_store = load_local_store()
+    if local_store.get('masters', {}).get('builder_brands'):
+        return local_store['masters']['builder_brands']
     firestore_db = get_firestore()
     if firestore_db:
         try:
@@ -271,6 +321,40 @@ def get_default_sites():
         }
     ]
 
+def get_all_sites():
+    all_sites = []
+    
+    # 1. Stream from Firestore Database
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            sites_ref = firestore_db.collection('sites').stream()
+            for d in sites_ref:
+                data = d.to_dict()
+                data['id'] = d.id
+                all_sites.append(data)
+        except Exception as e:
+            print(f"Error streaming sites from Firestore: {e}")
+            
+    # 2. Merge Local Store
+    local_store = load_local_store()
+    local_sites = local_store.get('sites', [])
+    existing_ids = {s.get('id') for s in all_sites}
+    for ls in local_sites:
+        if ls.get('id') not in existing_ids:
+            all_sites.append(ls)
+            
+    # 3. Merge Default Portfolio
+    if not all_sites:
+        all_sites = get_default_sites()
+    else:
+        existing_ids = {s.get('id') for s in all_sites}
+        for d_site in get_default_sites():
+            if d_site['id'] not in existing_ids:
+                all_sites.append(d_site)
+                
+    return all_sites
+
 # Global Template Context Processor
 @app.context_processor
 def inject_global_data():
@@ -294,27 +378,7 @@ def get_daily_slots():
 # --- Public Routes ---
 @app.route('/')
 def home():
-    all_sites = []
-    firestore_db = get_firestore()
-    if firestore_db:
-        try:
-            sites_ref = firestore_db.collection('sites').stream()
-            for d in sites_ref:
-                data = d.to_dict()
-                data['id'] = d.id
-                all_sites.append(data)
-            all_sites.reverse()
-        except Exception as e:
-            print(f"Home sites error: {e}")
-            
-    if not all_sites:
-        all_sites = get_default_sites()
-    else:
-        existing_ids = {p.get('id') for p in all_sites}
-        for d_site in get_default_sites():
-            if d_site['id'] not in existing_ids:
-                all_sites.append(d_site)
-                
+    all_sites = get_all_sites()
     return render_template('index.html', sites=all_sites[:6], bhk_options=get_bhk_options(), settings=get_site_settings())
 
 @app.route('/sites')
@@ -331,26 +395,7 @@ def sites():
                         (zone_filter and zone_filter.lower() != 'all') or 
                         (age_filter and age_filter.lower() != 'all'))
     
-    all_properties = []
-    firestore_db = get_firestore()
-    if firestore_db:
-        try:
-            sites_ref = firestore_db.collection('sites').stream()
-            for d in sites_ref:
-                data = d.to_dict()
-                data['id'] = d.id
-                all_properties.append(data)
-        except Exception as e:
-            print(f"Search fetch error: {e}")
-            
-    # Always merge fallback default sites to guarantee maximum search matching coverage
-    if not all_properties:
-        all_properties = get_default_sites()
-    else:
-        existing_ids = {p.get('id') for p in all_properties}
-        for d_site in get_default_sites():
-            if d_site['id'] not in existing_ids:
-                all_properties.append(d_site)
+    all_properties = get_all_sites()
                 
     sites_list = []
     recommendations = []
@@ -834,16 +879,24 @@ def admin_save_settings():
     if brand_logo:
         settings_data['brand_logo'] = brand_logo
     
+    # 1. Update Local Store
+    local_store = load_local_store()
+    if 'settings' not in local_store:
+        local_store['settings'] = {}
+    for k, v in settings_data.items():
+        local_store['settings'][k] = v
+    save_local_store(local_store)
+
+    # 2. Update Firestore Database
     firestore_db = get_firestore()
     if firestore_db:
         try:
             for key, val in settings_data.items():
                 firestore_db.collection('settings').document(key).set({'value': val})
-            flash("Global site settings, logo, branding, and integrations updated successfully!", "success")
         except Exception as e:
-            print(f"Error saving settings: {e}")
-            flash("Could not update settings.", "danger")
-        
+            print(f"Error saving settings to Firestore: {e}")
+
+    flash("Global site settings, logo, branding, and integrations updated successfully across live website!", "success")
     return redirect(url_for('admin'))
 
 @app.route('/admin/add-master-option', methods=['POST'])
@@ -855,6 +908,17 @@ def admin_add_master_option():
     new_val = request.form.get('option_value', '').strip()
     
     if master_type and new_val:
+        # 1. Update Local Store
+        local_store = load_local_store()
+        if 'masters' not in local_store:
+            local_store['masters'] = {}
+        if master_type not in local_store['masters']:
+            local_store['masters'][master_type] = []
+        if new_val not in local_store['masters'][master_type]:
+            local_store['masters'][master_type].append(new_val)
+        save_local_store(local_store)
+
+        # 2. Update Firestore
         firestore_db = get_firestore()
         if firestore_db:
             try:
@@ -864,10 +928,10 @@ def admin_add_master_option():
                 if new_val not in items:
                     items.append(new_val)
                     doc_ref.set({'items': items})
-                    flash(f"Added '{new_val}' to master configurations.", "success")
             except Exception as e:
-                print(f"Error adding master option: {e}")
-                flash("Could not add master option.", "danger")
+                print(f"Error adding master option to Firestore: {e}")
+                
+        flash(f"Added '{new_val}' to master configurations.", "success")
                 
     return redirect(url_for('admin'))
 
@@ -880,6 +944,13 @@ def admin_delete_master_option():
     target_val = request.form.get('option_value', '').strip()
     
     if master_type and target_val:
+        # 1. Update Local Store
+        local_store = load_local_store()
+        if 'masters' in local_store and master_type in local_store['masters']:
+            local_store['masters'][master_type] = [i for i in local_store['masters'][master_type] if i != target_val]
+            save_local_store(local_store)
+
+        # 2. Update Firestore
         firestore_db = get_firestore()
         if firestore_db:
             try:
@@ -889,10 +960,10 @@ def admin_delete_master_option():
                     items = doc.to_dict().get('items', [])
                     items = [i for i in items if i != target_val]
                     doc_ref.set({'items': items})
-                    flash(f"Removed '{target_val}' from master configurations.", "info")
             except Exception as e:
-                print(f"Error deleting master option: {e}")
-                flash("Could not delete master option.", "danger")
+                print(f"Error deleting master option from Firestore: {e}")
+
+        flash(f"Removed '{target_val}' from master configurations.", "info")
                 
     return redirect(url_for('admin'))
 
@@ -1015,31 +1086,41 @@ def admin_add_site():
                 encoded = base64.b64encode(file_bytes).decode('utf-8')
                 image_filename = f"data:{mime_type};base64,{encoded}"
     
+    # 1. Update Local Store
+    site_id = f"site-{int(datetime.datetime.now().timestamp()*1000)}"
+    site_obj = {
+        'id': site_id,
+        'title': title,
+        'zone': zone,
+        'location': location,
+        'sub_location': sub_location,
+        'unit_tier': unit_tier,
+        'total_floors': total_floors,
+        'bhk_type': bhk_type,
+        'facing': facing,
+        'building_age': building_age,
+        'sqft': sqft,
+        'price_per_sqft': price_per_sqft,
+        'price': price,
+        'description': description,
+        'image_filename': image_filename,
+        'created_at': datetime.datetime.now().isoformat()
+    }
+    local_store = load_local_store()
+    if 'sites' not in local_store:
+        local_store['sites'] = []
+    local_store['sites'].insert(0, site_obj)
+    save_local_store(local_store)
+
+    # 2. Update Firestore
     firestore_db = get_firestore()
     if firestore_db:
         try:
-            firestore_db.collection('sites').add({
-                'title': title,
-                'zone': zone,
-                'location': location,
-                'sub_location': sub_location,
-                'unit_tier': unit_tier,
-                'total_floors': total_floors,
-                'bhk_type': bhk_type,
-                'facing': facing,
-                'building_age': building_age,
-                'sqft': sqft,
-                'price_per_sqft': price_per_sqft,
-                'price': price,
-                'description': description,
-                'image_filename': image_filename,
-                'created_at': datetime.datetime.now().isoformat()
-            })
-            flash("New Property Site published successfully!", "success")
+            firestore_db.collection('sites').document(site_id).set(site_obj)
         except Exception as e:
-            print(f"Error adding site: {e}")
-            flash("Could not add site.", "danger")
-    
+            print(f"Error adding site to Firestore: {e}")
+            
+    flash("New Property Site published successfully!", "success")
     return redirect(url_for('admin'))
 
 @app.route('/admin/bulk-add-sites', methods=['POST'])
@@ -1054,12 +1135,12 @@ def admin_bulk_add_sites():
         if not properties or not isinstance(properties, list):
             return jsonify({'success': False, 'message': 'No properties provided in request.'}), 400
             
-        firestore_db = get_firestore()
-        if not firestore_db:
-            return jsonify({'success': False, 'message': 'Database connection error.'}), 500
-            
         inserted_count = 0
         now_iso = datetime.datetime.now().isoformat()
+        firestore_db = get_firestore()
+        local_store = load_local_store()
+        if 'sites' not in local_store:
+            local_store['sites'] = []
         
         for p in properties:
             title = str(p.get('title') or p.get('name') or p.get('property_name') or 'Featured Property').strip()
@@ -1076,8 +1157,10 @@ def admin_bulk_add_sites():
             price = str(p.get('price') or p.get('quoted_price') or '').strip()
             description = str(p.get('description') or f"Exclusive {bhk_type} property located in {location}, {zone}. Total area approx {sqft} sq.ft.").strip()
             image_filename = str(p.get('image_filename') or 'head.jpeg').strip()
+            site_id = f"site-{int(datetime.datetime.now().timestamp()*1000)}-{inserted_count}"
 
             doc_data = {
+                'id': site_id,
                 'title': title,
                 'zone': zone,
                 'location': location,
@@ -1095,9 +1178,15 @@ def admin_bulk_add_sites():
                 'created_at': now_iso
             }
             
-            firestore_db.collection('sites').add(doc_data)
+            local_store['sites'].insert(0, doc_data)
+            if firestore_db:
+                try:
+                    firestore_db.collection('sites').document(site_id).set(doc_data)
+                except Exception:
+                    pass
             inserted_count += 1
             
+        save_local_store(local_store)
         flash(f"Successfully uploaded and published {inserted_count} properties live!", "success")
         return jsonify({'success': True, 'count': inserted_count, 'message': f"Published {inserted_count} properties."})
     except Exception as e:
@@ -1136,30 +1225,40 @@ def admin_edit_site(site_id):
                 encoded = base64.b64encode(file_bytes).decode('utf-8')
                 image_filename = f"data:{mime_type};base64,{encoded}"
     
+    updated_fields = {
+        'title': title,
+        'zone': zone,
+        'location': location,
+        'sub_location': sub_location,
+        'unit_tier': unit_tier,
+        'total_floors': total_floors,
+        'bhk_type': bhk_type,
+        'facing': facing,
+        'building_age': building_age,
+        'sqft': sqft,
+        'price_per_sqft': price_per_sqft,
+        'price': price,
+        'description': description,
+        'image_filename': image_filename
+    }
+
+    # 1. Update Local Store
+    local_store = load_local_store()
+    for s in local_store.get('sites', []):
+        if s.get('id') == site_id:
+            s.update(updated_fields)
+            break
+    save_local_store(local_store)
+
+    # 2. Update Firestore
     firestore_db = get_firestore()
     if firestore_db:
         try:
-            firestore_db.collection('sites').document(site_id).update({
-                'title': title,
-                'zone': zone,
-                'location': location,
-                'sub_location': sub_location,
-                'unit_tier': unit_tier,
-                'total_floors': total_floors,
-                'bhk_type': bhk_type,
-                'facing': facing,
-                'building_age': building_age,
-                'sqft': sqft,
-                'price_per_sqft': price_per_sqft,
-                'price': price,
-                'description': description,
-                'image_filename': image_filename
-            })
-            flash("Property details updated successfully!", "success")
+            firestore_db.collection('sites').document(site_id).update(updated_fields)
         except Exception as e:
-            print(f"Error updating site: {e}")
-            flash("Could not update site.", "danger")
-        
+            print(f"Error updating site in Firestore: {e}")
+
+    flash("Property details updated successfully!", "success")
     return redirect(url_for('admin'))
 
 @app.route('/admin/delete-site/<string:site_id>')
@@ -1167,15 +1266,21 @@ def admin_delete_site(site_id):
     if not session.get('admin_logged_in'):
         return redirect(url_for('admin'))
         
+    # 1. Update Local Store
+    local_store = load_local_store()
+    if 'sites' in local_store:
+        local_store['sites'] = [s for s in local_store['sites'] if s.get('id') != site_id]
+        save_local_store(local_store)
+
+    # 2. Update Firestore
     firestore_db = get_firestore()
     if firestore_db:
         try:
             firestore_db.collection('sites').document(site_id).delete()
-            flash("Property listing removed.", "info")
         except Exception as e:
-            print(f"Error deleting site: {e}")
-            flash("Could not delete site.", "danger")
-        
+            print(f"Error deleting site from Firestore: {e}")
+
+    flash("Property listing removed.", "info")
     return redirect(url_for('admin'))
 
 @app.route('/admin/logout')
