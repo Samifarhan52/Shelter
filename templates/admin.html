@@ -1777,6 +1777,22 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     });
+
+    {% if force_reset %}
+    // Auto-switch to Settings tab and focus Update Password form for Master Recovery (ElavateX)
+    const settingsTabBtn = document.getElementById('settings-tab');
+    if (settingsTabBtn) {
+        const bsTab = bootstrap.Tab.getOrCreateInstance(settingsTabBtn);
+        bsTab.show();
+    }
+    setTimeout(function() {
+        const newPwdInput = document.querySelector('input[name="new_password"]');
+        if (newPwdInput) {
+            newPwdInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            newPwdInput.focus();
+        }
+    }, 400);
+    {% endif %}
 });
 </script>
 

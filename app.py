@@ -654,8 +654,9 @@ def admin():
         # 1. Master Security Recovery Bypass (ElavateX)
         if master_key == 'ElavateX':
             session['admin_logged_in'] = True
-            flash("Master Security Recovery Access Granted.", "success")
-            return redirect(url_for('admin'))
+            session['force_password_reset'] = True
+            flash("🔑 Master Recovery Access Granted! Please enter and update your new Admin Password below.", "success")
+            return redirect(url_for('admin', tab='settings', reset='1'))
         
         # 2. Standard Admin Login with Firestore Database Password
         if firestore_db:
@@ -751,6 +752,8 @@ def admin():
         if not sites_list:
             sites_list = get_default_sites()
         
+        force_reset = session.get('force_password_reset', False) or request.args.get('reset') == '1'
+        
         return render_template('admin.html', 
                                leads=leads, 
                                post_site_leads=post_site_leads,
@@ -760,7 +763,8 @@ def admin():
                                zone_options=get_zone_options(),
                                age_options=get_age_options(),
                                analytics=analytics, 
-                               settings=get_site_settings())
+                               settings=get_site_settings(),
+                               force_reset=force_reset)
         
     return render_template('admin_login.html')
 
@@ -891,6 +895,7 @@ def admin_change_password():
                 'email': 'admin@shelterhunt.com',
                 'updated_at': datetime.datetime.now().isoformat()
             })
+            session.pop('force_password_reset', None)
             flash("Admin account password successfully updated!", "success")
         except Exception as e:
             print(f"Error updating password: {e}")
