@@ -23,8 +23,10 @@ def get_firestore():
     global db
     if db is not None:
         return db
+    if firebase_admin is None:
+        return None
     try:
-        if not firebase_admin._apps:
+        if not hasattr(firebase_admin, '_apps') or not firebase_admin._apps:
             cred_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT")
             if cred_json and len(cred_json.strip()) > 0:
                 try:
@@ -34,7 +36,7 @@ def get_firestore():
                 except Exception as e:
                     print(f"Error parsing FIREBASE_SERVICE_ACCOUNT env var: {e}")
 
-            if not firebase_admin._apps and os.path.exists("firebase_key.json"):
+            if (not hasattr(firebase_admin, '_apps') or not firebase_admin._apps) and os.path.exists("firebase_key.json"):
                 try:
                     if os.path.getsize("firebase_key.json") > 10:
                         cred = credentials.Certificate("firebase_key.json")
@@ -42,7 +44,7 @@ def get_firestore():
                 except Exception as e:
                     print(f"Error loading firebase_key.json: {e}")
 
-        if firebase_admin._apps:
+        if hasattr(firebase_admin, '_apps') and firebase_admin._apps:
             db = firestore.client()
             return db
     except Exception as e:
