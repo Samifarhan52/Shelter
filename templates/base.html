@@ -323,15 +323,9 @@
                 </a>
 
                 <!-- Centered Desktop Search Bar -->
-                <div class="d-none d-lg-block flex-grow-1 mx-lg-5" style="max-width: 540px;">
+                <div class="d-none d-lg-block flex-grow-1 mx-lg-5" style="max-width: 480px;">
                     <form action="{{ url_for('sites') }}" method="GET" class="input-group">
-                        <input type="text" name="q" class="form-control nav-search-input py-2" placeholder="Search projects, locations, or BHK..." value="{{ search_query if search_query else '' }}">
-                        <select name="bhk" class="form-select nav-search-input py-2" style="max-width: 140px;">
-                            <option value="">All BHKs</option>
-                            {% for b in bhk_options %}
-                                <option value="{{ b }}" {% if selected_bhk == b %}selected{% endif %}>{{ b }}</option>
-                            {% endfor %}
-                        </select>
+                        <input type="text" name="q" class="form-control nav-search-input py-2 ps-3" placeholder="Search projects, locations..." value="{{ search_query if search_query else '' }}">
                         <button class="btn btn-gold px-4 fw-bold" type="submit">Search</button>
                     </form>
                 </div>
@@ -358,21 +352,9 @@
                 
                 <!-- Mobile Search Bar -->
                 <div class="d-lg-none w-100 py-2">
-                    <form action="{{ url_for('sites') }}" method="GET" class="row g-2">
-                        <div class="col-7">
-                            <input type="text" name="q" class="form-control form-control-sm nav-search-input" placeholder="Search projects..." value="{{ search_query if search_query else '' }}">
-                        </div>
-                        <div class="col-5">
-                            <select name="bhk" class="form-select form-select-sm nav-search-input">
-                                <option value="">All BHKs</option>
-                                {% for b in bhk_options %}
-                                    <option value="{{ b }}" {% if selected_bhk == b %}selected{% endif %}>{{ b }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-12 mt-1">
-                            <button class="btn btn-sm btn-gold w-100 fw-bold py-1.5" type="submit">Search Properties</button>
-                        </div>
+                    <form action="{{ url_for('sites') }}" method="GET" class="input-group">
+                        <input type="text" name="q" class="form-control form-control-sm nav-search-input py-2 ps-3" placeholder="Search projects, locations..." value="{{ search_query if search_query else '' }}">
+                        <button class="btn btn-sm btn-gold px-3 fw-bold" type="submit">Search</button>
                     </form>
                 </div>
 

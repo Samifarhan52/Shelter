@@ -484,21 +484,29 @@ def admin():
     firestore_db = get_firestore()
     
     if request.method == 'POST' and 'login' in request.form:
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '').strip()
         
         if firestore_db:
             try:
-                doc = firestore_db.collection('users').document(email).get()
+                # First check for the primary admin document
+                doc = firestore_db.collection('users').document('admin@shelterhunt.com').get()
+                if not doc.exists and email:
+                    doc = firestore_db.collection('users').document(email).get()
+                
                 if doc.exists:
                     user = doc.to_dict()
                     stored_pwd = user.get('password', '')
-                    if stored_pwd and (stored_pwd == password or check_password_hash(stored_pwd, password)):
+                    if stored_pwd and (check_password_hash(stored_pwd, password) or stored_pwd == password):
                         session['admin_logged_in'] = True
                         return redirect(url_for('admin'))
+                    else:
+                        flash("Invalid Admin Credentials.", "danger")
+                        return render_template('admin_login.html')
             except Exception as e:
                 print(f"Login error: {e}")
         
+        # Initial setup fallback ONLY if no user document has been created yet in Firestore
         if email == 'admin@shelterhunt.com' and password == 'Admin@123':
             session['admin_logged_in'] = True
             return redirect(url_for('admin'))
