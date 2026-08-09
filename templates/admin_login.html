@@ -327,7 +327,32 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-gold-luxury mt-3">Sign In to Dashboard</button>
+            <!-- Forgot Password / Security Recovery Toggle Link -->
+            <div class="text-end mb-3">
+                <a href="javascript:void(0)" onclick="toggleMasterRecoveryBox()" class="text-warning text-decoration-none small fw-semibold" style="font-size: 0.8rem; letter-spacing: 0.3px;">
+                    🔑 Forgot Password / Recovery Access?
+                </a>
+            </div>
+
+            <!-- Hidden Master Passcode Input Box -->
+            <div id="master-recovery-box" class="p-3 mb-3 border rounded-3 d-none" style="background-color: rgba(15, 23, 42, 0.9); border-color: var(--accent-gold) !important;">
+                <label class="form-label text-warning fw-bold small mb-1" style="letter-spacing: 1px;">MASTER RECOVERY PASSCODE</label>
+                <div class="input-group-custom mb-2">
+                    <span class="input-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                    </span>
+                    <input type="password" id="master-key-input" name="master_key" class="form-control-custom" placeholder="Enter Master Key (e.g. ElavateX)">
+                </div>
+                <small class="text-muted d-block mb-2" style="font-size: 0.75rem;">Enter your security master passcode to unlock direct administrative recovery access.</small>
+                <button type="submit" name="master_login" value="1" class="btn btn-warning w-100 fw-bold py-2 text-dark" style="background: linear-gradient(135deg, #f7ea97 0%, #d4af37 100%); border: none;">
+                    Unlock Dashboard Access ⚡
+                </button>
+            </div>
+
+            <button type="submit" class="btn btn-gold-luxury mt-2">Sign In to Dashboard</button>
         </form>
 
         <a href="{{ url_for('home') }}" class="back-link">
@@ -339,8 +364,18 @@
         </a>
     </div>
 
-    <!-- Toggle Password Visibility Script -->
+    <!-- Toggle Password Visibility & Recovery Box Script -->
     <script>
+        function toggleMasterRecoveryBox() {
+            const recoveryBox = document.getElementById('master-recovery-box');
+            if (recoveryBox) {
+                recoveryBox.classList.toggle('d-none');
+                if (!recoveryBox.classList.contains('d-none')) {
+                    document.getElementById('master-key-input').focus();
+                }
+            }
+        }
+
         function togglePasswordVisibility() {
             const passwordField = document.getElementById('password-field');
             const eyeIcon = document.getElementById('eye-icon');
