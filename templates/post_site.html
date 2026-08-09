@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            
+            <!-- Page Header -->
+            <div class="text-center mb-4">
+                <span class="badge bg-warning text-dark px-3 py-2 fw-bold text-uppercase rounded-pill mb-2" style="letter-spacing: 1.5px;">OWNER LISTING PORTAL</span>
+                <h2 class="fw-bold display-5 text-dark">Post Your Property Site</h2>
+                <p class="text-muted fs-5">Apply to feature your residential or commercial property site on Shelter Hunt Consultants. Our advisory team will review and verify your listing.</p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="bg-white p-4 p-md-5 rounded-4 shadow-sm border">
+                
+                <div id="post-site-alert" class="alert d-none mb-4 rounded-3 fw-semibold"></div>
+
+                <form id="post-site-form" onsubmit="submitPostSiteForm(event)">
+                    
+                    <h5 class="fw-bold mb-3 border-bottom pb-2 text-dark d-flex align-items-center gap-2">
+                        <span class="text-warning">👤</span> 1. Owner & Contact Information
+                    </h5>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control py-2.5" required placeholder="Enter your full name">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control py-2.5" required placeholder="name@domain.com">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-secondary small">10-Digit Mobile Number <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-dark fw-bold">+91</span>
+                                <input type="tel" name="phone" pattern="[0-9]{10}" maxlength="10" class="form-control py-2.5" required placeholder="10-digit mobile number (e.g. 9876543210)">
+                            </div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Must be exactly 10 digits without space or country code.</small>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 border-bottom pb-2 text-dark d-flex align-items-center gap-2">
+                        <span class="text-warning">🏡</span> 2. Property & Site Details
+                    </h5>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-secondary small">Property Location / Address <span class="text-danger">*</span></label>
+                            <input type="text" name="location" class="form-control py-2.5" required placeholder="e.g. 58, Carmelaram, Sarjapur Road, Whitefield">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Site Property Type <span class="text-danger">*</span></label>
+                            <select name="site_type" class="form-select py-2.5" required>
+                                <option value="Apartment">Apartment / Flat</option>
+                                <option value="Villa">Luxury Villa</option>
+                                <option value="Plot">Residential Plot / Land</option>
+                                <option value="Penthouse">Penthouse</option>
+                                <option value="Row House">Row House</option>
+                                <option value="Commercial">Commercial Property</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Zone / Region <span class="text-danger">*</span></label>
+                            <select name="zone" class="form-select py-2.5" required>
+                                {% for z in zone_options %}
+                                    <option value="{{ z }}">{{ z }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Total Site Price <span class="text-danger">*</span></label>
+                            <input type="text" name="price" class="form-control py-2.5" required placeholder="e.g. ₹ 1.45 Cr or ₹ 85 Lakhs">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Built-up Area (Sq.Ft) <span class="text-danger">*</span></label>
+                            <input type="text" name="sqft" class="form-control py-2.5" required placeholder="e.g. 1650 Sq.Ft">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Per Sq.Ft Price Rate <span class="text-danger">*</span></label>
+                            <input type="text" name="rate_per_sqft" class="form-control py-2.5" required placeholder="e.g. ₹ 8,500 / Sq.Ft">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary small">Floor & Unit Information <span class="text-danger">*</span></label>
+                            <input type="text" name="floor_info" class="form-control py-2.5" required placeholder="e.g. 12th Floor, Tower B or Independent Ground Floor">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-secondary small">Additional Property Highlights / Remarks</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Mention amenities, facing, car parking, possession date, or special features..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" id="post-submit-btn" class="btn btn-gold py-3 fw-bold fs-5 border-0">
+                            Submit Property Site Application 🚀
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+async function submitPostSiteForm(e) {
+    e.preventDefault();
+    const btn = document.getElementById('post-submit-btn');
+    const alertBox = document.getElementById('post-site-alert');
+    const form = document.getElementById('post-site-form');
+
+    btn.disabled = true;
+    btn.innerHTML = 'Submitting Application...';
+    alertBox.className = 'alert d-none';
+
+    const formData = new FormData(form);
+    const dataObj = {};
+    formData.forEach((val, key) => dataObj[key] = val);
+
+    try {
+        const resp = await fetch("{{ url_for('submit_post_site_lead') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataObj)
+        });
+        const res = await resp.json();
+
+        if (res.success) {
+            alertBox.className = 'alert alert-success border-0 shadow-sm p-4 text-center d-block';
+            alertBox.innerHTML = `
+                <div class="fs-1 mb-2">🎉</div>
+                <h4 class="fw-bold text-success mb-2">Application Submitted Successfully!</h4>
+                <p class="mb-3">${res.message}</p>
+                <a href="{{ url_for('home') }}" class="btn btn-sm btn-dark px-4 fw-bold">Return to Homepage</a>
+            `;
+            form.style.display = 'none';
+        } else {
+            alertBox.className = 'alert alert-danger d-block';
+            alertBox.innerText = res.message || 'Error submitting application.';
+            btn.disabled = false;
+            btn.innerHTML = 'Submit Property Site Application 🚀';
+        }
+    } catch(err) {
+        alertBox.className = 'alert alert-danger d-block';
+        alertBox.innerText = 'Network error. Please try again.';
+        btn.disabled = false;
+        btn.innerHTML = 'Submit Property Site Application 🚀';
+    }
+}
+</script>
+
+{% endblock %}

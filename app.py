@@ -4,8 +4,13 @@ import urllib.parse
 import json
 import base64
 import re
-import firebase_admin
-from firebase_admin import credentials, firestore
+try:
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+except ImportError:
+    firebase_admin = None
+    credentials = None
+    firestore = None
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -158,6 +163,24 @@ def get_site_settings():
         pass
     return defaults
 
+def get_builder_brands():
+    defaults = [
+        "Sobha Developers", "Prestige Group", "Brigade Group", "Godrej Properties", 
+        "Puravankara Limited", "Total Environment", "Provident Housing", 
+        "Assetz Property Group", "Sattva Group", "Lodha Group"
+    ]
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            docs = firestore_db.collection('masters').document('builder_brands').get()
+            if docs.exists:
+                custom = docs.to_dict().get('items', [])
+                if custom:
+                    return custom
+        except Exception:
+            pass
+    return defaults
+
 # Global Template Context Processor
 @app.context_processor
 def inject_global_data():
@@ -166,7 +189,8 @@ def inject_global_data():
         'bhk_options': get_bhk_options(),
         'facing_options': get_facing_options(),
         'zone_options': get_zone_options(),
-        'age_options': get_age_options()
+        'age_options': get_age_options(),
+        'builder_brands': get_builder_brands()
     }
 
 def get_daily_slots():
@@ -190,54 +214,62 @@ def sites():
     zone_filter = request.args.get('zone', '').strip()
     age_filter = request.args.get('age', '').strip()
     
+    # Require active search parameter to display property listings
+    has_searched = bool(query or (bhk_filter and bhk_filter.lower() != 'all') or 
+                        (facing_filter and facing_filter.lower() != 'all') or 
+                        (zone_filter and zone_filter.lower() != 'all') or 
+                        (age_filter and age_filter.lower() != 'all'))
+    
     sites_list = []
     
-    firestore_db = get_firestore()
-    if firestore_db:
-        try:
-            sites_ref = firestore_db.collection('sites').stream()
-            for d in sites_ref:
-                data = d.to_dict()
-                data['id'] = d.id
-                
-                title = str(data.get('title', '')).lower()
-                location = str(data.get('location', '')).lower()
-                sub_location = str(data.get('sub_location', '')).lower()
-                description = str(data.get('description', '')).lower()
-                bhk_type = str(data.get('bhk_type', ''))
-                facing = str(data.get('facing', ''))
-                zone = str(data.get('zone', ''))
-                building_age = str(data.get('building_age', ''))
-                
-                matches_q = True
-                if query:
-                    matches_q = (query in title or query in location or query in sub_location or query in description or query in bhk_type.lower() or query in zone.lower())
+    if has_searched:
+        firestore_db = get_firestore()
+        if firestore_db:
+            try:
+                sites_ref = firestore_db.collection('sites').stream()
+                for d in sites_ref:
+                    data = d.to_dict()
+                    data['id'] = d.id
                     
-                matches_bhk = True
-                if bhk_filter and bhk_filter.lower() != 'all':
-                    matches_bhk = (bhk_filter.lower() in bhk_type.lower())
-
-                matches_facing = True
-                if facing_filter and facing_filter.lower() != 'all':
-                    matches_facing = (facing_filter.lower() == facing.lower())
-
-                matches_zone = True
-                if zone_filter and zone_filter.lower() != 'all':
-                    matches_zone = (zone_filter.lower() in zone.lower() or zone_filter.lower() in location.lower())
-
-                matches_age = True
-                if age_filter and age_filter.lower() != 'all':
-                    matches_age = (age_filter.lower() == building_age.lower())
+                    title = str(data.get('title', '')).lower()
+                    location = str(data.get('location', '')).lower()
+                    sub_location = str(data.get('sub_location', '')).lower()
+                    description = str(data.get('description', '')).lower()
+                    bhk_type = str(data.get('bhk_type', ''))
+                    facing = str(data.get('facing', ''))
+                    zone = str(data.get('zone', ''))
+                    building_age = str(data.get('building_age', ''))
                     
-                if matches_q and matches_bhk and matches_facing and matches_zone and matches_age:
-                    sites_list.append(data)
-                    
-            sites_list.reverse()
-        except Exception as e:
-            print(f"Search error: {e}")
+                    matches_q = True
+                    if query:
+                        matches_q = (query in title or query in location or query in sub_location or query in description or query in bhk_type.lower() or query in zone.lower())
+                        
+                    matches_bhk = True
+                    if bhk_filter and bhk_filter.lower() != 'all':
+                        matches_bhk = (bhk_filter.lower() in bhk_type.lower())
+
+                    matches_facing = True
+                    if facing_filter and facing_filter.lower() != 'all':
+                        matches_facing = (facing_filter.lower() == facing.lower())
+
+                    matches_zone = True
+                    if zone_filter and zone_filter.lower() != 'all':
+                        matches_zone = (zone_filter.lower() in zone.lower() or zone_filter.lower() in location.lower())
+
+                    matches_age = True
+                    if age_filter and age_filter.lower() != 'all':
+                        matches_age = (age_filter.lower() == building_age.lower())
+                        
+                    if matches_q and matches_bhk and matches_facing and matches_zone and matches_age:
+                        sites_list.append(data)
+                        
+                sites_list.reverse()
+            except Exception as e:
+                print(f"Search error: {e}")
         
     return render_template('sites.html', 
                            sites=sites_list, 
+                           has_searched=has_searched,
                            bhk_options=get_bhk_options(),
                            facing_options=get_facing_options(),
                            zone_options=get_zone_options(),
@@ -433,18 +465,38 @@ def confirm_booking():
     
     return redirect(whatsapp_url)
 
+@app.route('/post-your-site')
+def post_your_site():
+    return render_template('post_site.html', 
+                           settings=get_site_settings(), 
+                           zone_options=get_zone_options(),
+                           bhk_options=get_bhk_options())
+
 @app.route('/submit-post-site-lead', methods=['POST'])
 def submit_post_site_lead():
     try:
         data = request.get_json() or request.form
         full_name = str(data.get('name', '')).strip()
+        email = str(data.get('email', '')).strip()
         phone = str(data.get('phone', '')).strip()
+        location = str(data.get('location', '')).strip()
+        site_type = str(data.get('site_type', '')).strip()
+        price = str(data.get('price', '')).strip()
+        sqft = str(data.get('sqft', '')).strip()
+        rate_per_sqft = str(data.get('rate_per_sqft', '')).strip()
+        floor_info = str(data.get('floor_info', '')).strip()
+        zone = str(data.get('zone', '')).strip()
+        notes = str(data.get('notes', '')).strip()
 
         digits_only = re.sub(r'\D', '', phone)
         if not full_name:
             return jsonify({'success': False, 'message': 'Please enter your full name.'}), 400
+        if not email or '@' not in email:
+            return jsonify({'success': False, 'message': 'Please enter a valid email address.'}), 400
         if len(digits_only) != 10:
             return jsonify({'success': False, 'message': 'Please enter a valid 10-digit mobile number.'}), 400
+        if not location:
+            return jsonify({'success': False, 'message': 'Please enter the site location/address.'}), 400
 
         now_iso = datetime.datetime.now().isoformat()
         firestore_db = get_firestore()
@@ -452,29 +504,26 @@ def submit_post_site_lead():
             try:
                 firestore_db.collection('post_site_leads').add({
                     'name': full_name,
+                    'email': email,
                     'phone': digits_only,
+                    'location': location,
+                    'site_type': site_type or 'Apartment',
+                    'price': price,
+                    'sqft': sqft,
+                    'rate_per_sqft': rate_per_sqft,
+                    'floor_info': floor_info,
+                    'zone': zone,
+                    'notes': notes,
                     'submitted_at': now_iso,
                     'status': 'New'
                 })
             except Exception as e:
                 print(f"Error storing post site lead: {e}")
 
-        settings = get_site_settings()
-        target_wa = settings.get('whatsapp_number', '918050749331')
-
-        wa_text = (
-            f"Hello Shelter Hunt Consultants,\n\n"
-            f"I would like to list/post my property on your platform. "
-            f"Please share the verification and onboarding process with me.\n\n"
-            f"• *Owner Name:* {full_name}\n"
-            f"• *Contact Mobile:* {digits_only}\n\n"
-            f"Looking forward to listing my property!"
-        )
-
-        encoded_message = urllib.parse.quote(wa_text)
-        whatsapp_url = f"https://wa.me/{target_wa}?text={encoded_message}"
-
-        return jsonify({'success': True, 'redirect_url': whatsapp_url})
+        return jsonify({
+            'success': True, 
+            'message': 'Thank you! Your property listing application has been submitted successfully to our Admin team. Our executive team will review your site details and contact you shortly.'
+        })
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
