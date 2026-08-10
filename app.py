@@ -1384,5 +1384,147 @@ def robots():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/x-icon')
 
+@app.route('/api/chat', methods=['POST'])
+def api_chat():
+    try:
+        data = request.get_json(silent=True) or {}
+        message = data.get('message', '').strip().lower()
+        
+        if not message:
+            return jsonify({
+                'success': False,
+                'response': "Please type a question or select a quick topic below."
+            }), 400
+
+        settings = get_site_settings()
+        phone = settings.get('contact_phone', '+91 8050749331')
+
+        # 1. Services Query
+        if any(w in message for w in ['service', 'services', 'provide', 'do for me', 'offer', 'advisory', 'consultation']):
+            resp = (
+                "We provide comprehensive, **unbiased real estate advisory** across Bengaluru:\n\n"
+                "• **Property Consultation:** Expert guidance focused on your needs, not sales targets.\n"
+                "• **Curated Site Selection:** 100% verified properties matched to your budget & location preferences.\n"
+                "• **Guided Site Visits:** Doorstep pickup & seamless on-site property walkthroughs.\n"
+                "• **Legal & Document Review:** Thorough verification of builder RERA, land title, and clearances.\n"
+                "• **Price Negotiation:** Assistance in getting transparent, best-market deals."
+            )
+            chips = [
+                {'label': 'Explore Services', 'url': '/services', 'isPrimary': True, 'icon': '💼'},
+                {'label': 'Book Strategy Session', 'url': '/book-session', 'icon': '📅'},
+                {'label': 'Request Callback', 'action': 'lead_form', 'icon': '📞'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
+        # 2. Properties / Sites / BHK / Location Query
+        elif any(w in message for w in ['property', 'properties', 'site', 'sites', 'flat', 'flats', 'apartment', 'villa', 'bhk', 'plot', 'location', 'builder', 'sobha', 'prestige', 'brigade', 'godrej']):
+            zones = get_zone_options()
+            bhks = get_bhk_options()
+            builders = get_builder_brands()
+            
+            zone_str = ", ".join(zones[:4])
+            bhk_str = ", ".join(bhks[:4])
+            builder_str = ", ".join(builders[:4])
+            
+            resp = (
+                f"We feature **100% verified property sites** across prime Bengaluru locations including {zone_str}.\n\n"
+                f"• **Configurations:** {bhk_str}\n"
+                f"• **Top Tier Builders:** {builder_str} and more.\n"
+                f"• **Verification Guarantee:** Unbiased analysis, zero sales pressure, and genuine builder credentials."
+            )
+            chips = [
+                {'label': 'Explore Property Sites', 'url': '/sites', 'isPrimary': True, 'icon': '🏙️'},
+                {'label': 'Book Strategy Session', 'url': '/book-session', 'icon': '📅'},
+                {'label': 'Request Callback', 'action': 'lead_form', 'icon': '📞'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
+        # 3. Strategy Sessions / Booking Query
+        elif any(w in message for w in ['book', 'booking', 'session', 'strategy', 'appointment', 'schedule', 'consult', 'meet']):
+            resp = (
+                "A **Property Strategy Session** is a dedicated 1-on-1 consultation with our senior real estate advisor.\n\n"
+                "• We analyze your exact budget, timeline, and ROI goals.\n"
+                "• Compare top projects objectively.\n"
+                "• Completely zero sales pressure!"
+            )
+            chips = [
+                {'label': 'Book a Strategy Session', 'url': '/book-session', 'isPrimary': True, 'icon': '📅'},
+                {'label': 'Request Callback', 'action': 'lead_form', 'icon': '📞'},
+                {'label': 'Explore Services', 'url': '/services', 'icon': '💼'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
+        # 4. Contact / Talk / Call / Phone / Email / Lead Query
+        elif any(w in message for w in ['contact', 'call', 'talk', 'phone', 'number', 'email', 'address', 'office', 'whatsapp', 'connect', 'agent', 'person']):
+            resp = (
+                f"We'd love to assist you! You can connect with us directly:\n\n"
+                f"• **Phone:** {phone}\n"
+                f"• **Email:** {settings.get('contact_email', 'sudarshan@shelterhuntconsultants.com')}\n"
+                f"• **Office:** {settings.get('contact_address', 'Carmelaram, Chikkabellandur, Bengaluru 560035')}\n\n"
+                f"Or request an immediate callback below!"
+            )
+            chips = [
+                {'label': 'Book Strategy Session', 'url': '/book-session', 'isPrimary': True, 'icon': '📅'},
+                {'label': 'Request Callback', 'action': 'lead_form', 'icon': '📞'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips, 'show_lead_form': True})
+
+        # 5. FAQs (Fees, verification, site visit)
+        elif any(w in message for w in ['fee', 'charge', 'cost', 'free', 'commission', 'price']):
+            resp = (
+                "Our advisory and property selection service for homebuyers is **100% free of charge**. "
+                "We provide transparent market analysis with zero hidden costs or sales markups."
+            )
+            chips = [
+                {'label': 'Book Strategy Session', 'url': '/book-session', 'isPrimary': True, 'icon': '📅'},
+                {'label': 'Explore Services', 'url': '/services', 'icon': '💼'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
+        elif any(w in message for w in ['visit', 'pickup', 'tour', 'inspect']):
+            resp = (
+                "We arrange **guided site visits with pickup support** for short-listed verified properties. "
+                "Our consultant travels with you to evaluate construction quality, surroundings, and legal aspects."
+            )
+            chips = [
+                {'label': 'Request Site Visit Callback', 'action': 'lead_form', 'isPrimary': True, 'icon': '📞'},
+                {'label': 'Explore Property Sites', 'url': '/sites', 'icon': '🏙️'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
+        # 6. Greetings / Intro
+        elif any(w in message for w in ['hi', 'hello', 'hey', 'greetings', 'who are you', 'what are you', 'help']):
+            resp = (
+                "Hello! I'm your **Shelter Hunt AI Assistant**. I'm here to guide you through our verified properties, "
+                "explain our services, or help you book a Property Strategy Session."
+            )
+            chips = [
+                {'label': 'Explore Services', 'url': '/services', 'icon': '💼'},
+                {'label': 'Explore Property Sites', 'url': '/sites', 'icon': '🏙️'},
+                {'label': 'Book Strategy Session', 'url': '/book-session', 'isPrimary': True, 'icon': '📅'},
+                {'label': 'Contact Us', 'action': 'lead_form', 'icon': '📞'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
+        # 7. Default Fallback
+        else:
+            resp = (
+                "I'm specialized in Shelter Hunt property consultation and listings across Bengaluru. "
+                "While I might not have the full details on that specific request, our senior real estate team can assist you directly!"
+            )
+            chips = [
+                {'label': 'Book Strategy Session', 'url': '/book-session', 'isPrimary': True, 'icon': '📅'},
+                {'label': 'Request Callback', 'action': 'lead_form', 'icon': '📞'},
+                {'label': 'Explore Property Sites', 'url': '/sites', 'icon': '🏙️'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
+    except Exception as e:
+        print(f"Chat API Exception: {e}")
+        return jsonify({
+            'success': False,
+            'response': "An error occurred while processing your message. Please try again."
+        }), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

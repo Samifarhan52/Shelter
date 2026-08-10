@@ -129,6 +129,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- AI Assistant CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='chatbot.css') }}">
     
     <style>
         .nav-search-input {
@@ -891,5 +893,54 @@
             initFlashDismissal();
         }
     </script>
+
+    <!-- 🤖 SHELTER HUNT AI ASSISTANT CONTAINER -->
+    <div id="sh-chatbot-container">
+        <!-- Floating Speech Tooltip above Robot -->
+        <div id="sh-ai-buddy-tooltip" class="sh-ai-buddy-tooltip">
+            <span class="tooltip-text">Hi! I'm your AI Buddy 👋</span>
+            <button id="sh-ai-buddy-tooltip-close" class="tooltip-close" aria-label="Close tooltip">&times;</button>
+        </div>
+
+        <!-- Floating Launcher Button with Robot Avatar -->
+        <div id="sh-chatbot-trigger" class="sh-chatbot-trigger" title="Shelter Hunt AI Assistant">
+            <img src="{{ url_for('static', filename='ai_avatar.jpg') }}" alt="Shelter Hunt AI Buddy" class="robot-avatar">
+            <span class="sh-chatbot-status-dot"></span>
+        </div>
+
+        <!-- Compact Chat Window -->
+        <div id="sh-chat-window" class="sh-chat-window">
+            <!-- Header -->
+            <div class="sh-chat-header">
+                <div class="sh-chat-header-info">
+                    <img src="{{ url_for('static', filename='ai_avatar.jpg') }}" alt="AI Buddy" class="sh-chat-header-avatar">
+                    <div>
+                        <h5 class="sh-chat-header-title">Shelter Hunt AI Buddy</h5>
+                        <p class="sh-chat-header-subtitle">Online • Knowledge-First Advisory</p>
+                    </div>
+                </div>
+                <button id="sh-chat-close-btn" class="sh-chat-close-btn" aria-label="Close Chat">&times;</button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="sh-chat-body" class="sh-chat-body">
+                <!-- Messages appended dynamically -->
+            </div>
+
+            <!-- Footer Input -->
+            <div class="sh-chat-footer">
+                <input type="text" id="sh-chat-input" class="sh-chat-input" placeholder="Ask about properties, services, strategy..." autocomplete="off">
+                <button id="sh-chat-send-btn" class="sh-chat-send-btn" aria-label="Send message">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant JavaScript -->
+    <script src="{{ url_for('static', filename='chatbot.js') }}"></script>
 </body>
 </html>
