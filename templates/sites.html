@@ -76,8 +76,7 @@
             <div class="d-flex flex-wrap gap-2">
                 {% for brand in builder_brands %}
                     <a href="{{ url_for('sites', q=brand) }}" 
-                       class="btn btn-sm btn-outline-warning text-dark border-0 rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
-                       style="background: rgba(197, 155, 39, 0.08); border: 1px solid rgba(197, 155, 39, 0.3) !important; font-size: 0.82rem; transition: all 0.2s ease;">
+                       class="brand-chip-pill rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 shadow-sm">
                         <span>🏗️</span>
                         <span>{{ brand }}</span>
                     </a>

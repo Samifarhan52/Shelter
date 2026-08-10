@@ -412,3 +412,23 @@ header nav.navbar {
     font-size: 0.75rem;
     color: #94a3b8;
 }
+
+/* High contrast Brand Filter Chips */
+.brand-chip-pill {
+    background: #fffbeb !important;
+    border: 1px solid #fcd34d !important;
+    color: #78350f !important;
+    font-weight: 700 !important;
+    font-size: 0.83rem;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 3px rgba(180, 83, 9, 0.08);
+}
+
+.brand-chip-pill:hover {
+    background: #fef3c7 !important;
+    border-color: #d97706 !important;
+    color: #451a03 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(180, 83, 9, 0.18);
+}

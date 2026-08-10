@@ -1044,6 +1044,22 @@ def admin_toggle_session(session_id):
         
     return redirect(url_for('admin'))
 
+@app.route('/admin/delete-session/<string:session_id>')
+def admin_delete_session(session_id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin'))
+        
+    firestore_db = get_firestore()
+    if firestore_db:
+        try:
+            firestore_db.collection('sessions').document(session_id).delete()
+            flash("Client lead deleted successfully.", "success")
+        except Exception as e:
+            print(f"Error deleting session lead: {e}")
+            flash("Could not delete client lead.", "danger")
+        
+    return redirect(url_for('admin'))
+
 @app.route('/admin/toggle-post-site-lead/<string:lead_id>')
 def admin_toggle_post_site_lead(lead_id):
     if not session.get('admin_logged_in'):

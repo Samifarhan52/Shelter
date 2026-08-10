@@ -369,9 +369,14 @@
                                                 {% endif %}
                                             </td>
                                             <td class="text-end">
-                                                <a href="{{ url_for('admin_toggle_session', session_id=lead.id) }}" class="btn btn-sm {% if lead.status == 'Cancelled' %}btn-outline-success{% else %}btn-outline-danger{% endif %} fw-semibold">
-                                                    {% if lead.status == 'Cancelled' %}Reopen Lead{% else %}Cancel Lead{% endif %}
-                                                </a>
+                                                <div class="d-inline-flex gap-1.5 align-items-center">
+                                                    <a href="{{ url_for('admin_toggle_session', session_id=lead.id) }}" class="btn btn-sm {% if lead.status == 'Cancelled' %}btn-outline-success{% else %}btn-outline-secondary{% endif %} fw-semibold">
+                                                        {% if lead.status == 'Cancelled' %}Reopen Lead{% else %}Cancel Lead{% endif %}
+                                                    </a>
+                                                    <a href="{{ url_for('admin_delete_session', session_id=lead.id) }}" class="btn btn-sm btn-outline-danger fw-semibold" onclick="return confirm('Are you sure you want to delete this client lead?');">
+                                                        🗑️ Delete
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                         {% else %}
