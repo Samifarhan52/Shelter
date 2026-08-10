@@ -86,7 +86,8 @@ document.addEventListener('DOMContentLoaded', function() {
             chipsHtml = '<div class="sh-action-chips">';
             actionChips.forEach(chip => {
                 if (chip.url) {
-                    chipsHtml += `<a href="${chip.url}" class="sh-chip-btn ${chip.isPrimary ? 'gold-filled' : ''}">${chip.icon ? chip.icon + ' ' : ''}${escapeHtml(chip.label)}</a>`;
+                    const isExternal = chip.url.startsWith('http');
+                    chipsHtml += `<a href="${chip.url}" ${isExternal ? 'target="_blank" rel="noopener noreferrer"' : ''} class="sh-chip-btn ${chip.isPrimary ? 'gold-filled' : ''}">${chip.icon ? chip.icon + ' ' : ''}${escapeHtml(chip.label)}</a>`;
                 } else if (chip.action === 'lead_form') {
                     chipsHtml += `<button class="sh-chip-btn gold-filled sh-trigger-lead-btn">${chip.icon ? chip.icon + ' ' : ''}${escapeHtml(chip.label)}</button>`;
                 } else {
@@ -316,6 +317,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = escapeHtml(text);
         // Bold formatting **text**
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Links [label](url)
+        html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #d4af37; text-decoration: underline; font-weight: 700;">$1</a>');
         // Bullet lists
         html = html.replace(/\n• (.*?)(?=\n|$)/g, '<br>• $1');
         html = html.replace(/\n\n/g, '<br><br>');

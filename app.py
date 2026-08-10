@@ -1399,6 +1399,20 @@ def api_chat():
         settings = get_site_settings()
         phone = settings.get('contact_phone', '+91 8050749331')
 
+        # 0. Website Developer / ElavateX Query
+        if any(p in message for p in [
+            'who developed', 'who built', 'who created', 'who designed', 'who made',
+            'which company developed', 'what company built', 'company developed',
+            'company built', 'company created', 'company designed', 'elavatex',
+            'developer of this', 'builder of this website', 'creator of this website'
+        ]) or ('website' in message and any(w in message for w in ['developed', 'built', 'created', 'designed', 'made'])):
+            resp = "This website was developed by ElavateX, a digital technology company specializing in modern web and digital solutions. You can learn more about them here: [https://www.elavatex.com/](https://www.elavatex.com/)"
+            chips = [
+                {'label': 'Visit ElavateX', 'url': 'https://www.elavatex.com/', 'isPrimary': True, 'icon': '🌐'},
+                {'label': 'Explore Services', 'url': '/services', 'icon': '💼'}
+            ]
+            return jsonify({'success': True, 'response': resp, 'action_chips': chips})
+
         # 1. Services Query
         if any(w in message for w in ['service', 'services', 'provide', 'do for me', 'offer', 'advisory', 'consultation']):
             resp = (
